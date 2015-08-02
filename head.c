@@ -1,4 +1,4 @@
-#include <stdio.h>
+##include <stdio.h>
 
 #include "colors.h" 
 
@@ -20,8 +20,14 @@ void loeschen() {
 void farbe(int i, int f) {
    printf(">>%d 0x%x\n", i, f);
 }
+void grau(int i, int g) {
+  farbe(i, g << 16 | g <<8 | g);
+}
 void farbe2(int i, int j, int f) {
   printf(">># %d %d 0x%x\n", i, j, f);
+}
+void grau2(int i, int j, int g) {
+  farbe2(i, j, g << 16 | g <<8 | g);
 }
 void formen(char* f) {
    printf(">>f %s\n", f);
@@ -35,6 +41,9 @@ void form2(int i, int j, char* f) {
 void zusammen2( int i, int j, int f, char* form) {
   farbe2( i, j, f );
   form2( i, j, form );
+}
+void symbolGroesse(int i, double s) {
+   printf(">>s %d %g\n", i, s);
 }
 void groesse(int x, int y) {
   printf(">>r %d %d\n", x, y);
