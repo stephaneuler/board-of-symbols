@@ -45,6 +45,7 @@
 #define MAROON 	0x800000	 		
 #define PURPLE 	0x800080	 		
 #define OLIVE 	0x808000	 		
+
 #define GRAY 	0x808080	 		
 #define SKYBLUE 	0x87CEEB	 		
 #define LIGHTSKYBLUE 	0x87CEFA	 		
