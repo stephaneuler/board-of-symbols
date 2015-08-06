@@ -1,24 +1,30 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
 <codes>
-<autosave>int i;
-int n = 24;
+<autosave>
+int max = 12;
+int i;
 
 // alles loeschen und Grundfarben setzen
 loeschen();
-formen( "*" );
-groesse( n,n);
-for( i=0; i&lt;n*n; i++ ) {
-    hintergrund( i, BLACK );
-    symbolGroesse( i, 0.5 * i / n / n );
-}</autosave>
+groesse( max, max);
+formen("tld");
+for( i=0; i&lt;max*max; i++ ) {
+    symbolGroesse( i, 0.5 * i / max /max );
+    grau(i, 255 * i  /max /max );
+    hintergrund( i, WHITE );
+}
+</autosave>
 <snippet name="modulo">
+<code>
 int i;
 int farben[] = { RED, BLUE, GREEN, OLIVE, YELLOW, 0xCDD718};
 for( i=0; i&lt;130; i++ ) {
     farbe(i, farben[i % (sizeof( farben) / sizeof( int )) ] );
 }
+</code>
 </snippet>
 <snippet name="noName">
+<code>
 int i, j;
 int farben[] = { RED, BLUE, GREEN, BLACK, YELLOW, 0x1310FA};
 for( i=0; i&lt;14; i++) {
@@ -26,77 +32,26 @@ for( j=0; j&lt;20; j++) {
     farbe2(i, j, farben[(i + j )% (sizeof( farben) / sizeof( int )) ] );
  }
 }
+</code>
 </snippet>
-<snippet name="test">
+
+<snippet name="grauen">
+<tag>Graustufen</tag>
+<code>
 int i;
-for( i=0; i&lt;10; i+=2 ) {
-farbe(i, 0xFF2BE0) ;
-}
-form2( 2,4, "*" );
-</snippet>
-<snippet name="rgb">int i;
-int max = 400;
-
-clear();
-hintergrund( 0xFFF047);
-for( i=0; i&lt;max; i+=3 ) {
-    farbe(i, (i *256 / max) );
-    farbe(i+1, (i *256 / max) &lt;&lt; 8);
-    farbe(i+2, (i *256 / max) &lt;&lt; 16);
-}
-</snippet>
-<snippet name="rgb2">int i;
-int max = 400;
-
-// alles loeschen und Grundfarben setzen
-loeschen();
-hintergrund( 0xFFF047);
-rahmen( 0xFFF047 );
-formen( "r" );
-
-for( i=0; i&lt;max; i+=3 ) {
-    farbe(i, (i *256 / max) );
-    farbe(i+1, (i *256 / max) &lt;&lt; 8);
-    farbe(i+2, (i *256 / max) &lt;&lt; 16);
-}
-</snippet>
-<snippet name="dreieck">int i, j;
-int max = 20;
-
-// alles loeschen und Grundfarben setzen
-loeschen();
-formen( "none" );
-flaeche( 0xFFF047);
-rahmen( 0xFFF047 );
-
-for( i=0; i&lt;max; i++ ) {
-	for( j=0; j&lt;max; j++ )  {
-		if( i == j ) {
-	  		farbe2(i, j, BLUE);
-			form2(i,j, "tlu" );
-		} else if( i &lt; j ) {
-	   		farbe2(i, j, NAVY);
-			form2(i,j, "s" );
-		}
-	}
-}
-</snippet>
-<snippet name="prints">int i = 10;
-
-for( i=0; i&lt;10; i++ ) {
-printf("%d", i );
-}
-printf("test\n");
-printf("test\n");</snippet>
-<snippet name="grauen">int i;
 
 // alles loeschen und Grundfarben setzen
 loeschen();
 groesse( 16,1);
 for( i=0; i&lt;16; i++ ) {
     grau( i, i*16 );
-}</snippet>
-<snippet name="wachsen">int i;
+}
+</code>
+</snippet>
+
+<snippet name="wachsen">
+<code>
+int i;
 
 // alles loeschen und Grundfarben setzen
 loeschen();
@@ -105,5 +60,25 @@ groesse( 12,12);
 for( i=0; i&lt;12*12; i++ ) {
     farbe( i, BLACK );
     symbolGroesse( i, 0.5 * i / 12 / 12 );
-}</snippet>
+}
+</code>
+</snippet>
+
+<snippet name="wachsenGrau">
+<tag>Graustufen</tag>
+<code>
+int max = 12;
+int i;
+
+// alles loeschen und Grundfarben setzen
+loeschen();
+groesse( max, max);
+formen("tld");
+for( i=0; i&lt;max*max; i++ ) {
+    symbolGroesse( i, 0.5 * i / max /max );
+    grau(i, 255 * i  /max /max );
+    hintergrund( i, WHITE );
+}
+</code>
+</snippet>
 </codes>
