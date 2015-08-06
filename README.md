@@ -3,6 +3,6 @@
 how to start:
 - download the latest release https://github.com/stephaneuler/board-of-symbols/releases
 - unzip the archiv
-- copy the file jserver.jar into the new directory
-- install gcc (GNU c compiler) 
-- run jserver.jar
+- download the file jserver.jar and move it into the new directory
+- if necessary - install gcc (GNU c compiler) 
+- run jserver.jar ( double click or command: java -jar jserver.jar ) 
