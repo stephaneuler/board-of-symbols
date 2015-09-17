@@ -2,8 +2,14 @@
 
 #include "colors.h" 
 
+void groesse(int x, int y) {
+  printf(">>r %d %d\n", x, y);
+}
 void hintergrund(int i, int f) {
   printf(">>b %d 0x%x\n", i, f);
+}
+void hintergrund2(int i, int j, int f) {
+  printf(">>#b %d %d 0x%x\n", i, j, f);
 }
 void flaeche(int f) {
    printf(">>ba 0x%x\n", f);
@@ -45,7 +51,7 @@ void zusammen2( int i, int j, int f, char* form) {
 void symbolGroesse(int i, double s) {
    printf(">>s %d %g\n", i, s);
 }
-void groesse(int x, int y) {
-  printf(">>r %d %d\n", x, y);
+void symbolGroesse2(int i, int j, double s) {
+  printf(">>#s %d %d %g\n", i, j, s);
 }
-int main() { 
+int main() {
