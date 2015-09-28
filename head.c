@@ -26,6 +26,9 @@ void loeschen() {
 void farbe(int i, int f) {
    printf(">>%d 0x%x\n", i, f);
 }
+void farben(int f) {
+   printf(">>a 0x%x\n", f);
+}
 void grau(int i, int g) {
   farbe(i, g << 16 | g <<8 | g);
 }
@@ -43,6 +46,12 @@ void form(int i, char* f) {
 }
 void form2(int i, int j, char* f) {
   printf(">>#fi %d %d %s\n", i, j, f);
+}
+void text(int i, char* f) {
+   printf(">>T %d %s\n", i, f);
+}
+void text2(int i, int j, char* f) {
+  printf(">>#T %d %d %s\n", i, j, f);
 }
 void zusammen2( int i, int j, int f, char* form) {
   farbe2( i, j, f );
