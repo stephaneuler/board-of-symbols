@@ -1,18 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
 <codes>
 <autosave>
-int max = 12;
-int i;
-
-// alles loeschen und Grundfarben setzen
-loeschen();
-groesse( max, max);
-formen("tld");
-for( i=0; i&lt;max*max; i++ ) {
-    symbolGroesse( i, 0.5 * i / max /max );
-    grau(i, 255 * i  /max /max );
-    hintergrund( i, WHITE );
-}
+farbe( 12, BLUE );
 </autosave>
 <snippet name="modulo">
 <code>
