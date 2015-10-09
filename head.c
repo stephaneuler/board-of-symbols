@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 #include "colors.h" 
 
@@ -52,6 +54,12 @@ void text(int i, char* f) {
 }
 void text2(int i, int j, char* f) {
   printf(">>#T %d %d %s\n", i, j, f);
+}
+void zeichen(int i, char c) {
+   printf(">>T %d %c\n", i, c);
+}
+void zeichen2(int i, int j, char c) {
+  printf(">>#T %d %d %c\n", i, j, c);
 }
 void zusammen2( int i, int j, int f, char* form) {
   farbe2( i, j, f );
