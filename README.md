@@ -12,5 +12,5 @@ in order to run the compile and link command cl some environment variables have 
 - go to the Visual Studio directories and run vsvarsall.bat script 
 - in the command window return to the jserver directory
 - type: set > vc.properties 
-- open this file in an editor and replace all \ with \\ 
+- open this file in an editor and replace all backslashs \  with double backslashs \\\\ 
 
