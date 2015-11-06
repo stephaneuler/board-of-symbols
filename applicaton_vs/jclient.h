@@ -1,0 +1,22 @@
+int sendMessage(char *sendbuf );
+int sendMessageI2(int, int );
+char *getAnswer( void );
+
+void groesse(int x, int y); 
+void hintergrund(int i, int f); 
+void hintergrund2(int i, int j, int f); 
+void flaeche(int f);
+void rahmen(int f); 
+void loeschen(); 
+void farbe(int i, int f);
+void grau(int i, int g); 
+void farbe2(int i, int j, int f); 
+void grau2(int i, int j, int g); 
+void formen(char* f);
+void form(int i, char* f); 
+void form2(int i, int j, char* f); 
+void symbolGroesse(int i, double s); 
+void text(int i, char* f);
+void text2(int i, int j, char* f);
+void zeichen(int i, char c);
+void zeichen2(int i, int j, char c);
