@@ -16,9 +16,9 @@ void hintergrund(int i, int f) {
 }
 void hintergrund2(int i, int j, int f) {
 	if( f >= 0 ) {
-		sprintf_s(nachricht, ">>b %d %d 0x%x\n", i, j, f);
+		sprintf_s(nachricht, ">>#b %d %d 0x%x\n", i, j, f);
 	} else {
-		sprintf_s(nachricht, ">>b %d %d %d\n", i, j, f);
+		sprintf_s(nachricht, ">>#b %d %d %d\n", i, j, f);
 	}
 	sendMessage( nachricht );
 }
@@ -65,7 +65,7 @@ void symbolGroesse(int i, double s) {
 	sendMessage( nachricht );
 }
 void symbolGroesse2(int i, int j, double s) {
-	sprintf_s(nachricht, ">>s %d %d %g\n", i, j, s);
+	sprintf_s(nachricht, ">>#s %d %d %g\n", i, j, s);
 	sendMessage( nachricht );
 }
 void text(int i, char* f) {
@@ -87,4 +87,11 @@ void zeichen2(int i, int j, char c) {
 		sprintf_s(nachricht, ">>#T %d %d %c \n", i, j, c);
 		sendMessage( nachricht );
 	}
+}
+
+char  *abfragen() {
+		sprintf_s(nachricht, "p\n" );
+		sendMessage( nachricht );
+		return getAnswer();
+
 }
