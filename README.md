@@ -15,6 +15,6 @@ in order to execute the compile and link command cl some environment variables h
 - type: set > vc.properties 
 - open this file in an editor and replace all backslashs \  with double backslashs \\\\ 
 
-Integration in a Visual Studio project 
+Integration in a Visual Studio project: 
 in the directory applicaton_vs you find all required .cpp and .h files. Coyp them into your project. 
 
