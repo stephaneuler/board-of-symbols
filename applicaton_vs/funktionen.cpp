@@ -95,3 +95,9 @@ char  *abfragen() {
 		return getAnswer();
 
 }
+
+void statusText( char * s ) {
+		sprintf_s(nachricht, ">>t %s\n", s );
+		sendMessage( nachricht );
+
+}

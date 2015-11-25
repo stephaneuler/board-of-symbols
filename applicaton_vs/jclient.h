@@ -21,4 +21,5 @@ void text(int i, char* f);
 void text2(int i, int j, char* f);
 void zeichen(int i, char c);
 void zeichen2(int i, int j, char c);
+void statusText( char * s ) ;
 char *abfragen();
