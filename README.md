@@ -18,3 +18,5 @@ in order to execute the compile and link command cl some environment variables h
 Integration in a Visual Studio project: 
 in the directory applicaton_vs you find all required .cpp and .h files. Coyp them into your project. 
 
+In Xcode, create new CommandLine Application as ANSI C oder C++ and simply drop in all necessary files.
+
