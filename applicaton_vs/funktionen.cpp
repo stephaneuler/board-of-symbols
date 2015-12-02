@@ -67,7 +67,7 @@ void loeschen() {
     sendMessage( nachricht );
 }
 void farben(int f) {
-    sprintf_s(nachricht, ">>a 0x%x\n", i, f);
+    sprintf_s(nachricht, ">>a 0x%x\n", f);
     sendMessage( nachricht );
 }
 void farbe(int i, int f) {
