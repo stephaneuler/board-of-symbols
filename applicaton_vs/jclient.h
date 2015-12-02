@@ -8,6 +8,7 @@ void hintergrund2(int i, int j, int f);
 void flaeche(int f);
 void rahmen(int f); 
 void loeschen(); 
+void farben(int f);
 void farbe(int i, int f);
 void grau(int i, int g); 
 void farbe2(int i, int j, int f); 
