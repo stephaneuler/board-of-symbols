@@ -66,6 +66,10 @@ void loeschen() {
 #endif
     sendMessage( nachricht );
 }
+void farben(int f) {
+    sprintf_s(nachricht, ">>a 0x%x\n", i, f);
+    sendMessage( nachricht );
+}
 void farbe(int i, int f) {
 #if __WIN32__
     sprintf_s(nachricht, ">>%d 0x%x\n", i, f);
