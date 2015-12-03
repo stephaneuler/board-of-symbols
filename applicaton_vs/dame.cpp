@@ -34,8 +34,10 @@ void dame() {
             } else {
                 hintergrund2( i, j , WHITE );
             }
-#if __WIN32__
+#if WINDOWS
             Sleep( 100 );
+#elif APPLE
+			sleep(1);
 #endif
             printf(".");
             fflush( stdout );
@@ -50,11 +52,7 @@ void dame() {
         if( strlen( a ) > 0 ) {
             printf( "Nachricht: %s\n", a );
             if( a[0] == '#' ) {
-#if __WIN32__
                 sscanf_s( a, "# %d %d %d", &feld, &ix, &iy );
-#else
-                sscanf( a, "# %d %d %d", &feld, &ix, &iy );
-#endif
                 if( brett[ix][iy] != 0 ) {
                     form2( ix, iy, "none" );
                     brett[ix][iy] = 0;
@@ -67,8 +65,10 @@ void dame() {
                 
             }
         } else {
-#if __WIN32__
+#if WINDOWS
             Sleep( 100 );
+#elif APPLE
+			sleep(1);
 #endif
         }
     }

@@ -9,9 +9,10 @@
 
 #include <stdio.h>
 
-#if  WIN32
-#define __WIN32__ 1 
-#else
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__CYGWIN__) || defined(__MINGW32__) || defined(__BORLANDC__)
+#define WINDOWS 1
+#elif defined(__APPLE__)
+#define APPLE 1
 // re-defines for non MS
 #define scanf_s scanf
 #define sscanf_s sscanf
@@ -19,11 +20,11 @@
 #define strcat_s strcat
 #endif
 
-#if __WIN32__
+#if WINDOWS
 #include "targetver.h"
 #include <tchar.h>
 #include <ws2tcpip.h> // WinSocket
-#elif __APPLE__
+#elif APPLE
 #include <unistd.h> // for sleep() Function
 #include <sys/types.h>
 #include <sys/socket.h>

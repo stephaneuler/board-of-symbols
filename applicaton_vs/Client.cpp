@@ -6,7 +6,7 @@
 
 #include "stdafx.h"
 
-#if __WIN32__
+#if WINDOWS
     // Need to link with Ws2_32.lib, Mswsock.lib, and Advapi32.lib
     #pragma comment (lib, "Ws2_32.lib")
     #pragma comment (lib, "Mswsock.lib")
@@ -29,7 +29,7 @@ char *getAnswer( void ) {
 
 int terminate( char* text ) {
     if( verbose ) printf("%s", text);
-#if __WIN32__
+#if WINDOWS
     WSACleanup();
     system( "pause" );
 #endif
@@ -40,18 +40,14 @@ int terminate( char* text ) {
 int sendMessageI2(int i, int j ) {
     char buff[100];
     
-#if __WIN32__
     sprintf_s( buff, "%d %d \n", i, j );
-#else
-    sprintf( buff, "%d %d \n", i, j );
-#endif
     
     return sendMessage( buff );
 }
 
 int sendMessage(char *sendbuf ) {
     
-#if __WIN32__
+#if WINDOWS
     WSADATA wsaData;
     SOCKET ConnectSocket = INVALID_SOCKET;
 #else
@@ -65,7 +61,7 @@ int sendMessage(char *sendbuf ) {
     int recvbuflen = DEFAULT_BUFLEN;
     char recvbuf[DEFAULT_BUFLEN];
     
-#if __WIN32__
+#if WINDOWS
     // Initialize Winsock
     iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
     if (iResult != 0) {
@@ -74,7 +70,7 @@ int sendMessage(char *sendbuf ) {
     }
 #endif
     
-#if __WIN32__
+#if WINDOWS
     ZeroMemory( &hints, sizeof(hints) );
 #else
     memset(&hints, 0, sizeof hints); // make sure the struct is empty
@@ -87,7 +83,7 @@ int sendMessage(char *sendbuf ) {
     iResult = getaddrinfo("localhost", DEFAULT_PORT, &hints, &result);
     if ( iResult != 0 ) {
         printf("getaddrinfo failed with error: %ld\n", iResult);
-#if __WIN32__
+#if WINDOWS
         WSACleanup();
 #endif
         return 1;
@@ -100,7 +96,7 @@ int sendMessage(char *sendbuf ) {
         ConnectSocket = socket(ptr->ai_family, ptr->ai_socktype,
                                ptr->ai_protocol);
         if (ConnectSocket == INVALID_SOCKET) {
-#if __WIN32__
+#if WINDOWS
             printf("socket failed with error: %ld\n", WSAGetLastError());
             WSACleanup();
 #else
@@ -112,7 +108,7 @@ int sendMessage(char *sendbuf ) {
         // Connect to server.
         iResult = connect( ConnectSocket, ptr->ai_addr, (int)ptr->ai_addrlen);
         if (iResult == SOCKET_ERROR) {
-#if __WIN32__
+#if WINDOWS
             closesocket(ConnectSocket);
 #else
             close(ConnectSocket);
@@ -133,7 +129,7 @@ int sendMessage(char *sendbuf ) {
     // Send an initial buffer
     iResult = send( ConnectSocket, sendbuf, (int)strlen(sendbuf), 0 );
     if (iResult == SOCKET_ERROR) {
-#if __WIN32__
+#if WINDOWS
         printf("socket failed with error: %ld\n", WSAGetLastError());
         closesocket(ConnectSocket);
         WSACleanup();
@@ -150,7 +146,7 @@ int sendMessage(char *sendbuf ) {
     // shutdown the connection since no more data will be sent
     iResult = shutdown(ConnectSocket, SD_SEND);
     if (iResult == SOCKET_ERROR) {
-#if __WIN32__
+#if WINDOWS
         printf("shutdown failed with error: %ld\n", WSAGetLastError());
         closesocket(ConnectSocket);
         WSACleanup();
@@ -170,16 +166,12 @@ int sendMessage(char *sendbuf ) {
         if ( iResult > 0 ) {
             recvbuf[iResult] = '\0';
             if( verbose ) printf("Bytes received: %ld %s\n", iResult, recvbuf);
-#if __WIN32__
             strcat_s( answer, recvbuf );
-#else
-            strcat( answer, recvbuf );
-#endif
             //printf(">>>%s<<<\n", answer );
         } else if ( iResult == 0 ) {
             if( verbose ) printf("Connection closed\n");
         } else {
-#if __WIN32__
+#if WINDOWS
             printf("recv failed with error: %d\n", WSAGetLastError());
 #else
             fprintf(stderr, "recv failed, getaddrinfo error: %s\n", gai_strerror((int)iResult));
@@ -189,7 +181,7 @@ int sendMessage(char *sendbuf ) {
     } while( iResult > 0 );
     
     // cleanup
-#if __WIN32__
+#if WINDOWS
     closesocket(ConnectSocket);
     WSACleanup();
 #else
