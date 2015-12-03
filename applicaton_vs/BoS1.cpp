@@ -14,8 +14,10 @@ void test2() {
     loeschen();
     for( i=0; i<60; i++ ) {
         farbe( i, BLUE );
-#if __WIN32__
+#if WINDOWS
         Sleep( 100 );
+#elif APPLE
+		sleep(1);
 #endif
     }
 }
@@ -24,15 +26,13 @@ void test2a() {
     int i, anzahl;
     loeschen();
     printf("Wie viele Felder? ");
-#if __WIN32__
     scanf_s("%d", &anzahl );
-#else
-    scanf("%d", &anzahl );
-#endif
     for( i=0; i<anzahl; i++ ) {
         farbe( i, BLUE );
-#if __WIN32__
+#if WINDOWS
         Sleep( 100 );
+#elif APPLE
+		sleep(1);
 #endif
     }
 }
@@ -43,8 +43,10 @@ void test3() {
         if( strlen( a ) > 0 ) {
             printf( "Nachricht: %s\n", a );
         } else {
-#if __WIN32__
+#if WINDOWS
             Sleep( 100 );
+#elif APPLE
+			sleep(1);
 #endif
         }
     }
@@ -57,24 +59,21 @@ void test4() {
         if( strlen( a ) > 0 ) {
             printf( "Nachricht: %s\n", a );
             if( a[0] == '#' ) {
-#if __WIN32__
                 sscanf_s( a, "# %d", &feld );
-#else
-                sscanf( a, "# %d", &feld );
-
-#endif
                 farbe( feld, 0xff00 );
             }
         } else {
-#if __WIN32__
+#if WINDOWS
             Sleep( 100 );
+#elif APPLE
+			sleep(1);
 #endif
         }
     }
 }
 
 
-#if __WIN32__
+#if WINDOWS
 int _tmain(int argc, _TCHAR* argv[])
 {
     //	test2a();
