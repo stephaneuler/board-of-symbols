@@ -16,7 +16,7 @@ void test2() {
         farbe( i, BLUE );
 #if WINDOWS
         Sleep( 100 );
-#elif APPLE
+#else
 		sleep(1);
 #endif
     }
@@ -31,7 +31,7 @@ void test2a() {
         farbe( i, BLUE );
 #if WINDOWS
         Sleep( 100 );
-#elif APPLE
+#else
 		sleep(1);
 #endif
     }
@@ -45,7 +45,7 @@ void test3() {
         } else {
 #if WINDOWS
             Sleep( 100 );
-#elif APPLE
+#else
 			sleep(1);
 #endif
         }
@@ -65,13 +65,21 @@ void test4() {
         } else {
 #if WINDOWS
             Sleep( 100 );
-#elif APPLE
+#else
 			sleep(1);
 #endif
         }
     }
 }
 
+/** 
+ * When using MINGW, please link the following files in this given order in your linker settings:
+ * "C:\MinGW\lib\libws2_32.a"
+ * "C:\MinGW\lib\libmswsock.a"
+ * "C:\MinGW\lib\libadvapi32.a"
+ * 
+ * For Eclipse C++: Right click on your project -> Properties -> C/C++ Build -> Settings -> "Tool Settings" -> MinGW C++ Linker -> Miscellaneous -> "Other objects" (lower part) -> Add object
+ */
 
 #if WINDOWS
 int _tmain(int argc, _TCHAR* argv[])
