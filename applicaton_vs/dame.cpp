@@ -36,7 +36,7 @@ void dame() {
             }
 #if WINDOWS
             Sleep( 100 );
-#elif APPLE
+#else
 			sleep(1);
 #endif
             printf(".");
@@ -67,7 +67,7 @@ void dame() {
         } else {
 #if WINDOWS
             Sleep( 100 );
-#elif APPLE
+#else
 			sleep(1);
 #endif
         }

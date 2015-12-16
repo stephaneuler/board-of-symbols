@@ -6,15 +6,11 @@
 
 #include "stdafx.h"
 
-#if WINDOWS
+#if VISUALSTUDIO
     // Need to link with Ws2_32.lib, Mswsock.lib, and Advapi32.lib
     #pragma comment (lib, "Ws2_32.lib")
     #pragma comment (lib, "Mswsock.lib")
     #pragma comment (lib, "AdvApi32.lib")
-#else
-    #define INVALID_SOCKET 1
-    #define SOCKET_ERROR -1
-    #define SD_SEND 1
 #endif
 
 #define DEFAULT_BUFLEN 512
