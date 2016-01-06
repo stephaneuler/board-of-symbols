@@ -4,3 +4,4 @@ Version
 
 0.98a  removed bug "missing compiler property"
 
+0.98b  faster drawing of circles, first version auto formatter
