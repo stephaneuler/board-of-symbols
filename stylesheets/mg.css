@@ -1,0 +1,14 @@
+    h1 {margin: 0; }
+    h2 {margin: 0; padding-top: 0.5em;}
+    div.maincontainer { width: 1000px;  height: 630px; margin-left: 200px;  margin-top: 60px;
+                        border: 3px solid gray;  background-color:#FFED66;}
+    div.preview { margin: 30px }
+    div.view { margin: 30px; height: 250px;  text-align: center; }
+    div.controll { margin: 30px; height: 30px;  text-align: center; }
+    div.thumb {  margin:1px; float: left;  width:35px; height: 35px; }
+    img.thumbImage { position: relative; ;  width:35px; height: 35px;   top: 50%;   transform: translateY(-50%); } 
+    img.bigImage { position: relative; max-height: 250px; top: 50%;   transform: translateY(-50%); } 
+
+    span.viewer { width: 200px;  height: 400px; } 
+ 
+ 
