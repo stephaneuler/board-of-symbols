@@ -22,11 +22,7 @@ import javax.swing.JTextField;
 import plotter.Graphic;
 import plotter.Plotter;
 
-/**
- * @author Euler
- * @version 0.96 September 2015
- * 
- */
+
 
 // Version wer wann was
 // .94 se 15-07 erste stabile Version
@@ -34,9 +30,22 @@ import plotter.Plotter;
 // .96 se 15-09 hintergGrund2, symbolGroesse2
 // .97 se 15-10-08 diverse Kleinigkeiten
 // .973 se 15-10-18 Short cuts
-// .974b se 15-11-10 Bugfix filte rmode
+// .974b se 15-11-10 Bugfix filter mode
 // .974c se 15-12-01 save font size
 
+
+/**
+ * This class implements a NxM board as used for board games like chess or checkers. 
+ * A instance of Plotter is used for drawing. 
+ * The plotter is embedded in a Plotter.Graphic Object that provides a simple GUI with menus, buttons, labels, etc. 
+ * A board has a list of symbols. These symbols can be accessed by index. 
+ * The method receiveMessage handles commands in the BoS Language (BoSL).
+ * 
+ * 
+ * @author Euler
+ * @version 0.96 September 2015
+ * 
+ */
 public class Board implements ActionListener, MouseListener {
 
 	public static final String FILTER_PREFIX = ">>";
@@ -439,7 +448,11 @@ public class Board implements ActionListener, MouseListener {
 				return "ERROR - " + index + " out of Range ";
 			}
 			String[] p2 = line.split("\\s+", 3);
-			symbols.get(index).setText(p2[2]);
+			if( p2.length >= 3 ) {
+				symbols.get(index).setText(p2[2]);
+			} else {
+				symbols.get(index).setText("");
+			}
 			symbols.get(index).zeichnen(plotter);
 			graphic.repaint();
 			return "okay";
@@ -454,6 +467,32 @@ public class Board implements ActionListener, MouseListener {
 			}
 			String[] p2 = line.split("\\s+", 4);
 			symbols.get(index).setText(p2[3]);
+			symbols.get(index).zeichnen(plotter);
+			graphic.repaint();
+			return "okay";
+		}
+
+		if (line.startsWith("TC ")) {
+			int index = Integer.parseInt(p[1]);
+			if (index < 0 | index >= nSymbols) {
+				return "ERROR - " + index + " out of Range ";
+			}
+			int icolor = parseColor(p[2]);
+			symbols.get(index).setTextFarbe(new Color(icolor));
+			symbols.get(index).zeichnen(plotter);
+			graphic.repaint();
+			return "okay";
+		}
+
+		if (line.startsWith("#TC ")) {
+			int col = Integer.parseInt(p[1]);
+			int row = Integer.parseInt(p[2]);
+			int index = col + row * columns;
+			if (index < 0 | index >= nSymbols) {
+				return "ERROR - " + index + " out of Range ";
+			}
+			int icolor = parseColor(p[3]);
+			symbols.get(index).setTextFarbe(new Color(icolor));
 			symbols.get(index).zeichnen(plotter);
 			graphic.repaint();
 			return "okay";

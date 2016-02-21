@@ -111,27 +111,6 @@ public class CodeExecutorC extends CodeExecutor {
 		return exeName;
 	}
 
-	private static void getMSVars() {
-		ProcessBuilder pb = new ProcessBuilder("getVars.bat");
-		// pb.redirectError();
-		try {
-			final Process p = pb.start();
-			System.out.println("Started execution process");
-			BufferedReader input = new BufferedReader(new InputStreamReader(
-					p.getInputStream()));
-			String line;
-			while ((line = input.readLine()) != null) {
-				System.out.println(line);
-			}
-			input.close();
-			p.waitFor();
-		} catch (IOException | InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
-
 	@Override
 	public String compileAndExecute(String fileName) {
 		StringBuffer result = new StringBuffer();
@@ -236,8 +215,7 @@ public class CodeExecutorC extends CodeExecutor {
 					hasErrors = true;
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				board.setLastError("can not read log file <<" + e.getMessage() + ">>");
 				result.append("\nsiehe Datei v2.log\n");
 				hasErrors = true;
 			}
@@ -280,8 +258,7 @@ public class CodeExecutorC extends CodeExecutor {
 						}
 						input.close();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						board.setLastError("can not run thread <<" + e.getMessage() + ">>");
 					}
 				}
 			}).start();

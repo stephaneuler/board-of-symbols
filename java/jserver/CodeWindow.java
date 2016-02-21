@@ -84,8 +84,9 @@ import plotter.Sleep;
 @SuppressWarnings("serial")
 public class CodeWindow extends JFrame implements ActionListener,
 		DocumentListener, ExecutorListener {
+	private static final String METHOD_PREFIX = "m:";
 	private static String version = "0.99 Dezember 2015";
-	//private static final int C = 1;
+	// private static final int C = 1;
 	private static final int componentXSize = 160;
 	private static final int componentYSize = 25;
 
@@ -291,9 +292,9 @@ public class CodeWindow extends JFrame implements ActionListener,
 		DefaultCaret caret = (DefaultCaret) messageField.getCaret();
 		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 
-//		Dimension minSize = new Dimension(5, 5);
-//		Dimension prefSize = new Dimension(5, 5);
-//		Dimension maxSize = new Dimension(Short.MAX_VALUE, 5);
+		// Dimension minSize = new Dimension(5, 5);
+		// Dimension prefSize = new Dimension(5, 5);
+		// Dimension maxSize = new Dimension(Short.MAX_VALUE, 5);
 		Dimension componentSize = new Dimension(componentXSize, componentYSize);
 
 		List<String> snippetNames = codeDB.getSnippetNames();
@@ -399,32 +400,33 @@ public class CodeWindow extends JFrame implements ActionListener,
 				.createLineBorder(Color.BLUE, 3));
 		statusLabel.setBorder(BorderFactory.createLineBorder(Color.BLUE, 3));
 
-//		Box buttonBox = Box.createVerticalBox();
-//		// buttonBox.setBorder(BorderFactory.createCompoundBorder(
-//		// BorderFactory.createLineBorder(Color.BLUE),
-//		// buttonBox.getBorder()));
-//		buttonBox.setBorder(BorderFactory.createCompoundBorder(
-//				BorderFactory.createEmptyBorder(), buttonBox.getBorder()));
-//		// buttonBox.setBorder(BorderFactory.createLineBorder(Color.BLUE, 10 )
-//		// );
-//		buttonBox.add(snippetNameLabel);
-//		buttonBox.add(new Box.Filler(minSize, prefSize, maxSize));
-//		buttonBox.add(runButton);
-//		// buttonBox.add(statusLabel);
-//		buttonBox.add(new Box.Filler(minSize, prefSize, maxSize));
-//		// buttonBox.add(new JLabel("Laden"));
-//		buttonBox.add(snippetSelector);
-//		buttonBox.add(new Box.Filler(minSize, prefSize, maxSize));
-//		buttonBox.add(saveButton);
-//		buttonBox.add(new Box.Filler(minSize, prefSize, maxSize));
-//		buttonBox.add(saveAsButton);
-//		buttonBox.add(new Box.Filler(minSize, prefSize, maxSize));
-//		buttonBox.add(snippetNameField);
-//		buttonBox.add(new Box.Filler(minSize, prefSize, maxSize));
-//
-//		controllBox.add(buttonBox);
-//
-//		controllBox.add(Box.createHorizontalGlue());
+		// Box buttonBox = Box.createVerticalBox();
+		// // buttonBox.setBorder(BorderFactory.createCompoundBorder(
+		// // BorderFactory.createLineBorder(Color.BLUE),
+		// // buttonBox.getBorder()));
+		// buttonBox.setBorder(BorderFactory.createCompoundBorder(
+		// BorderFactory.createEmptyBorder(), buttonBox.getBorder()));
+		// // buttonBox.setBorder(BorderFactory.createLineBorder(Color.BLUE, 10
+		// )
+		// // );
+		// buttonBox.add(snippetNameLabel);
+		// buttonBox.add(new Box.Filler(minSize, prefSize, maxSize));
+		// buttonBox.add(runButton);
+		// // buttonBox.add(statusLabel);
+		// buttonBox.add(new Box.Filler(minSize, prefSize, maxSize));
+		// // buttonBox.add(new JLabel("Laden"));
+		// buttonBox.add(snippetSelector);
+		// buttonBox.add(new Box.Filler(minSize, prefSize, maxSize));
+		// buttonBox.add(saveButton);
+		// buttonBox.add(new Box.Filler(minSize, prefSize, maxSize));
+		// buttonBox.add(saveAsButton);
+		// buttonBox.add(new Box.Filler(minSize, prefSize, maxSize));
+		// buttonBox.add(snippetNameField);
+		// buttonBox.add(new Box.Filler(minSize, prefSize, maxSize));
+		//
+		// controllBox.add(buttonBox);
+		//
+		// controllBox.add(Box.createHorizontalGlue());
 
 		// codeInput.setColumns(60);
 		// codeInput.setRows(20);
@@ -521,7 +523,15 @@ public class CodeWindow extends JFrame implements ActionListener,
 		redoMenuItem.setAccelerator(KeyStroke.getKeyStroke("control Y"));
 		editMenu.add(undoMenuItem);
 		editMenu.add(redoMenuItem);
-		Utils.addMenuItem(this, editMenu, autoLayoutText);
+		Utils.addMenuItem(this, editMenu, autoLayoutText,
+				"automatisch formatieren", "control F");
+
+		editMenu.addSeparator();
+		String[] methods = MethodExtractor.getMethods("jserver.XSend");
+		for (String method : methods) {
+			JMenuItem jmi = Utils.addMenuItem(this, editMenu, method);
+			jmi.setActionCommand(METHOD_PREFIX + method);
+		}
 
 		JMenu menuHelp = new JMenu("Hilfe");
 		Utils.addMenuItem(this, menuHelp, helpText);
@@ -656,7 +666,17 @@ public class CodeWindow extends JFrame implements ActionListener,
 			} catch (BadLocationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} // insert your text
+			} 
+
+		} else if (cmd.startsWith(METHOD_PREFIX) ) { 
+			int pos = codeInput.getCaretPosition(); // get the cursor position
+			try {
+				Document doc = codeInput.getDocument();
+				doc.insertString(pos, cmd.substring( METHOD_PREFIX.length() ), null);
+			} catch (BadLocationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
 
 		} else if (cmd.equals(fontIncText)) {
 			Font font = new Font("Consolas", Font.PLAIN, ++fontSize);
@@ -740,6 +760,9 @@ public class CodeWindow extends JFrame implements ActionListener,
 			for (String name : snippetNames) {
 				snippetSelector.addItem(name);
 			}
+		} else if (cmd.equals(helpText)) {
+			JOptionPane.showMessageDialog(this, 
+					"Noch keine Hilfe vorhanden - sorry", "Hilfe", JOptionPane.INFORMATION_MESSAGE);
 
 		}
 	}

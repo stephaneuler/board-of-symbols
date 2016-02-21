@@ -44,7 +44,7 @@ public class Dice {
 			}
 			double px = center.x + pos[value - 1][2 * n] * size;
 			double py = center.y + pos[value - 1][2 * n + 1] * size;
-			for (double t = 0; t < 2 * Math.PI; t += 0.1) {
+			for (double t = 0; t < 2 * Math.PI; t += 0.2) {
 				double x = px + pipSize * Math.cos(t);
 				double y = py + pipSize * Math.sin(t);
 				plotter.add(key2, x, y);

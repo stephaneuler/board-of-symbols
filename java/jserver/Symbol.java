@@ -25,12 +25,14 @@ public class Symbol {
 	String key = null;
 	SymbolType type = SymbolType.CIRCLE;
 	protected Color farbe = Color.LIGHT_GRAY;
+	protected Color textFarbe = Color.BLACK;
 	protected Color hintergrund;;
 	private Stroke stroke = new BasicStroke(5.f);
 	private DataObject mitHintergrund = null;
 	private String text = null;
 	TextObject textObject = null;
 	private List<String> secondaryKeys = new ArrayList<String>();
+	private boolean useAlphaWithText;
 
 	public Symbol(Position pos, double size) {
 		super();
@@ -61,6 +63,14 @@ public class Symbol {
 
 	public void setText(String text) {
 		this.text = text;
+	}
+
+	public Color getTextFarbe() {
+		return textFarbe;
+	}
+
+	public void setTextFarbe(Color textFarbe) {
+		this.textFarbe = textFarbe;
 	}
 
 	public static void toggleNumbering() {
@@ -158,7 +168,7 @@ public class Symbol {
 		// plotter.setDataColor(key, farbe.darker());
 		// }
 		plotter.setDataColor(key, farbe);
-		for( String k : secondaryKeys ) {
+		for (String k : secondaryKeys) {
 			plotter.removeDataObject(k);
 		}
 		secondaryKeys.clear();
@@ -194,16 +204,18 @@ public class Symbol {
 			plotter.setDataColor(key, farbe);
 		}
 
-		if (text != null) {
-			plotter.setDataColor(key,
-					new Color(farbe.getRed(), farbe.getGreen(),
-							farbe.getBlue(), alpha));
+		if (text != null ) {
+			if (useAlphaWithText && text.length() != 0) {
+				plotter.setDataColor(
+						key,
+						new Color(farbe.getRed(), farbe.getGreen(), farbe
+								.getBlue(), alpha));
+			}
 			// System.out.println("Text:" + text );
 			// if (textObject == null) {
-			while (plotter.removeText(pos.x, pos.y))
-				;
+			while (plotter.removeText(pos.x, pos.y));
 			textObject = plotter.setText(text, pos.x, pos.y);
-			textObject.setColor(Color.BLACK);
+			textObject.setColor(textFarbe);
 			textObject.setFont(font);
 			// } else {
 			// textObject.setText(text);
@@ -215,9 +227,10 @@ public class Symbol {
 				double y = pos.y + size * Math.sin(t);
 				plotter.add(key, x, y);
 			}
-		} else if (Dice.isDiceType( type )  ) {
-			Dice.draw( key, secondaryKeys, Dice.getValue( type ), plotter, pos, size  );
-			
+		} else if (Dice.isDiceType(type)) {
+			Dice.draw(key, secondaryKeys, Dice.getValue(type), plotter, pos,
+					size);
+
 		} else if (type == SymbolType.SQUARE) {
 			plotter.add(key, pos.x - size, pos.y - size);
 			plotter.addD(key, 2 * size, 0);
@@ -310,10 +323,10 @@ public class Symbol {
 	}
 
 	public void clearForm(Plotter plotter) {
-		if( key != null ) {
+		if (key != null) {
 			plotter.removeAll(key);
 		}
-		for( String k : secondaryKeys ) {
+		for (String k : secondaryKeys) {
 			plotter.removeDataObject(k);
 		}
 		secondaryKeys.clear();

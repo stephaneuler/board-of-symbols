@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,8 +31,6 @@ public class CodeExecutorBoSL extends CodeExecutor {
 	}
 
 	/*
-	 * This class uses the method createTmpSourceFile to store the commands in a
-	 * list of Strings.
 	 * 
 	 * (non-Javadoc)
 	 * 
@@ -53,8 +50,8 @@ public class CodeExecutorBoSL extends CodeExecutor {
 			}
 			fw.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			board.setLastError("can not create file <<" + e.getMessage() + ">>");
+			return null;
 		}
 		return fileName;
 	}

@@ -4,6 +4,20 @@ import java.io.PrintStream;
 
 import javax.swing.JTextArea;
 
+/**
+ * This is abstract class with the interface to a board. 
+ * It implements the convenience methods to send commands. 
+ * A sub class has to implement the abstract method send. 
+ * The codeExecutorJava performs the following sequence of method calls
+ * <ol>
+ * <li>setUp - connect the output with the message field</li>
+ * <li>send - send all commands</li>
+ * <li>setDown  - disconnect the output</li>
+ * </ol>
+ * 
+ * @author Euler
+ *
+ */
 public abstract class XSend {
 	Board board = null;
 	public String result = "";
@@ -17,6 +31,10 @@ public abstract class XSend {
 		System.setOut(outStream);
 	}
 	
+	public void setDown() {
+		System.setOut(stdout);
+	}
+	
 	public String getResult() {
 		return result;
 	}
@@ -25,10 +43,6 @@ public abstract class XSend {
 		this.result = result;
 	}
 
-	public void setDown() {
-		System.setOut(stdout);
-	}
-	
 	public  void setBoard(Board board) {
 		this.board = board;
 	}
@@ -99,6 +113,14 @@ public abstract class XSend {
 
 	public void text(int i, String f) {
 		result +=  board.receiveMessage(">>T " + i + " " + f );
+	}
+
+	public void textFarbe(int i, int c) {
+		result +=  board.receiveMessage(">>TC " + i + " " + c );
+	}
+
+	public void textFarbe2(int i, int j, int c) {
+		result +=  board.receiveMessage(">>#TC " + i + " " + j + " " + c );
 	}
 
 	public void text2(int i, int j, String f) {
