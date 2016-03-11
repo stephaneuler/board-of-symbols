@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 
@@ -143,6 +144,7 @@ public class CodeWindow extends JFrame implements ActionListener,
 	private CodeExecutor codeExecutor;
 	private String authorName = "nobody";
 	private String fileOpenDirectory = null;
+	private String XMLFileName = null;
 	private boolean codeHasChanged = false;
 	private String imageDir = "images/";
 	private String stopImgLocation = imageDir + "Stop16.gif";
@@ -164,6 +166,7 @@ public class CodeWindow extends JFrame implements ActionListener,
 			authorName = a;
 		}
 		fileOpenDirectory = board.getGraphic().getProperty("codeDir");
+		XMLFileName = board.getGraphic().getProperty("XMLFileName");
 		String mode = board.getGraphic().getProperty("compiler",
 				CodeExecutor.gccText);
 		codeExecutor = CodeExecutor.getExecutor(mode, board, this);
@@ -174,10 +177,19 @@ public class CodeWindow extends JFrame implements ActionListener,
 	}
 
 	private String readXMLFile() {
-		String fileName = askCodeFileNam();
+		String fileName = askCodeFileName();
 		if (fileName == null)
 			return null;
-		codeDB.setXmlFile(new File(fileName));
+		File file = new File( fileName );
+		codeDB.setXmlFile( file );
+		if( ! file.exists() ) {
+			JOptionPane.showMessageDialog(this,
+					"Datei " + fileName + " neu anlegen ",
+					"Codes lesen", JOptionPane.ERROR_MESSAGE);
+			codeDB.createDocument();
+			codeDB.writeXML();
+		}
+		board.getGraphic().saveProperty("XMLFileName", file.getName());
 		try {
 			codeDB.readXML();
 		} catch (ParserConfigurationException | SAXException | IOException e2) {
@@ -190,7 +202,7 @@ public class CodeWindow extends JFrame implements ActionListener,
 
 	}
 
-	private String askCodeFileNam() {
+	private String askCodeFileName() {
 		JFileChooser chooser = new JFileChooser();
 		if (fileOpenDirectory != null) {
 			chooser.setCurrentDirectory(new File(fileOpenDirectory));
@@ -207,7 +219,7 @@ public class CodeWindow extends JFrame implements ActionListener,
 			fileOpenDirectory = chooser.getCurrentDirectory().getAbsolutePath();
 			board.getGraphic().saveProperty("codeDir", fileOpenDirectory);
 			String filename = chooser.getSelectedFile().getAbsolutePath();
-			System.out.println(filename);
+			//System.out.println(filename);
 			return filename;
 		} else {
 			return null;
@@ -239,6 +251,9 @@ public class CodeWindow extends JFrame implements ActionListener,
 	}
 
 	private void setup(String string) {
+		if( XMLFileName != null ) {
+			codeDB.setXmlFile( new File(fileOpenDirectory, XMLFileName));
+		}
 		try {
 			codeDB.readXML();
 		} catch (ParserConfigurationException | SAXException | IOException e1) {
@@ -364,27 +379,29 @@ public class CodeWindow extends JFrame implements ActionListener,
 			colorSelector.setRenderer(renderer);
 
 			colorSelector.setActionCommand(colorSelectorCommand);
-			colorSelector.setMaximumSize(new Dimension(componentXSize,
-					componentYSize));
 			colorSelector.addActionListener(this);
 
-			Box color2 = Box.createVerticalBox();
-			color2.add(selectorInfo);
-			color2.add(colorSelector);
-
-			executionInfoLabel.setMaximumSize(componentSize);
-			executionInfoLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-			executionInfoLabel.setBorder(BorderFactory.createLineBorder(
-					Color.BLUE, 3));
-			color2.add(executionInfoLabel);
-
-			controllBox.add(color2);
+//			Box color2 = Box.createVerticalBox();
+//			color2.add(selectorInfo);
+//			color2.add(colorSelector);
+//
+//			executionInfoLabel.setMaximumSize(componentSize);
+//			executionInfoLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+//			executionInfoLabel.setBorder(BorderFactory.createLineBorder(
+//					Color.BLUE, 3));
+//			color2.add(executionInfoLabel);
+//
+//			controllBox.add(color2);
 		} else {
 			JOptionPane.showMessageDialog(this,
 					"Fehler beim Lesen der Farben-Datei: "
 							+ codeDB.getLastException().getMessage(),
 					"Farben lesen", JOptionPane.ERROR_MESSAGE);
+			colorSelector.addItem("-");
+			
 		}
+		colorSelector.setMaximumSize(new Dimension(componentXSize,
+				componentYSize));
 
 		snippetSelector.setMaximumSize(componentSize);
 		snippetNameLabel.setMaximumSize(componentSize);
@@ -459,7 +476,9 @@ public class CodeWindow extends JFrame implements ActionListener,
 		// felhermeldung), C-Mode kein sichtbarer Effekt
 		// DefaultSyntaxKit.initKit();
 		// codeInput.setContentType("text/C");
-		codeInput.setText(codeDB.getLastEditElement().getTextContent());
+		if( codeDB.hasLastEditElement() ) {
+			codeInput.setText(codeDB.getLastEditElement().getTextContent());
+		}
 		codeHasChanged = false;
 
 		messageField.setColumns(60);
@@ -478,9 +497,9 @@ public class CodeWindow extends JFrame implements ActionListener,
 		menuPropertier = new JMenu("Eigenschaften");
 
 		Utils.addMenuItem(this, menuPropertier, fontIncText, "vergrößert Font",
-				"alt I");
+				"alt PLUS");
 		Utils.addMenuItem(this, menuPropertier, fontDecText,
-				"verkleinert Font", "alt D");
+				"verkleinert Font", "alt MINUS");
 		Utils.addMenuItem(this, menuPropertier, bigFontText, "Großer Font",
 				"alt B");
 		Utils.addMenuItem(this, menuPropertier, normalFontText,
@@ -773,6 +792,7 @@ public class CodeWindow extends JFrame implements ActionListener,
 			text += "* ";
 		}
 		text += codeExecutor.getCompileMode();
+		text += " / " + codeDB.getXMLFileName();
 		infoLabel.setText(text);
 		// infoLabel.setText( codeExecutor.getCompileMode() + " " + fontSize
 		// +"pt");
@@ -792,6 +812,7 @@ public class CodeWindow extends JFrame implements ActionListener,
 			System.out.println("CodeRunner fileName: " + fileName);
 			if (fileName == null) {
 				result += "ERROR " + board.getLastError();
+				failedCompilation();
 			} else {
 				result += codeExecutor.compileAndExecute(fileName);
 			}

@@ -128,7 +128,7 @@ public abstract class XSend {
 	}
 
 	public void zeichen(int i, char c) {
-		result +=  board.receiveMessage(">>#T " + i + " " + c );
+		result +=  board.receiveMessage(">>T " + i + " " + c );
 	}
 
 	public void zeichen2(int i, int j, char c) {

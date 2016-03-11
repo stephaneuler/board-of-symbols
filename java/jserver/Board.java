@@ -36,19 +36,20 @@ import plotter.Plotter;
 
 /**
  * This class implements a NxM board as used for board games like chess or checkers. 
- * A instance of Plotter is used for drawing. 
+ * An instance of Plotter is used for drawing. 
  * The plotter is embedded in a Plotter.Graphic Object that provides a simple GUI with menus, buttons, labels, etc. 
  * A board has a list of symbols. These symbols can be accessed by index. 
  * The method receiveMessage handles commands in the BoS Language (BoSL).
  * 
  * 
- * @author Euler
- * @version 0.96 September 2015
+ * @author Stephan Euler
+ * @version {@value #VERSION}
  * 
  */
 public class Board implements ActionListener, MouseListener {
 
 	public static final String FILTER_PREFIX = ">>";
+	public static final String VERSION = " 0.974c Dezember 2015";
 
 	private static final String clearText = "Farben zurück setzten";
 	private static final String clearTextText = "Texte löschen";
@@ -69,9 +70,9 @@ public class Board implements ActionListener, MouseListener {
 	private static final int RAW = 0;
 	private static final int C = 1;
 
-	private Graphic graphic = new Graphic("Board, Version 0.974c Dezember 2015");
+	private Graphic graphic = new Graphic("Board, Version " + VERSION);
 	private Plotter plotter = graphic.getPlotter();
-	private int messages = 0;
+	private int messageCount = 0;
 	private int rows = 10;
 	private int columns = 10;
 	private double radius = 0.5;
@@ -204,15 +205,16 @@ public class Board implements ActionListener, MouseListener {
 		JMenu menu = new JMenu("Brett");
 
 		Utils.addMenuItem(this, menu, clearText, "alles löschen", "alt R");
+		Utils.addMenuItem(this, menu, clearTextText, "Texte löschen" );
 		Utils.addMenuItem(this, menu, fontSizeText, "Schriftgröße für Texte");
-		Utils.addMenuItem(this, menu, growText, "wachsen");
-		Utils.addMenuItem(this, menu, shrinkText, "schrumpfen");
+		Utils.addMenuItem(this, menu, growText, "wachsen", "alt PLUS");
+		Utils.addMenuItem(this, menu, shrinkText, "schrumpfen", "alt MINUS");
 		Utils.addMenuItem(this, menu, bigText, "groß");
 		Utils.addMenuItem(this, menu, rowText, "Anzahl der Zeilen");
 		Utils.addMenuItem(this, menu, colText, "Anzahl der Spalten");
-		Utils.addMenuItem(this, menu, quadText, "Anzahl der Zeilen, Spalten");
+		Utils.addMenuItem(this, menu, quadText, "Anzahl der Zeilen, Spalten", "alt Q");
 		Utils.addMenuItem(this, menu, interactiveText,
-				"Einblenden des Eingabefeldes");
+				"Einblenden des Eingabefeldes", "alt I");
 		// Utils.addMenuItem(this, menu, codingText,
 		// "Einblenden der Code-Eingabe");
 		Utils.addMenuItem(this, menu, codingWindowText,
@@ -240,11 +242,21 @@ public class Board implements ActionListener, MouseListener {
 		return "okay";
 	}
 
+	/**
+	 * Commands in BoSL can be send with this method. 
+	 * The method parses the line and executes the command. 
+	 * In filter mode lines not starting with FILTER_PREFIX are ignored. 
+	 * This is helpfull when the commands are mixed with other output. 
+	 * 
+	 * 
+	 * @param line a line with (currently) one command
+	 * @return okay or an error message
+	 */
 	public String receiveMessage(String line) {
 		// System.out.println( "receiveMessage: " + line);
 		line = line.trim();
-		++messages;
-		String info = columns + "x" + rows + " Feld, Nachricht #" + messages
+		++messageCount;
+		String info = columns + "x" + rows + " Feld, Nachricht #" + messageCount
 				+ ": " + line;
 
 		if (line.startsWith(FILTER_PREFIX)) {
@@ -304,7 +316,8 @@ public class Board implements ActionListener, MouseListener {
 				return "ERROR - " + index + " out of Range ";
 			}
 			symbols.get(index).setType(s);
-			redrawSymbols();
+			redrawSymbol( symbols.get(index) );
+			//redrawSymbols();
 			return "okay";
 		}
 
@@ -323,7 +336,8 @@ public class Board implements ActionListener, MouseListener {
 				return "ERROR - " + index + " out of Range ";
 			}
 			symbols.get(index).setType(s);
-			redrawSymbols();
+			redrawSymbol( symbols.get(index) );
+			//redrawSymbols();
 			return "okay";
 		}
 
@@ -339,9 +353,7 @@ public class Board implements ActionListener, MouseListener {
 			}
 			double size = Double.parseDouble(p[2]);
 			symbols.get(index).setSize(size);
-			symbols.get(index).clearForm(plotter);
-			symbols.get(index).zeichnen(plotter);
-			graphic.repaint();
+			redrawSymbol( symbols.get(index) );
 			return "okay";
 
 		}
@@ -359,9 +371,7 @@ public class Board implements ActionListener, MouseListener {
 			}
 			double size = Double.parseDouble(p[3]);
 			symbols.get(index).setSize(size);
-			symbols.get(index).clearForm(plotter);
-			symbols.get(index).zeichnen(plotter);
-			graphic.repaint();
+			redrawSymbol( symbols.get(index) );
 			return "okay";
 
 		}
@@ -466,7 +476,11 @@ public class Board implements ActionListener, MouseListener {
 				return "ERROR - " + index + " out of Range ";
 			}
 			String[] p2 = line.split("\\s+", 4);
-			symbols.get(index).setText(p2[3]);
+			if( p2.length >= 4 ) {
+				symbols.get(index).setText(p2[3]);
+			} else {
+				symbols.get(index).setText("");
+			}
 			symbols.get(index).zeichnen(plotter);
 			graphic.repaint();
 			return "okay";
@@ -545,6 +559,12 @@ public class Board implements ActionListener, MouseListener {
 			return "ERROR - can not parse line :" + line;
 		}
 
+	}
+
+	private void redrawSymbol(Symbol symbol) {
+		symbol.clearForm(plotter);
+		symbol.zeichnen(plotter);
+		graphic.repaint();
 	}
 
 	private boolean updateSymbol(int index, String colorString) {

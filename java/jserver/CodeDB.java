@@ -6,10 +6,13 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -51,6 +54,26 @@ public class CodeDB {
 
 	public void setXmlFile(File xmlFile) {
 		this.xmlFile = xmlFile;
+	}
+
+	public String getXMLFileName() {
+		return xmlFile.getName();
+	}
+
+
+	public void createDocument() {
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder builder;
+		try {
+			builder = factory.newDocumentBuilder();
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		}
+		document = builder.newDocument();
+		document.appendChild( document.createElement("codes") );
+		
 	}
 
 	void readXML() throws ParserConfigurationException, SAXException,
@@ -211,8 +234,9 @@ public class CodeDB {
 	 *         exists or does not contain required format
 	 */
 	public List<String> getColorNames() {
-		List<String> list = new ArrayList<String>();
+		List<String> colorNames = new ArrayList<String>();
 
+		// first try to read file
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(
 					"colors.h"));
@@ -222,19 +246,26 @@ public class CodeDB {
 					break;
 				}
 				String[] parts = line.split(" +");
-				list.add(parts[1]);
+				colorNames.add(parts[1]);
 				int value = Board.parseColor(parts[2].trim());
 				colors.add(new Color(value));
 				colorValues.put(parts[1], value);
 			}
 			reader.close();
 		} catch (IOException e) {
-			// e.printStackTrace();
 			lastException = e;
-			return null;
+			// no file found, use class ColorNames as source
+			colorValues = ColorNames.getColors();	
+			String[] t = new String[1];
+			String[] cv =  colorValues.keySet().toArray(t);
+			Arrays.sort( cv );
+			for( String c : cv ) {
+				colorNames.add(c);
+				colors.add(new Color( colorValues.get(c) ));
+			}
 		}
 
-		return list;
+		return colorNames;
 	}
 
 	public Integer getColorValue(String s) {
@@ -252,10 +283,14 @@ public class CodeDB {
 	public Element getLastEditElement() {
 		return lastEditElement;
 	}
+	public boolean hasLastEditElement() {
+		return lastEditElement != null;
+	}
 
 	public void setLastEditElement(Element lastEditElement) {
 		this.lastEditElement = lastEditElement;
 	}
+
 
 
 }

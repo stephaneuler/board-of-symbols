@@ -16,6 +16,12 @@ public class MethodExtractor {
 	}
 
 	/**
+	 * This method looks up all methods of the class with the given name. 
+	 * Setters and getters and the special method send are ignored. 
+	 * For all other methods a simplified text description is stored in a list. 
+	 * Finally the list is converted into an array of strings. 
+	 * This array is sorted and returned. 
+	 * 
 	 * @param className
 	 * @return an array with methods
 	 */
