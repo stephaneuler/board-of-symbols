@@ -8,11 +8,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -61,6 +59,9 @@ public class CodeDB {
 	}
 
 
+	/**
+	 * create a document with the root node <code>codes</code>
+	 */
 	public void createDocument() {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder;
@@ -76,6 +77,13 @@ public class CodeDB {
 		
 	}
 
+	/**
+	 * Read and parse the given file and build a document.
+	 * 
+	 * @throws ParserConfigurationException
+	 * @throws SAXException
+	 * @throws IOException
+	 */
 	void readXML() throws ParserConfigurationException, SAXException,
 			IOException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -86,6 +94,9 @@ public class CodeDB {
 				.item(0));
 	}
 
+	/**
+	 * Write the document to the given file. 
+	 */
 	void writeXML() {
 		Transformer tf;
 		try {
@@ -99,6 +110,14 @@ public class CodeDB {
 		}
 	}
 
+	/**
+	 * Save the code as snippet. The methods appends the snippet to the existing list. 
+	 * It does not check for dublicate names. 
+	 * 
+	 * @param name
+	 * @param code
+	 * @param authorName
+	 */
 	public void saveAsSnippet(String name, String code, String authorName) {
 		Element snip = document.createElement("snippet");
 		snip.setAttribute("name", name);
@@ -119,6 +138,12 @@ public class CodeDB {
 		writeXML();
 	}
 
+	/**
+	 * Overwrite the given snippet with the new code. 
+	 * 
+	 * @param snippetName
+	 * @param code
+	 */
 	public void overwriteSnippet(String snippetName, String code) {
 		Element s = getSnippetByName(snippetName);
 		Node updated = null;

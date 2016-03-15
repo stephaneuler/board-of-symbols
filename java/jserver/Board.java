@@ -25,11 +25,11 @@ import plotter.Plotter;
 
 
 // Version wer wann was
-// .94 se 15-07 erste stabile Version
-// .95 se 15-09 kleinere Erweiterungen (Hintergrund, ... )
-// .96 se 15-09 hintergGrund2, symbolGroesse2
-// .97 se 15-10-08 diverse Kleinigkeiten
-// .973 se 15-10-18 Short cuts
+// .94   se 15-07 erste stabile Version
+// .95   se 15-09 kleinere Erweiterungen (Hintergrund, ... )
+// .96   se 15-09 hintergGrund2, symbolGroesse2
+// .97   se 15-10-08 diverse Kleinigkeiten
+// .973  se 15-10-18 Short cuts
 // .974b se 15-11-10 Bugfix filter mode
 // .974c se 15-12-01 save font size
 

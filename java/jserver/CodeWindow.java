@@ -12,14 +12,10 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.List;
 
-import javax.crypto.spec.GCMParameterSpec;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -46,7 +42,6 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingWorker;
-import javax.swing.WindowConstants;
 import javax.swing.colorchooser.AbstractColorChooserPanel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -67,6 +62,8 @@ import plotter.Graphic;
 import plotter.Sleep;
 
 /**
+ * This is the GUI for writing and executing code for BoS.
+ * 
  * @author Euler
  * @version 0.1  July 2015
  * 
@@ -78,16 +75,11 @@ import plotter.Sleep;
 //.98  se  15-12-05    Java support
 //.98a se  15-12-15    Bug bei fehlendem ini-Eintrag compiler
 
-/**
- * @author Euler
- * 
- */
 @SuppressWarnings("serial")
 public class CodeWindow extends JFrame implements ActionListener,
 		DocumentListener, ExecutorListener {
 	private static final String METHOD_PREFIX = "m:";
 	private static String version = "0.99 Dezember 2015";
-	// private static final int C = 1;
 	private static final int componentXSize = 160;
 	private static final int componentYSize = 25;
 
@@ -381,17 +373,6 @@ public class CodeWindow extends JFrame implements ActionListener,
 			colorSelector.setActionCommand(colorSelectorCommand);
 			colorSelector.addActionListener(this);
 
-//			Box color2 = Box.createVerticalBox();
-//			color2.add(selectorInfo);
-//			color2.add(colorSelector);
-//
-//			executionInfoLabel.setMaximumSize(componentSize);
-//			executionInfoLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-//			executionInfoLabel.setBorder(BorderFactory.createLineBorder(
-//					Color.BLUE, 3));
-//			color2.add(executionInfoLabel);
-//
-//			controllBox.add(color2);
 		} else {
 			JOptionPane.showMessageDialog(this,
 					"Fehler beim Lesen der Farben-Datei: "
@@ -417,40 +398,6 @@ public class CodeWindow extends JFrame implements ActionListener,
 				.createLineBorder(Color.BLUE, 3));
 		statusLabel.setBorder(BorderFactory.createLineBorder(Color.BLUE, 3));
 
-		// Box buttonBox = Box.createVerticalBox();
-		// // buttonBox.setBorder(BorderFactory.createCompoundBorder(
-		// // BorderFactory.createLineBorder(Color.BLUE),
-		// // buttonBox.getBorder()));
-		// buttonBox.setBorder(BorderFactory.createCompoundBorder(
-		// BorderFactory.createEmptyBorder(), buttonBox.getBorder()));
-		// // buttonBox.setBorder(BorderFactory.createLineBorder(Color.BLUE, 10
-		// )
-		// // );
-		// buttonBox.add(snippetNameLabel);
-		// buttonBox.add(new Box.Filler(minSize, prefSize, maxSize));
-		// buttonBox.add(runButton);
-		// // buttonBox.add(statusLabel);
-		// buttonBox.add(new Box.Filler(minSize, prefSize, maxSize));
-		// // buttonBox.add(new JLabel("Laden"));
-		// buttonBox.add(snippetSelector);
-		// buttonBox.add(new Box.Filler(minSize, prefSize, maxSize));
-		// buttonBox.add(saveButton);
-		// buttonBox.add(new Box.Filler(minSize, prefSize, maxSize));
-		// buttonBox.add(saveAsButton);
-		// buttonBox.add(new Box.Filler(minSize, prefSize, maxSize));
-		// buttonBox.add(snippetNameField);
-		// buttonBox.add(new Box.Filler(minSize, prefSize, maxSize));
-		//
-		// controllBox.add(buttonBox);
-		//
-		// controllBox.add(Box.createHorizontalGlue());
-
-		// codeInput.setColumns(60);
-		// codeInput.setRows(20);
-
-		// System.out.println( codeInput.getEditorKit() );
-		// codeInput.setEditorKit( new StyledEditorKit() );
-		// System.out.println( codeInput.getEditorKit() );
 		codeInput.setPreferredSize(new Dimension(500, 300));
 		codeInput.setFont(normalFont);
 		codeInput.getDocument().addDocumentListener(this);
@@ -487,7 +434,6 @@ public class CodeWindow extends JFrame implements ActionListener,
 		JScrollPane scrollPane2 = new JScrollPane(messageField);
 
 		center.add(scrollPane);
-		// center.add(controllBox);
 		center.add(scrollPane2);
 
 		JMenu menuPropertier;
@@ -555,11 +501,6 @@ public class CodeWindow extends JFrame implements ActionListener,
 		JMenu menuHelp = new JMenu("Hilfe");
 		Utils.addMenuItem(this, menuHelp, helpText);
 
-		// menuBar.add(menuPropertier);
-		// menuBar.add(menuCompile);
-		// menuBar.add(editMenu);
-		// menuBar.add(Box.createHorizontalGlue());
-		// menuBar.add(infoLabel);
 
 		GroupLayout layout = new GroupLayout(menuBar);
 		layout.setAutoCreateGaps(true);
