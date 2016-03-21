@@ -7,3 +7,5 @@ Version
 0.98b  faster drawing of circles, first version auto formatter
 
 0.9?? dice symbols, BoSL, refactoring, ... (Feb. 8)
+
+0.99 Internationalization support
