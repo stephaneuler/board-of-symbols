@@ -8,4 +8,4 @@ Version
 
 0.9?? dice symbols, BoSL, refactoring, ... (Feb. 8)
 
-0.99 Internationalization support
+0.99 Internationalization support (march 2016)
