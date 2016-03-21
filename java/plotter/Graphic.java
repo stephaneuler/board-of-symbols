@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.ConcurrentModificationException;
 import java.util.Map;
 import java.util.Properties;
+import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -43,7 +44,8 @@ import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 // Version wer wann was
-// 1.2 se 1303 Screen-Dump, print
+// 1.2  se 1303 Screen-Dump, print
+// 1.21 se 1312 addExternMenu
 
 /**
  * A JFrame to host the plotter panel
@@ -54,14 +56,9 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  * 
  */
 
-// Version wer wann was
-// 1.21 se 1312 addExternMenu
 
 public class Graphic extends JFrame implements ActionListener, Printable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -2263967270489771875L;
 	static int verbose = 0;
 	static int xsize = 800;
@@ -76,10 +73,14 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 	private String fileOpenDirectory = "";
 	private String dumpText = "Zeige Daten";
 	private String saveText = "Bild speichern unter ...";
+	private String saveTTText = "Speichert Screenshot in Datei";
 	private String exportText = "Daten exportieren nach ...";
 	private String deleteDataText = "Daten löschen";
 	private String showStatusText = "Status";
+	private String showStatusTTText = "Zeigt Plotter Status";
 	private String printText = "Drucken ...";
+	private String printTTText = "Senden an Drucker";
+	private String fileText = "Datei";
 	private Properties properties = new Properties();
 	private String propertieFile = "graphic.ini";
 	private Box top = new Box(BoxLayout.X_AXIS);
@@ -104,6 +105,20 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 	public Graphic(String string, Plotter plotter) {
 		this.plotter = plotter;
 		setup(string);
+	}
+
+	public Graphic(ResourceBundle messages) {
+		fileText = messages.getString("file");
+		saveText = messages.getString("imageSave");
+		saveTTText = messages.getString("tooltip.imageSave");
+		printText = messages.getString("print");
+		printTTText = messages.getString("tooltip.print");
+		showStatusText = messages.getString("status");
+		showStatusTTText = messages.getString("tooltip.status");
+		
+		plotter = new Plotter("Plotter");
+		plotter.setPreferredSize(new Dimension(500, 300));
+		setup("Graphic " + version);
 	}
 
 	public void setup(String string) {
@@ -154,17 +169,23 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 		JMenu fileMenu;
 		JMenuItem mi;
 
-		fileMenu = new JMenu("Datei");
+		fileMenu = new JMenu(fileText);
 		menuBar.add(fileMenu);
 		mi = new JMenuItem(saveText);
 		mi.addActionListener(this);
-		mi.setToolTipText("Speichert Screenshot in Datei");
+		mi.setToolTipText(saveTTText);
 		fileMenu.add(mi);
 
 		mi = new JMenuItem(printText);
 		mi.addActionListener(this);
-		mi.setToolTipText("Senden an Drucker");
+		mi.setToolTipText(printTTText);
 		fileMenu.add(mi);
+		
+		mi = new JMenuItem(showStatusText);
+		mi.addActionListener(this);
+		mi.setToolTipText(	showStatusTTText );
+		fileMenu.add(mi);
+
 		setJMenuBar(menuBar);
 
 		dataMenu = new JMenu("Daten");
@@ -174,11 +195,6 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 		mi.addActionListener(this);
 		mi.setToolTipText("Zeigt alle Daten an");
 		dataMenu.add(mi);
-
-		mi = new JMenuItem(showStatusText);
-		mi.addActionListener(this);
-		mi.setToolTipText("Zeigt Plotter Status");
-		fileMenu.add(mi);
 
 		mi = new JMenuItem(exportText);
 		mi.addActionListener(this);
@@ -330,8 +346,8 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 	}
 
 	public String getProperty(String string, String defValue) {
-		System.out.println(string + " :  "
-				+ properties.getProperty(string, defValue));
+		//System.out.println(string + " :  "
+		//		+ properties.getProperty(string, defValue));
 		return properties.getProperty(string, defValue);
 	}
 

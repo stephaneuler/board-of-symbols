@@ -7,10 +7,21 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.ResourceBundle;
+import java.util.TreeMap;
 
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -22,8 +33,6 @@ import javax.swing.JTextField;
 import plotter.Graphic;
 import plotter.Plotter;
 
-
-
 // Version wer wann was
 // .94   se 15-07 erste stabile Version
 // .95   se 15-09 kleinere Erweiterungen (Hintergrund, ... )
@@ -32,46 +41,45 @@ import plotter.Plotter;
 // .973  se 15-10-18 Short cuts
 // .974b se 15-11-10 Bugfix filter mode
 // .974c se 15-12-01 save font size
-
+//       se 16-03    start internationalization
 
 /**
- * This class implements a NxM board as used for board games like chess or checkers. 
- * An instance of Plotter is used for drawing. 
- * The plotter is embedded in a Plotter.Graphic Object that provides a simple GUI with menus, buttons, labels, etc. 
- * A board has a list of symbols. These symbols can be accessed by index. 
- * The method receiveMessage handles commands in the BoS Language (BoSL).
+ * This class implements a NxM board as used for board games like chess or
+ * checkers. An instance of Plotter is used for drawing. The plotter is embedded
+ * in a Plotter.Graphic Object that provides a simple GUI with menus, buttons,
+ * labels, etc. A board has a list of symbols. These symbols can be accessed by
+ * index. The method receiveMessage handles commands in the BoS Language (BoSL).
  * 
  * 
  * @author Stephan Euler
- * @version {@value #VERSION}
+ * @version 0.974c Dezember 2015
  * 
  */
 public class Board implements ActionListener, MouseListener {
 
 	public static final String FILTER_PREFIX = ">>";
-	public static final String VERSION = " 0.974c Dezember 2015";
 
-	private static final String clearText = "Farben zurück setzten";
-	private static final String clearTextText = "Texte löschen";
-	private static final String fontSizeText = "Texte Größe";
-	private static final String growText = "wachsen";
-	private static final String shrinkText = "schrumpfen";
-	private static final String bigText = "groß";
-	private static final String rowText = "Zeilen";
-	private static final String colText = "Spalten";
-	private static final String quadText = "Quadrat";
-	private static final String numberingText = "Nummerierung Ein/Aus";
-	private static final String alphaText = "Alpha-Wert";
-	private static final String sendText = "senden";
+	private static String clearColorsText;
+	private static String clearTextText;
+	private static String fontSizeText;
+	private static String growText;
+	private static String shrinkText;
+	private static String bigText;
+	private static String rowText;
+	private static String colText;
+	private static String quadText;
+	private static String interactiveText;
+	private static String codingWindowText;
+	private static String numberingText;
+	private static String alphaText;
+	private static String sendText;
 	private static final String runText = "ausführen";
-	private static final String interactiveText = "Interaktiv";
 	private static final String codingText = "C-Code Eingabe";
-	private static final String codingWindowText = "Fenster für Code Eingabe";
 	private static final int RAW = 0;
 	private static final int C = 1;
 
-	private Graphic graphic = new Graphic("Board, Version " + VERSION);
-	private Plotter plotter = graphic.getPlotter();
+	private Graphic graphic;
+	private Plotter plotter;
 	private int messageCount = 0;
 	private int rows = 10;
 	private int columns = 10;
@@ -84,7 +92,7 @@ public class Board implements ActionListener, MouseListener {
 	private JTextField input = new JTextField();
 	private JLabel waitingCommands = new JLabel(" 0 ");
 	private List<String> commands = new ArrayList<String>();
-	private JButton sendButton = new JButton(sendText);
+	private JButton sendButton;
 	private boolean interactive = false;
 	private boolean coding = false;
 	private JTextArea codeInput = new JTextArea();
@@ -97,47 +105,76 @@ public class Board implements ActionListener, MouseListener {
 	private CodeWindow codeWindow;
 	private Color defaultBackground;
 	private boolean userDefinedStatusLine = false;
+	private ResourceBundle messages;
+	private Properties properties = new Properties();
+
+	private String propertieFile = "board.properties";
+	private String language = "de";
+	private String country = "DE";
+
+	private boolean verbose = false;
 
 	public Board() {
 
-		// graphic.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		BufferedInputStream stream;
+		try {
+			stream = new BufferedInputStream(new FileInputStream(propertieFile));
+			properties.load(stream);
+			stream.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("property file " + propertieFile + " not found");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		loadMessages();
+		setStrings();
+		SymbolType.setSymbolTexts(messages);
+
+		graphic = new Graphic(messages);
+		plotter = graphic.getPlotter();
+
 		graphic.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		graphic.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
-				if (codeWindow != null && codeWindow.isCodeHasChanged()) {
-					int reply = JOptionPane.showConfirmDialog(null,
-							"Code wurde verändert, trotzdem schließen?",
-							"Änderungen", JOptionPane.YES_NO_OPTION);
-					if (reply == JOptionPane.NO_OPTION) {
-						return;
+				if (codeWindow != null) {
+					codeWindow.savePosition();
+					if (codeWindow.isCodeHasChanged()) {
+						int reply = Dialogs.codeHasChangedDialog(messages);
+						if (reply == JOptionPane.NO_OPTION) {
+							return;
+						}
 					}
-
 				}
 				System.exit(0);
 			}
 		});
 
+		graphic.setTitle("Board, " + messages.getString("boardVersion"));
+
 		plotter.setPreferredSize(500, 500);
 		defaultBackground = plotter.getBackground();
 		graphic.pack();
 
-		String p = graphic.getProperty("columns");
+		String p = properties.getProperty("columns");
 		if (p != null) {
 			columns = Integer.parseInt(p);
 		}
-		p = graphic.getProperty("rows");
+		p = properties.getProperty("rows");
 		if (p != null) {
 			rows = Integer.parseInt(p);
 		}
 
-		Symbol.setNumbering(Boolean.parseBoolean(graphic
+		Symbol.setNumbering(Boolean.parseBoolean(properties
 				.getProperty("numbering")));
 		drawSymbols();
 
-		symbolFontSize = Integer.parseInt(graphic.getProperty("fontSize", ""
+		symbolFontSize = Integer.parseInt(properties.getProperty("fontSize", ""
 				+ symbolFontSize));
 		Symbol.setFontSize(symbolFontSize);
 
+		sendButton = new JButton(sendText);
+		sendButton.setToolTipText(messages.getString("tooltip.sendButton"));
 		sendButton.addActionListener(this);
 		runButton.addActionListener(this);
 		messageField.setEditable(false);
@@ -157,11 +194,68 @@ public class Board implements ActionListener, MouseListener {
 		graphic.removeDataMenu();
 		graphic.addExternMenu(myBoardMenu());
 		graphic.addExternMenu(myFormMenu());
+		graphic.addExternMenu(myOptionsMenu());
 
 		setStatusLineInfo();
 		plotter.addMouseListener(this);
 
 		graphic.repaint();
+	}
+
+	public Properties getProperties() {
+		return properties;
+	}
+
+	/**
+	 * Gets the texts from the resource bundle and copies them into variables.
+	 */
+	private void setStrings() {
+		clearColorsText = messages.getString("clearColors");
+		clearTextText = messages.getString("clearTexts");
+		fontSizeText = messages.getString("fontSize");
+		growText = messages.getString("grow");
+		shrinkText = messages.getString("shrink");
+		bigText = messages.getString("big");
+		rowText = messages.getString("rows");
+		colText = messages.getString("columns");
+		quadText = messages.getString("square");
+		interactiveText = messages.getString("interactive");
+		codingWindowText = messages.getString("codingWindow");
+
+		numberingText = Utils.concat(messages, "numbering", "onOff");
+		alphaText = "Alpha " + messages.getString("value");
+		sendText = messages.getString("send");
+		// TODO Auto-generated method stub
+
+	}
+
+	/**
+	 * Gets a resource bundle with the locale specified in the properties.
+	 */
+	private void loadMessages() {
+
+		language = properties.getProperty("language", language);
+		country = properties.getProperty("country", country);
+
+		Locale locale = new Locale(language, country);
+
+		JComponent.setDefaultLocale(locale);
+
+		messages = ResourceBundle.getBundle("config/MessagesBundle", locale);
+		if (verbose) {
+			System.out.println(locale);
+			System.out.println(messages.getLocale());
+			System.out.println(messages.getString("boardVersion"));
+		}
+
+		if (!locale.equals(messages.getLocale())) {
+			String notFound = messages.getString("notFoundUsing");
+			String text = String.format(notFound, "" + locale,
+					"" + messages.getLocale());
+			JOptionPane.showMessageDialog(graphic, text, "Language",
+					JOptionPane.INFORMATION_MESSAGE);
+
+		}
 	}
 
 	public Graphic getGraphic() {
@@ -178,13 +272,18 @@ public class Board implements ActionListener, MouseListener {
 
 	private void setStatusLineInfo() {
 		if (!userDefinedStatusLine) {
-			String info = columns + "x" + rows + " Feld";
+			String info = columns + "x" + rows + " "
+					+ messages.getString("board");
 			plotter.setStatusLine(info);
 		}
 	}
 
+	public ResourceBundle getMessages() {
+		return messages;
+	}
+
 	private JMenu myFormMenu() {
-		JMenu menu = new JMenu("Formen");
+		JMenu menu = new JMenu(messages.getString("forms"));
 		for (SymbolType type : SymbolType.values()) {
 			Utils.addMenuItem(this, menu, SymbolType.texts.get(type),
 					SymbolType.tooltips.get(type));
@@ -201,24 +300,47 @@ public class Board implements ActionListener, MouseListener {
 		return menu;
 	}
 
-	private JMenu myBoardMenu() {
-		JMenu menu = new JMenu("Brett");
+	private JMenu myOptionsMenu() {
+		JMenu menu = new JMenu(messages.getString("options"));
 
-		Utils.addMenuItem(this, menu, clearText, "alles löschen", "alt R");
-		Utils.addMenuItem(this, menu, clearTextText, "Texte löschen" );
-		Utils.addMenuItem(this, menu, fontSizeText, "Schriftgröße für Texte");
-		Utils.addMenuItem(this, menu, growText, "wachsen", "alt PLUS");
-		Utils.addMenuItem(this, menu, shrinkText, "schrumpfen", "alt MINUS");
-		Utils.addMenuItem(this, menu, bigText, "groß");
-		Utils.addMenuItem(this, menu, rowText, "Anzahl der Zeilen");
-		Utils.addMenuItem(this, menu, colText, "Anzahl der Spalten");
-		Utils.addMenuItem(this, menu, quadText, "Anzahl der Zeilen, Spalten", "alt Q");
+		Map<String, String> languages = new TreeMap<String, String>();
+		languages.put("Deutsch", "de_DE");
+		languages.put("English (US)", "en_US");
+		for (String key : languages.keySet()) {
+			JMenuItem mi = Utils.addMenuItem(this, menu, key);
+			mi.setActionCommand("LANG_" + languages.get(key));
+		}
+
+		return menu;
+	}
+
+	private JMenu myBoardMenu() {
+		JMenu menu = new JMenu(messages.getString("board"));
+
+		Utils.addMenuItem(this, menu, clearColorsText,
+				messages.getString("tooltip.clearColors"), "alt R");
+		Utils.addMenuItem(this, menu, clearTextText,
+				messages.getString("tooltip.clearTexts"));
+		Utils.addMenuItem(this, menu, fontSizeText,
+				messages.getString("tooltip.fontSize"));
+		Utils.addMenuItem(this, menu, growText,
+				messages.getString("tooltip.grow"), "alt PLUS");
+		Utils.addMenuItem(this, menu, shrinkText,
+				messages.getString("tooltip.shrink"), "alt MINUS");
+		Utils.addMenuItem(this, menu, bigText,
+				messages.getString("tooltip.big"));
+		Utils.addMenuItem(this, menu, rowText,
+				messages.getString("tooltip.columns"));
+		Utils.addMenuItem(this, menu, colText,
+				messages.getString("tooltip.rows"));
+		Utils.addMenuItem(this, menu, quadText,
+				messages.getString("tooltip.setSquare"), "alt Q");
 		Utils.addMenuItem(this, menu, interactiveText,
-				"Einblenden des Eingabefeldes", "alt I");
+				messages.getString("tooltip.interactive"), "alt I");
 		// Utils.addMenuItem(this, menu, codingText,
 		// "Einblenden der Code-Eingabe");
 		Utils.addMenuItem(this, menu, codingWindowText,
-				"Öffnet Fenster für Code-Eingabe", "alt C");
+				messages.getString("tooltip.codingWindow"), "alt C");
 
 		return menu;
 	}
@@ -243,21 +365,22 @@ public class Board implements ActionListener, MouseListener {
 	}
 
 	/**
-	 * Commands in BoSL can be send with this method. 
-	 * The method parses the line and executes the command. 
-	 * In filter mode lines not starting with FILTER_PREFIX are ignored. 
-	 * This is helpfull when the commands are mixed with other output. 
+	 * Commands in BoSL can be send with this method. The method parses the line
+	 * and executes the command. In filter mode lines not starting with
+	 * FILTER_PREFIX are ignored. This is helpful when the commands are mixed
+	 * with other output.
 	 * 
 	 * 
-	 * @param line a line with (currently) one command
+	 * @param line
+	 *            a line with (currently) one command
 	 * @return okay or an error message
 	 */
 	public String receiveMessage(String line) {
 		// System.out.println( "receiveMessage: " + line);
 		line = line.trim();
 		++messageCount;
-		String info = columns + "x" + rows + " Feld, Nachricht #" + messageCount
-				+ ": " + line;
+		String info = columns + "x" + rows + " Feld, Nachricht #"
+				+ messageCount + ": " + line;
 
 		if (line.startsWith(FILTER_PREFIX)) {
 			line = line.substring(FILTER_PREFIX.length()).trim();
@@ -286,7 +409,7 @@ public class Board implements ActionListener, MouseListener {
 		}
 
 		if (line.equals("c")) {
-			actionPerformed(new ActionEvent(this, 0, clearText));
+			actionPerformed(new ActionEvent(this, 0, clearColorsText));
 			graphic.repaint();
 			return "okay";
 		}
@@ -316,8 +439,8 @@ public class Board implements ActionListener, MouseListener {
 				return "ERROR - " + index + " out of Range ";
 			}
 			symbols.get(index).setType(s);
-			redrawSymbol( symbols.get(index) );
-			//redrawSymbols();
+			redrawSymbol(symbols.get(index));
+			// redrawSymbols();
 			return "okay";
 		}
 
@@ -336,8 +459,8 @@ public class Board implements ActionListener, MouseListener {
 				return "ERROR - " + index + " out of Range ";
 			}
 			symbols.get(index).setType(s);
-			redrawSymbol( symbols.get(index) );
-			//redrawSymbols();
+			redrawSymbol(symbols.get(index));
+			// redrawSymbols();
 			return "okay";
 		}
 
@@ -353,7 +476,7 @@ public class Board implements ActionListener, MouseListener {
 			}
 			double size = Double.parseDouble(p[2]);
 			symbols.get(index).setSize(size);
-			redrawSymbol( symbols.get(index) );
+			redrawSymbol(symbols.get(index));
 			return "okay";
 
 		}
@@ -371,7 +494,7 @@ public class Board implements ActionListener, MouseListener {
 			}
 			double size = Double.parseDouble(p[3]);
 			symbols.get(index).setSize(size);
-			redrawSymbol( symbols.get(index) );
+			redrawSymbol(symbols.get(index));
 			return "okay";
 
 		}
@@ -458,7 +581,7 @@ public class Board implements ActionListener, MouseListener {
 				return "ERROR - " + index + " out of Range ";
 			}
 			String[] p2 = line.split("\\s+", 3);
-			if( p2.length >= 3 ) {
+			if (p2.length >= 3) {
 				symbols.get(index).setText(p2[2]);
 			} else {
 				symbols.get(index).setText("");
@@ -476,7 +599,7 @@ public class Board implements ActionListener, MouseListener {
 				return "ERROR - " + index + " out of Range ";
 			}
 			String[] p2 = line.split("\\s+", 4);
-			if( p2.length >= 4 ) {
+			if (p2.length >= 4) {
 				symbols.get(index).setText(p2[3]);
 			} else {
 				symbols.get(index).setText("");
@@ -596,9 +719,9 @@ public class Board implements ActionListener, MouseListener {
 	@Override
 	public void actionPerformed(ActionEvent event) {
 		String cmd = event.getActionCommand();
-		System.out.println("World cmd: " + cmd);
+		System.out.println("Board cmd: " + cmd);
 
-		if (cmd.equals(clearText)) {
+		if (cmd.equals(clearColorsText)) {
 			for (Symbol s : symbols) {
 				s.reset();
 				s.setSize(radius);
@@ -609,8 +732,8 @@ public class Board implements ActionListener, MouseListener {
 			graphic.repaint();
 
 		} else if (cmd.equals(fontSizeText)) {
-			String a = JOptionPane.showInputDialog(graphic, "Schriftgröße",
-					symbolFontSize);
+			String a = JOptionPane.showInputDialog(graphic,
+					messages.getString("tooltip.fontSize"), symbolFontSize);
 			if (a != null) {
 				symbolFontSize = Integer.parseInt(a);
 				Symbol.setFontSize(symbolFontSize);
@@ -653,8 +776,8 @@ public class Board implements ActionListener, MouseListener {
 			setStatusLineInfo();
 			graphic.repaint();
 		} else if (cmd.equals(rowText)) {
-			String a = JOptionPane.showInputDialog(graphic, "Anzahl Zeilen",
-					new Integer(rows));
+			String a = JOptionPane.showInputDialog(graphic,
+					messages.getString("tooltip.rows"), new Integer(rows));
 			if (a != null) {
 				rows = Integer.parseInt(a);
 				drawSymbols();
@@ -662,8 +785,9 @@ public class Board implements ActionListener, MouseListener {
 				graphic.repaint();
 			}
 		} else if (cmd.equals(colText)) {
-			String a = JOptionPane.showInputDialog(graphic, "Anzahl Spalten",
-					new Integer(columns));
+			String a = JOptionPane
+					.showInputDialog(graphic, messages
+							.getString("tooltip.columns"), new Integer(columns));
 			if (a != null) {
 				columns = Integer.parseInt(a);
 				drawSymbols();
@@ -671,8 +795,8 @@ public class Board implements ActionListener, MouseListener {
 				graphic.repaint();
 			}
 		} else if (cmd.equals(quadText)) {
-			String a = JOptionPane.showInputDialog(graphic,
-					"Anzahl Zeilen, Spalten", new Integer(columns));
+			String a = JOptionPane.showInputDialog(graphic, messages
+					.getString("tooltip.setSquare"), new Integer(columns));
 			if (a != null) {
 				columns = Integer.parseInt(a);
 				rows = columns;
@@ -746,12 +870,33 @@ public class Board implements ActionListener, MouseListener {
 
 		} else if (cmd.equals(codingWindowText)) {
 			codeWindow = new CodeWindow(this);
+		} else if (cmd.startsWith("LANG")) {
+			String[] parts = cmd.split("_");
+			language = parts[1];
+			country = parts[2];
+			JOptionPane.showMessageDialog(
+					graphic,
+					messages.getString("languageChanged") + " "
+							+ messages.getString("restartRequired"),
+					"Language", JOptionPane.INFORMATION_MESSAGE);
+
 		}
-		graphic.saveProperty("rows", "" + rows);
-		graphic.saveProperty("columns", "" + columns);
-		graphic.saveProperty("coding", "" + coding);
-		graphic.saveProperty("numbering", "" + Symbol.isNumbering());
-		graphic.saveProperty("fontSize", "" + symbolFontSize);
+
+		properties.setProperty("language", language);
+		properties.setProperty("country", country);
+		properties.setProperty("columns", "" + columns);
+		properties.setProperty("coding", "" + coding);
+		properties.setProperty("numbering", "" + Symbol.isNumbering());
+		properties.setProperty("fontSize", "" + symbolFontSize);
+		saveProperties();
+	}
+
+	void saveProperties() {
+		try {
+			properties.store(new FileWriter(propertieFile), "");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 	}
 

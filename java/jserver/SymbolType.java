@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Random;
+import java.util.ResourceBundle;
 
 /**
  * The enummeration of all signal types. Each type has a description, a tool tip text and a short form. 
@@ -80,7 +81,7 @@ public enum SymbolType {
 	}
 
 	/**
-	 * This method returns a random type (excluding none). 
+	 * This method returns a random type (excluding RANDOM and NONE). 
 	 * 
 	 * @return the choosen type
 	 */
@@ -108,6 +109,45 @@ public enum SymbolType {
 			return getTypeFromText( longName );
 		}
 		return null;
+	}
+
+	/**
+	 * Set the symbol texts using a resource bundle and overwriting the defaults in German. 
+	 * 
+	 * @param messages the resource bundle containing the texts
+	 */
+	public static void setSymbolTexts(ResourceBundle messages) {
+		texts.put(CIRCLE, messages.getString("circle"));
+		texts.put(SQUARE, messages.getString("square"));
+		texts.put(DIAMOND, messages.getString("diamond"));
+		texts.put(STAR, messages.getString("asterisk"));
+		texts.put(PLUS,  messages.getString("plus"));
+		texts.put(VLINE, messages.getString("verticalLine"));
+		texts.put(HLINE, messages.getString("horizontalLine"));
+		texts.put(UP, messages.getString("slantedLine") + " /");
+		texts.put(DOWN, messages.getString("slantedLine") + " \\");
+		texts.put(TRIANGLE_LD, Utils.concat( messages, "triangle", ",", "left", "down") );
+		texts.put(TRIANGLE_RD, Utils.concat( messages, "triangle", ",", "right", "down") );
+		texts.put(TRIANGLE_LU, Utils.concat( messages, "triangle", ",", "left", "up") );
+		texts.put(TRIANGLE_RU, Utils.concat( messages, "triangle", ",", "right", "up") );
+		
+		texts.put(DICE_1, messages.getString("dice") + " 1");
+		texts.put(DICE_2, messages.getString("dice") + " 2");
+		texts.put(DICE_3, messages.getString("dice") + " 3");
+		texts.put(DICE_4, messages.getString("dice") + " 4");
+		texts.put(DICE_5, messages.getString("dice") + " 5");
+		texts.put(DICE_6, messages.getString("dice") + " 6");
+		
+		texts.put(RANDOM, messages.getString("mixture"));
+		texts.put(NONE, messages.getString("none"));
+
+		for (SymbolType key : texts.keySet()) {
+			tooltips.put(key,  messages.getString("switchTo") + " " +texts.get(key));
+		}
+		tooltips.put(RANDOM, messages.getString("switchTo") + " " +  messages.getString("tooltip.mixture"));
+
+		// TODO Auto-generated method stub
+		
 	}
 
 }

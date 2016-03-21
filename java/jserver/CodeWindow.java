@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Properties;
+import java.util.ResourceBundle;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -65,42 +67,45 @@ import plotter.Sleep;
  * This is the GUI for writing and executing code for BoS.
  * 
  * @author Euler
- * @version 0.1  July 2015
+ * @version 0.1 July 2015
  * 
  */
-//Version wer wann        was
-//.94  se  15-10-15    prüft auf ungespeicherte Änderungen
-//.95  se  15-10-22    undo
-//.96  se  15-10-25    load xml file
-//.98  se  15-12-05    Java support
-//.98a se  15-12-15    Bug bei fehlendem ini-Eintrag compiler
+// Version wer wann was
+// .94 se 15-10-15 prüft auf ungespeicherte Änderungen
+// .95 se 15-10-22 undo
+// .96 se 15-10-25 load xml file
+// .98 se 15-12-05 Java support
+// .98a se 15-12-15 Bug bei fehlendem ini-Eintrag compiler
 
 @SuppressWarnings("serial")
 public class CodeWindow extends JFrame implements ActionListener,
 		DocumentListener, ExecutorListener {
 	private static final String METHOD_PREFIX = "m:";
-	private static String version = "0.99 Dezember 2015";
 	private static final int componentXSize = 160;
 	private static final int componentYSize = 25;
 
-	private static final String runText = "ausführen";
-	private static final String stopText = "abbrechen";
-	private static final String saveText = "speichern";
-	private static final String saveAsText = "speichern untern";
+	private static String version;
+	private static String runText ;
+	private static String stopText;
+	private static String saveText;
+	private static String saveAsText;
 	private static final String loadCommand = "loadSnippet";
 	private static final String colorSelectorCommand = "selectColor";
 	private static final String fontIncText = "Zoom +";
 	private static final String fontDecText = "Zoom -";
-	private static final String bigFontText = "Groß";
+	private static String bigFontText;
 	private static final String normalFontText = "100%";
-	private static final String authorText = "AutorIn";
-	private static final String codeFileText = "Code Datei";
+	private static String authorText;
+	private static String codeFileText;
 	private static final String exeCommandtext = "Befehl";
 	private static final String exeNametext = "Name für Programm";
-	private static final String commandsFromFiletext = "Aus Datei";
+	private static String commandsFromFiletext;
 	private static final String showColorChooserText = "Farbwähler";
-	private static final String helpText = "Hilfe";
-	private static final String autoLayoutText = "formatieren";
+	private static String helpText;
+	private static String autoLayoutText;
+	private static String newSnippetText;
+	private static String editNewSnippetText;
+	private static final String lastEditedSnippetText = "<html><em>letztes Snippet</em></html>";
 
 	private int xsize = 500;
 	private int ysize = 350;
@@ -115,8 +120,7 @@ public class CodeWindow extends JFrame implements ActionListener,
 	private JEditorPane codeInput = new JEditorPane();
 	private JTextArea messageField = new JTextArea();
 	private JTextField snippetNameField = new JTextField();
-	private JLabel snippetNameLabel = new JLabel(
-			"<html><em>letzte Sicherung</em></html>");
+	private JLabel snippetNameLabel = new JLabel(newSnippetText);
 	private JLabel statusLabel = new JLabel();
 	private JLabel executionInfoLabel = new JLabel();
 	private JLabel infoLabel = new JLabel();
@@ -124,8 +128,8 @@ public class CodeWindow extends JFrame implements ActionListener,
 	private JColorChooser colorChooser = new JColorChooser();
 	private JButton runButton = new JButton();
 	private JButton stopButton = new JButton();
-	private JButton saveButton = new JButton(saveText);
-	private JButton saveAsButton = new JButton(saveAsText);
+	private JButton saveButton;
+	private JButton saveAsButton;
 	private JButton showColorChooserButton = new JButton();
 	private Box center = new Box(BoxLayout.Y_AXIS);
 	private Box controllBox = new Box(BoxLayout.X_AXIS);
@@ -149,9 +153,13 @@ public class CodeWindow extends JFrame implements ActionListener,
 	private UndoAction undoAction = null;
 	private RedoAction redoAction = null;
 	private CodeLayouter codeLayouter = new CodeLayouter();
+	private ResourceBundle messages;
 
 	public CodeWindow(Board board) {
 		this.board = board;
+		messages = board.getMessages();
+		setStrings();
+
 		board.setFilterMode(true);
 		String a = board.getGraphic().getProperty("author");
 		if (a != null) {
@@ -168,16 +176,37 @@ public class CodeWindow extends JFrame implements ActionListener,
 
 	}
 
+	private void setStrings() {
+		bigFontText = Utils.capitalize(messages.getString("big"));
+		helpText = Utils.capitalize(messages.getString("help"));
+		editNewSnippetText = Utils.capitalize(messages.getString("new"));
+		newSnippetText = "<html><em>" + messages.getString("new")
+				+ "</em></html>";
+		version = messages.getString("codeWindowVersion");
+		saveText = messages.getString("save");
+		saveAsText = messages.getString("saveAs");
+		autoLayoutText = messages.getString("format");
+		authorText = messages.getString("author");
+		codeFileText = messages.getString("codeFile");
+		runText  = messages.getString("compileExecute");
+		stopText  = messages.getString("stopExecution");
+		commandsFromFiletext  = messages.getString("fromFile");
+		
+		// TODO Auto-generated method stub
+
+	}
+
 	private String readXMLFile() {
 		String fileName = askCodeFileName();
 		if (fileName == null)
 			return null;
-		File file = new File( fileName );
-		codeDB.setXmlFile( file );
-		if( ! file.exists() ) {
-			JOptionPane.showMessageDialog(this,
-					"Datei " + fileName + " neu anlegen ",
-					"Codes lesen", JOptionPane.ERROR_MESSAGE);
+		File file = new File(fileName);
+		codeDB.setXmlFile(file);
+		if (!file.exists()) {
+			JOptionPane
+					.showMessageDialog(this, "Datei " + fileName
+							+ " neu anlegen ", "Codes lesen",
+							JOptionPane.ERROR_MESSAGE);
 			codeDB.createDocument();
 			codeDB.writeXML();
 		}
@@ -211,7 +240,7 @@ public class CodeWindow extends JFrame implements ActionListener,
 			fileOpenDirectory = chooser.getCurrentDirectory().getAbsolutePath();
 			board.getGraphic().saveProperty("codeDir", fileOpenDirectory);
 			String filename = chooser.getSelectedFile().getAbsolutePath();
-			//System.out.println(filename);
+			// System.out.println(filename);
 			return filename;
 		} else {
 			return null;
@@ -219,32 +248,32 @@ public class CodeWindow extends JFrame implements ActionListener,
 
 	}
 
-	private void savePosition() {
-		board.getGraphic().saveProperty("codeWindowPosX", "" + getBounds().x);
-		board.getGraphic().saveProperty("codeWindowPosY", "" + getBounds().y);
-		board.getGraphic().saveProperty("codeWindowWidth",
-				"" + getBounds().width);
-		board.getGraphic().saveProperty("codeWindowHeight",
-				"" + getBounds().height);
+	void savePosition() {
+		Properties properties = board.getProperties();
+		properties.setProperty("codeWindowPosX", "" + getBounds().x);
+		properties.setProperty("codeWindowPosY", "" + getBounds().y);
+		properties.setProperty("codeWindowWidth", "" + getBounds().width);
+		properties.setProperty("codeWindowHeight", "" + getBounds().height);
+		board.saveProperties();
 	}
 
 	private void loadPosition() {
-		Graphic g = board.getGraphic();
+		Properties properties = board.getProperties();
 		String s;
-		s = g.getProperty("codeWindowPosX", "" + xpos);
+		s = properties.getProperty("codeWindowPosX", "" + xpos);
 		xpos = Integer.parseInt(s);
-		s = g.getProperty("codeWindowPosY", "" + ypos);
+		s = properties.getProperty("codeWindowPosY", "" + ypos);
 		ypos = Integer.parseInt(s);
-		s = g.getProperty("codeWindowWidth", "" + xsize);
+		s = properties.getProperty("codeWindowWidth", "" + xsize);
 		xsize = Integer.parseInt(s);
-		s = g.getProperty("codeWindowHeight", "" + ysize);
+		s = properties.getProperty("codeWindowHeight", "" + ysize);
 		ysize = Integer.parseInt(s);
 
 	}
 
 	private void setup(String string) {
-		if( XMLFileName != null ) {
-			codeDB.setXmlFile( new File(fileOpenDirectory, XMLFileName));
+		if (XMLFileName != null) {
+			codeDB.setXmlFile(new File(fileOpenDirectory, XMLFileName));
 		}
 		try {
 			codeDB.readXML();
@@ -259,9 +288,7 @@ public class CodeWindow extends JFrame implements ActionListener,
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				if (codeHasChanged) {
-					int reply = JOptionPane.showConfirmDialog(null,
-							"Code wurde verändert, trotzdem schließen?",
-							"Änderungen", JOptionPane.YES_NO_OPTION);
+					int reply = Dialogs.codeHasChangedDialog(messages);
 					if (reply == JOptionPane.NO_OPTION) {
 						return;
 					}
@@ -315,8 +342,10 @@ public class CodeWindow extends JFrame implements ActionListener,
 
 		runButton.addActionListener(this);
 		stopButton.addActionListener(this);
+		saveButton = new JButton(saveText);
 		saveButton.addActionListener(this);
 		saveButton.setEnabled(false);
+		saveAsButton = new JButton(saveAsText);
 		saveAsButton.addActionListener(this);
 		showColorChooserButton.addActionListener(this);
 
@@ -379,7 +408,7 @@ public class CodeWindow extends JFrame implements ActionListener,
 							+ codeDB.getLastException().getMessage(),
 					"Farben lesen", JOptionPane.ERROR_MESSAGE);
 			colorSelector.addItem("-");
-			
+
 		}
 		colorSelector.setMaximumSize(new Dimension(componentXSize,
 				componentYSize));
@@ -423,8 +452,9 @@ public class CodeWindow extends JFrame implements ActionListener,
 		// felhermeldung), C-Mode kein sichtbarer Effekt
 		// DefaultSyntaxKit.initKit();
 		// codeInput.setContentType("text/C");
-		if( codeDB.hasLastEditElement() ) {
+		if (codeDB.hasLastEditElement()) {
 			codeInput.setText(codeDB.getLastEditElement().getTextContent());
+			snippetNameLabel.setText(lastEditedSnippetText);
 		}
 		codeHasChanged = false;
 
@@ -440,46 +470,51 @@ public class CodeWindow extends JFrame implements ActionListener,
 		JMenu menuCompile;
 		JMenuBar menuBar = new JMenuBar();
 
-		menuPropertier = new JMenu("Eigenschaften");
+		menuPropertier = new JMenu(messages.getString("properties"));
 
-		Utils.addMenuItem(this, menuPropertier, fontIncText, "vergrößert Font",
+		Utils.addMenuItem(this, menuPropertier, fontIncText, messages.getString("tooltip.increaseFont"),
 				"alt PLUS");
 		Utils.addMenuItem(this, menuPropertier, fontDecText,
-				"verkleinert Font", "alt MINUS");
-		Utils.addMenuItem(this, menuPropertier, bigFontText, "Großer Font",
+				messages.getString("tooltip.decreaseFont"), "alt MINUS");
+		Utils.addMenuItem(this, menuPropertier, bigFontText, messages.getString("tooltip.bigFont"),
 				"alt B");
 		Utils.addMenuItem(this, menuPropertier, normalFontText,
-				"normal großer Font", "alt N");
+				messages.getString("tooltip.normalFont"), "alt N");
 		menuPropertier.addSeparator();
 		Utils.addMenuItem(this, menuPropertier, authorText,
-				"Name des Autors / der Autorin der Code-Schnipsel");
+				messages.getString("tooltip.author"));
 		menuPropertier.addSeparator();
 		Utils.addMenuItem(this, menuPropertier, codeFileText,
-				"Andere Datei mit Code-Schnipsel laden");
+				messages.getString("tooltip.codeFile"));
 
 		menuCompile = new JMenu("Compiler");
 
 		Utils.addMenuItem(this, menuCompile, CodeExecutor.boSLText,
 				"BoS Language");
-		Utils.addMenuItem(this, menuCompile, CodeExecutor.gccText, "GCC");
-		Utils.addMenuItem(this, menuCompile, CodeExecutor.devCText, "Dev C++");
-		Utils.addMenuItem(this, menuCompile, CodeExecutor.vsText,
-				"MS Visual Studio");
+
+		JMenu cMenu = new JMenu("C");
+
+		Utils.addMenuItem(this, cMenu, CodeExecutor.gccText, "GCC");
+		Utils.addMenuItem(this, cMenu, CodeExecutor.devCText, "Dev C++");
+		Utils.addMenuItem(this, cMenu, CodeExecutor.vsText, "MS Visual Studio");
+		menuCompile.add(cMenu);
 		Utils.addMenuItem(this, menuCompile, CodeExecutor.javaText, "Java");
 
 		menuCompile.addSeparator();
+		Utils.addMenuItem(this, menuCompile, editNewSnippetText,
+				messages.getString("tooltip.newSnippet"), "control N");
+		menuCompile.addSeparator();
 		Utils.addMenuItem(this, menuCompile, runText,
-				"compiliern und ausführen", "alt X");
-		Utils.addMenuItem(this, menuCompile, stopText, "Ausführung abbrechen");
+				messages.getString("tooltip.compileExecute"), "alt X");
+		Utils.addMenuItem(this, menuCompile, stopText, messages.getString("tooltip.stopExecution"));
 		Utils.addMenuItem(this, menuCompile, commandsFromFiletext,
-				"Befehle aus Datei commands.txt ausführen", "alt Y");
-		Utils.addMenuItem(this, menuCompile, exeNametext,
-				"Name für Programm (generierte C-Datei)");
+				messages.getString("tooltip.fromFile"), "alt Y");
 
-		// mi = new JMenuItem(exeCommandtext);
-		// mi.addActionListener(this);
-		// mi.setToolTipText("Befehl zum Ausführen");
-		// menuCompile.add(mi);
+		// only usefull for testing / debugging
+		// Utils.addMenuItem(this, menuCompile, exeNametext,
+		// "Name für Programm (generierte C-Datei)");
+		// Utils.addMenuItem(this, menuCompile, exeCommandtext,
+		// "Befehl zum Ausführen");
 
 		JMenu editMenu = new JMenu("Edit");
 		JMenuItem undoMenuItem = new JMenuItem(undoAction);
@@ -498,9 +533,8 @@ public class CodeWindow extends JFrame implements ActionListener,
 			jmi.setActionCommand(METHOD_PREFIX + method);
 		}
 
-		JMenu menuHelp = new JMenu("Hilfe");
+		JMenu menuHelp = new JMenu(messages.getString("help"));
 		Utils.addMenuItem(this, menuHelp, helpText);
-
 
 		GroupLayout layout = new GroupLayout(menuBar);
 		layout.setAutoCreateGaps(true);
@@ -559,15 +593,28 @@ public class CodeWindow extends JFrame implements ActionListener,
 			codeExecutor.stopExecution();
 
 		} else if (cmd.equals(commandsFromFiletext)) {
-			CodeExecutorBoSL fileExecuter = new CodeExecutorBoSL( board );
+			CodeExecutorBoSL fileExecuter = new CodeExecutorBoSL(board);
 			String result = fileExecuter.compileAndExecute("commands.txt");
 			messageField.setText(result);
 
+		} else if (cmd.equals(editNewSnippetText)) {
+			if (codeHasChanged) {
+				int reply = Dialogs.codeHasChangedDialog(messages);
+				if (reply == JOptionPane.NO_OPTION) {
+					return;
+				}
+			}
+			codeInput.setText("");
+			snippetName = null;
+			snippetNameLabel.setText(newSnippetText);
+			saveButton.setEnabled(false);
+			codeHasChanged = false;
+			updateInfoLabel();
+
 		} else if (cmd.equals(loadCommand)) {
 			if (codeHasChanged) {
-				int reply = JOptionPane.showConfirmDialog(this,
-						"Code wurde verändert, trotzdem neu laden?",
-						"Änderungen", JOptionPane.YES_NO_OPTION);
+				int reply = Dialogs.codeHasChangedDialog(messages,
+						"changesLoadSnippet");
 				if (reply == JOptionPane.NO_OPTION) {
 					return;
 				}
@@ -602,6 +649,8 @@ public class CodeWindow extends JFrame implements ActionListener,
 			}
 			codeDB.saveAsSnippet(text, codeInput.getText(), authorName);
 			snippetSelector.addItem(text);
+			snippetSelector
+					.setSelectedIndex(snippetSelector.getItemCount() - 1);
 			snippetName = text;
 			snippetNameLabel.setText(snippetName);
 			snippetNameField.setText("");
@@ -626,17 +675,18 @@ public class CodeWindow extends JFrame implements ActionListener,
 			} catch (BadLocationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} 
+			}
 
-		} else if (cmd.startsWith(METHOD_PREFIX) ) { 
+		} else if (cmd.startsWith(METHOD_PREFIX)) {
 			int pos = codeInput.getCaretPosition(); // get the cursor position
 			try {
 				Document doc = codeInput.getDocument();
-				doc.insertString(pos, cmd.substring( METHOD_PREFIX.length() ), null);
+				doc.insertString(pos, cmd.substring(METHOD_PREFIX.length()),
+						null);
 			} catch (BadLocationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} 
+			}
 
 		} else if (cmd.equals(fontIncText)) {
 			Font font = new Font("Consolas", Font.PLAIN, ++fontSize);
@@ -700,9 +750,8 @@ public class CodeWindow extends JFrame implements ActionListener,
 
 		} else if (cmd.equals(codeFileText)) {
 			if (codeHasChanged) {
-				int reply = JOptionPane.showConfirmDialog(null,
-						"Code wurde verändert, trotzdem neue Datei laden?",
-						"Änderungen", JOptionPane.YES_NO_OPTION);
+				int reply = Dialogs.codeHasChangedDialog(messages,
+						"changesLoadFile");
 				if (reply == JOptionPane.NO_OPTION) {
 					return;
 				}
@@ -721,8 +770,11 @@ public class CodeWindow extends JFrame implements ActionListener,
 				snippetSelector.addItem(name);
 			}
 		} else if (cmd.equals(helpText)) {
-			JOptionPane.showMessageDialog(this, 
-					"Noch keine Hilfe vorhanden - sorry", "Hilfe", JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane
+					.showMessageDialog(this,
+							"Noch keine Hilfe vorhanden - sorry",
+							messages.getString("help"),
+							JOptionPane.INFORMATION_MESSAGE);
 
 		}
 	}
