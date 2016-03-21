@@ -1,13 +1,21 @@
-# board-of-symbols
+# board-of-symbols (BoS)
 
-## How to start:
+BoS now supports both Java and C. 
+
+## How to start Java:
+- download the file jserver.jar 
+- if necessary - install java SDK
+- run jserver.jar ( double click or via commandline: java -jar jserver.jar ) 
+- then open a code window (menu "Fenster für Code-Eingabe") to enter some Java code
+
+## How to start C:
 
 - download the zip-archive
 - unzip the archive
 - if necessary - install gcc (GNU C compiler) via CommandLine/Xcode/MinGW for Windows)
 - run jserver.jar ( double click or via commandline: java -jar jserver.jar ) 
 - then open a code window (menu "Fenster für Code-Eingabe") to enter some C code
-- 
+
 
 ## For Visual Studio Compiler users:
 
