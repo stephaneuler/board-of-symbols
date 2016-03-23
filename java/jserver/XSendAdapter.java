@@ -1,6 +1,6 @@
 package jserver;
 
-public class XSendAdapter extends XSend {
+public class XSendAdapter extends XSendDE {
 	 public static final int NAVY = 128; 
 	 public static final int DARKBLUE = 139; 
 	 public static final int MEDIUMBLUE = 205; 

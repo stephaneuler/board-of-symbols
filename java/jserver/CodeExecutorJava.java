@@ -161,6 +161,7 @@ public class CodeExecutorJava extends CodeExecutor {
 	@Override
 	public String createTmpSourceFile(String codeInput) {
 		// boolean useHeaderFile = true;
+		String language = board.getMessages().getLocale().getLanguage().toUpperCase();
 		try {
 			Files.copy(Paths.get("head.java"), Paths.get(fileName),
 					StandardCopyOption.REPLACE_EXISTING);
@@ -170,7 +171,7 @@ public class CodeExecutorJava extends CodeExecutor {
 				BufferedWriter fw = new BufferedWriter(new FileWriter(fileName));
 				fw.write("import jserver.*;\n");
 				fw.write("import java.util.*;\n");
-				fw.write("public class ATest extends XSend {\n");
+				fw.write("public class ATest extends XSend" + language + " {\n");
 				fw.write("public void send()  throws InterruptedException { ;");
 				fw.close();
 			} catch (IOException e) {

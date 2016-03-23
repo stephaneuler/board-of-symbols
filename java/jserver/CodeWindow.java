@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
@@ -158,6 +159,8 @@ public class CodeWindow extends JFrame implements ActionListener,
 	public CodeWindow(Board board) {
 		this.board = board;
 		messages = board.getMessages();
+		Locale locale = messages.getLocale();
+		System.out.println( "CodeWindow: got " + locale.getLanguage() );
 		setStrings();
 
 		board.setFilterMode(true);
@@ -527,7 +530,8 @@ public class CodeWindow extends JFrame implements ActionListener,
 				"automatisch formatieren", "control F");
 
 		editMenu.addSeparator();
-		String[] methods = MethodExtractor.getMethods("jserver.XSend");
+		String className = "jserver.XSend" + messages.getLocale().getLanguage().toUpperCase();
+		String[] methods = MethodExtractor.getMethods( className );
 		for (String method : methods) {
 			JMenuItem jmi = Utils.addMenuItem(this, editMenu, method);
 			jmi.setActionCommand(METHOD_PREFIX + method);
@@ -713,7 +717,7 @@ public class CodeWindow extends JFrame implements ActionListener,
 			// updateInfoLabel();
 
 		} else if (cmd.equals(authorText)) {
-			String a = JOptionPane.showInputDialog(this, "AutorIn", authorName);
+			String a = JOptionPane.showInputDialog(this, authorText, authorName);
 			if (a != null && a.trim().length() > 0) {
 				authorName = a;
 				board.getGraphic().saveProperty("author", authorName);
@@ -936,7 +940,7 @@ public class CodeWindow extends JFrame implements ActionListener,
 
 	@Override
 	public void startCompilation() {
-		executionInfoLabel.setText("starte Compilierung");
+		executionInfoLabel.setText( messages.getString("startCompile"));
 		executionInfoLabel.setBackground(Color.RED);
 		executionInfoLabel.setOpaque(true);
 		Sleep.sleep(100);
@@ -945,7 +949,7 @@ public class CodeWindow extends JFrame implements ActionListener,
 
 	@Override
 	public void failedCompilation() {
-		executionInfoLabel.setText("Compilierung gescheitert");
+		executionInfoLabel.setText(messages.getString("failedCompile" ) );
 		executionInfoLabel.setBackground(Color.RED);
 		executionInfoLabel.setOpaque(true);
 		runButton.setEnabled(true);
@@ -955,7 +959,7 @@ public class CodeWindow extends JFrame implements ActionListener,
 
 	@Override
 	public void endCompilation() {
-		executionInfoLabel.setText("Compilierung beendet");
+		executionInfoLabel.setText(messages.getString("compileEnded") );
 		executionInfoLabel.setOpaque(false);
 		Sleep.sleep(100);
 
@@ -963,7 +967,7 @@ public class CodeWindow extends JFrame implements ActionListener,
 
 	@Override
 	public void startExecution() {
-		executionInfoLabel.setText("starte Ausführung");
+		executionInfoLabel.setText(messages.getString("startExecution"));
 		executionInfoLabel.setBackground(Color.GREEN);
 		executionInfoLabel.setOpaque(true);
 		Sleep.sleep(100);
@@ -971,7 +975,7 @@ public class CodeWindow extends JFrame implements ActionListener,
 
 	@Override
 	public void endExecution() {
-		executionInfoLabel.setText("Ausführung beendet");
+		executionInfoLabel.setText(messages.getString("executionEnded"));
 		executionInfoLabel.setOpaque(false);
 		runButton.setEnabled(true);
 		stopButton.setEnabled(false);

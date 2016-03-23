@@ -12,13 +12,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
-import java.util.TreeMap;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -75,6 +74,7 @@ public class Board implements ActionListener, MouseListener {
 	private static String sendText;
 	private static final String runText = "ausführen";
 	private static final String codingText = "C-Code Eingabe";
+	private static final String formPrefix = "FORM_";
 	private static final int RAW = 0;
 	private static final int C = 1;
 
@@ -285,8 +285,9 @@ public class Board implements ActionListener, MouseListener {
 	private JMenu myFormMenu() {
 		JMenu menu = new JMenu(messages.getString("forms"));
 		for (SymbolType type : SymbolType.values()) {
-			Utils.addMenuItem(this, menu, SymbolType.texts.get(type),
+			JMenuItem mi = Utils.addMenuItem(this, menu, SymbolType.texts.get(type),
 					SymbolType.tooltips.get(type));
+			mi.setActionCommand(formPrefix + SymbolType.texts.get(type));
 		}
 
 		menu.addSeparator();
@@ -303,14 +304,27 @@ public class Board implements ActionListener, MouseListener {
 	private JMenu myOptionsMenu() {
 		JMenu menu = new JMenu(messages.getString("options"));
 
-		Map<String, String> languages = new TreeMap<String, String>();
-		languages.put("Deutsch", "de_DE");
-		languages.put("English (US)", "en_US");
-		for (String key : languages.keySet()) {
-			JMenuItem mi = Utils.addMenuItem(this, menu, key);
-			mi.setActionCommand("LANG_" + languages.get(key));
+		Properties languages = new Properties();
+		String languagesFile = "config/languages.properties";
+		try {
+			InputStream stream;
+			stream =  ClassLoader.getSystemClassLoader().getResourceAsStream(languagesFile);
+			if( stream == null ) {
+				System.out.println("property file " + languagesFile + " not found");
+				languages.setProperty("Deutsch", "de_DE");
+				languages.setProperty("English (US)", "en_US");
+			} else {
+				languages.load(stream);
+				stream.close();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-
+		
+		for (String key : languages.stringPropertyNames()) {
+			JMenuItem mi = Utils.addMenuItem(this, menu, key);
+			mi.setActionCommand("LANG_" + languages.getProperty(key));
+		}
 		return menu;
 	}
 
@@ -746,8 +760,14 @@ public class Board implements ActionListener, MouseListener {
 			}
 			redrawSymbols();
 			graphic.repaint();
-		} else if (SymbolType.hasType(cmd)) {
-			setNewSymbolType(SymbolType.getTypeFromText(cmd));
+			
+		} else if( cmd.startsWith(formPrefix) ) {
+			String formName = cmd.substring(formPrefix.length());
+			if( SymbolType.hasType(formName))  {
+				setNewSymbolType(SymbolType.getTypeFromText(formName) );
+		}
+				
+			
 		} else if (cmd.equals(numberingText)) {
 			Symbol.toggleNumbering();
 			if (!Symbol.isNumbering()) {
@@ -870,7 +890,7 @@ public class Board implements ActionListener, MouseListener {
 
 		} else if (cmd.equals(codingWindowText)) {
 			codeWindow = new CodeWindow(this);
-		} else if (cmd.startsWith("LANG")) {
+		} else if (cmd.startsWith("LANG_")) {
 			String[] parts = cmd.split("_");
 			language = parts[1];
 			country = parts[2];
