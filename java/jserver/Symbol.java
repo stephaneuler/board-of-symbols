@@ -122,7 +122,7 @@ public class Symbol {
 	}
 
 	public void setHintergrund(Color hintergrund) {
-		System.out.println("Hintergrund: " + hintergrund);
+		//System.out.println("Hintergrund: " + hintergrund);
 		this.hintergrund = hintergrund;
 	}
 

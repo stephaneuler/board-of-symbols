@@ -57,6 +57,20 @@ public enum SymbolType {
 
 		tooltips.put(RANDOM, "Umschalten auf \"bunte Mischung\"");
 
+		updateShortForms();
+	}
+
+	/**
+	 * This method returns a random type (excluding RANDOM and NONE). 
+	 * 
+	 * @return the choosen type
+	 */
+	public static SymbolType getRandom() {
+		// -2 to ignore RANDOM and NONE type
+		return values()[random.nextInt( values().length -2 )];
+	}
+
+	private static void updateShortForms() {
 		shortForm.setProperty("s", texts.get(SQUARE));
 		shortForm.setProperty("c", texts.get(CIRCLE));
 		shortForm.setProperty("d", texts.get(DIAMOND));
@@ -80,16 +94,6 @@ public enum SymbolType {
 		shortForm.setProperty("none", texts.get(NONE));
 	}
 
-	/**
-	 * This method returns a random type (excluding RANDOM and NONE). 
-	 * 
-	 * @return the choosen type
-	 */
-	public static SymbolType getRandom() {
-		// -2 to ignore RANDOM and NONE type
-		return values()[random.nextInt( values().length -2 )];
-	}
-
 	public static boolean hasType(String cmd) {
 		return texts.containsValue(cmd);
 	}
@@ -105,6 +109,7 @@ public enum SymbolType {
 
 	public static SymbolType getTypeFromShortName(String shortName ) {
 		String longName = shortForm.getProperty( shortName  );
+		//System.out.println( shortName + " -> " + longName );
 		if( longName != null ) {
 			return getTypeFromText( longName );
 		}
@@ -146,6 +151,7 @@ public enum SymbolType {
 		}
 		tooltips.put(RANDOM, messages.getString("switchTo") + " " +  messages.getString("tooltip.mixture"));
 
+		updateShortForms();
 		// TODO Auto-generated method stub
 		
 	}

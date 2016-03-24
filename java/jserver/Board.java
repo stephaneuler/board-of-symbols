@@ -266,6 +266,10 @@ public class Board implements ActionListener, MouseListener {
 		return plotter;
 	}
 
+	public ResourceBundle getMessages() {
+		return messages;
+	}
+
 	public Symbol getSymbol(int i) {
 		return symbols.get(i);
 	}
@@ -276,10 +280,6 @@ public class Board implements ActionListener, MouseListener {
 					+ messages.getString("board");
 			plotter.setStatusLine(info);
 		}
-	}
-
-	public ResourceBundle getMessages() {
-		return messages;
 	}
 
 	private JMenu myFormMenu() {
@@ -446,6 +446,7 @@ public class Board implements ActionListener, MouseListener {
 			}
 			SymbolType s = SymbolType.getTypeFromShortName(p[2]);
 			if (s == null) {
+				System.out.println( "Error: unknown form: " + p[2]);
 				return "Error: unknown form";
 			}
 			int index = Integer.parseInt(p[1]);

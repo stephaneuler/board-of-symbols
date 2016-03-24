@@ -86,7 +86,7 @@ public class CodeWindow extends JFrame implements ActionListener,
 	private static final int componentYSize = 25;
 
 	private static String version;
-	private static String runText ;
+	private static String runText;
 	private static String stopText;
 	private static String saveText;
 	private static String saveAsText;
@@ -95,6 +95,7 @@ public class CodeWindow extends JFrame implements ActionListener,
 	private static final String fontIncText = "Zoom +";
 	private static final String fontDecText = "Zoom -";
 	private static String bigFontText;
+	private static String fontSizeText;
 	private static final String normalFontText = "100%";
 	private static String authorText;
 	private static String codeFileText;
@@ -160,7 +161,7 @@ public class CodeWindow extends JFrame implements ActionListener,
 		this.board = board;
 		messages = board.getMessages();
 		Locale locale = messages.getLocale();
-		System.out.println( "CodeWindow: got " + locale.getLanguage() );
+		System.out.println("CodeWindow: got " + locale.getLanguage());
 		setStrings();
 
 		board.setFilterMode(true);
@@ -179,8 +180,12 @@ public class CodeWindow extends JFrame implements ActionListener,
 
 	}
 
+	/**
+	 * Gets the texts from the resource bundle and copies them into variables.
+	 */
 	private void setStrings() {
 		bigFontText = Utils.capitalize(messages.getString("big"));
+		fontSizeText = Utils.capitalize(messages.getString("fontSize"));
 		helpText = Utils.capitalize(messages.getString("help"));
 		editNewSnippetText = Utils.capitalize(messages.getString("new"));
 		newSnippetText = "<html><em>" + messages.getString("new")
@@ -191,11 +196,9 @@ public class CodeWindow extends JFrame implements ActionListener,
 		autoLayoutText = messages.getString("format");
 		authorText = messages.getString("author");
 		codeFileText = messages.getString("codeFile");
-		runText  = messages.getString("compileExecute");
-		stopText  = messages.getString("stopExecution");
-		commandsFromFiletext  = messages.getString("fromFile");
-		
-		// TODO Auto-generated method stub
+		runText = messages.getString("compileExecute");
+		stopText = messages.getString("stopExecution");
+		commandsFromFiletext = messages.getString("fromFile");
 
 	}
 
@@ -469,25 +472,28 @@ public class CodeWindow extends JFrame implements ActionListener,
 		center.add(scrollPane);
 		center.add(scrollPane2);
 
-		JMenu menuPropertier;
+		JMenu menuProperties;
 		JMenu menuCompile;
 		JMenuBar menuBar = new JMenuBar();
 
-		menuPropertier = new JMenu(messages.getString("properties"));
+		menuProperties = new JMenu(messages.getString("properties"));
 
-		Utils.addMenuItem(this, menuPropertier, fontIncText, messages.getString("tooltip.increaseFont"),
-				"alt PLUS");
-		Utils.addMenuItem(this, menuPropertier, fontDecText,
+		Utils.addMenuItem(this, menuProperties, fontIncText,
+				messages.getString("tooltip.increaseFont"), "alt PLUS");
+		Utils.addMenuItem(this, menuProperties, fontDecText,
 				messages.getString("tooltip.decreaseFont"), "alt MINUS");
-		Utils.addMenuItem(this, menuPropertier, bigFontText, messages.getString("tooltip.bigFont"),
-				"alt B");
-		Utils.addMenuItem(this, menuPropertier, normalFontText,
+		Utils.addMenuItem(this, menuProperties, bigFontText,
+				messages.getString("tooltip.bigFont"), "alt B");
+		Utils.addMenuItem(this, menuProperties, fontSizeText,
+				messages.getString("tooltip.fontSize"));
+
+		Utils.addMenuItem(this, menuProperties, normalFontText,
 				messages.getString("tooltip.normalFont"), "alt N");
-		menuPropertier.addSeparator();
-		Utils.addMenuItem(this, menuPropertier, authorText,
+		menuProperties.addSeparator();
+		Utils.addMenuItem(this, menuProperties, authorText,
 				messages.getString("tooltip.author"));
-		menuPropertier.addSeparator();
-		Utils.addMenuItem(this, menuPropertier, codeFileText,
+		menuProperties.addSeparator();
+		Utils.addMenuItem(this, menuProperties, codeFileText,
 				messages.getString("tooltip.codeFile"));
 
 		menuCompile = new JMenu("Compiler");
@@ -509,7 +515,8 @@ public class CodeWindow extends JFrame implements ActionListener,
 		menuCompile.addSeparator();
 		Utils.addMenuItem(this, menuCompile, runText,
 				messages.getString("tooltip.compileExecute"), "alt X");
-		Utils.addMenuItem(this, menuCompile, stopText, messages.getString("tooltip.stopExecution"));
+		Utils.addMenuItem(this, menuCompile, stopText,
+				messages.getString("tooltip.stopExecution"));
 		Utils.addMenuItem(this, menuCompile, commandsFromFiletext,
 				messages.getString("tooltip.fromFile"), "alt Y");
 
@@ -530,8 +537,9 @@ public class CodeWindow extends JFrame implements ActionListener,
 				"automatisch formatieren", "control F");
 
 		editMenu.addSeparator();
-		String className = "jserver.XSend" + messages.getLocale().getLanguage().toUpperCase();
-		String[] methods = MethodExtractor.getMethods( className );
+		String className = "jserver.XSend"
+				+ messages.getLocale().getLanguage().toUpperCase();
+		String[] methods = MethodExtractor.getMethods(className);
 		for (String method : methods) {
 			JMenuItem jmi = Utils.addMenuItem(this, editMenu, method);
 			jmi.setActionCommand(METHOD_PREFIX + method);
@@ -546,7 +554,7 @@ public class CodeWindow extends JFrame implements ActionListener,
 
 		SequentialGroup verticalGroup = layout.createSequentialGroup();
 		verticalGroup.addGroup(layout.createParallelGroup()
-				.addComponent(menuPropertier).addComponent(menuCompile)
+				.addComponent(menuProperties).addComponent(menuCompile)
 				.addComponent(editMenu).addComponent(menuHelp)
 				.addComponent(infoLabel));
 		verticalGroup.addGroup(layout.createParallelGroup()
@@ -561,7 +569,7 @@ public class CodeWindow extends JFrame implements ActionListener,
 
 		ParallelGroup horizontalGroup = layout.createParallelGroup();
 		horizontalGroup.addGroup(layout.createSequentialGroup()
-				.addComponent(menuPropertier).addComponent(menuCompile)
+				.addComponent(menuProperties).addComponent(menuCompile)
 				.addComponent(editMenu).addComponent(menuHelp)
 				.addGap(0, 0, Short.MAX_VALUE).addComponent(infoLabel));
 		horizontalGroup.addGroup(layout.createSequentialGroup()
@@ -710,6 +718,16 @@ public class CodeWindow extends JFrame implements ActionListener,
 			messageField.setFont(bigFont);
 			// updateInfoLabel();
 
+		} else if (cmd.equals(fontSizeText)) {
+			String a = JOptionPane.showInputDialog(null,
+					messages.getString("tooltip.fontSize"), fontSize);
+			if (a != null) {
+				fontSize = Integer.parseInt(a);
+				Font font = new Font("Consolas", Font.PLAIN, --fontSize);
+				codeInput.setFont(font);
+				messageField.setFont(font);
+			}
+
 		} else if (cmd.equals(normalFontText)) {
 			fontSize = normalFontSize;
 			codeInput.setFont(normalFont);
@@ -717,7 +735,8 @@ public class CodeWindow extends JFrame implements ActionListener,
 			// updateInfoLabel();
 
 		} else if (cmd.equals(authorText)) {
-			String a = JOptionPane.showInputDialog(this, authorText, authorName);
+			String a = JOptionPane
+					.showInputDialog(this, authorText, authorName);
 			if (a != null && a.trim().length() > 0) {
 				authorName = a;
 				board.getGraphic().saveProperty("author", authorName);
@@ -940,7 +959,7 @@ public class CodeWindow extends JFrame implements ActionListener,
 
 	@Override
 	public void startCompilation() {
-		executionInfoLabel.setText( messages.getString("startCompile"));
+		executionInfoLabel.setText(messages.getString("startCompile"));
 		executionInfoLabel.setBackground(Color.RED);
 		executionInfoLabel.setOpaque(true);
 		Sleep.sleep(100);
@@ -949,7 +968,7 @@ public class CodeWindow extends JFrame implements ActionListener,
 
 	@Override
 	public void failedCompilation() {
-		executionInfoLabel.setText(messages.getString("failedCompile" ) );
+		executionInfoLabel.setText(messages.getString("failedCompile"));
 		executionInfoLabel.setBackground(Color.RED);
 		executionInfoLabel.setOpaque(true);
 		runButton.setEnabled(true);
@@ -959,7 +978,7 @@ public class CodeWindow extends JFrame implements ActionListener,
 
 	@Override
 	public void endCompilation() {
-		executionInfoLabel.setText(messages.getString("compileEnded") );
+		executionInfoLabel.setText(messages.getString("compileEnded"));
 		executionInfoLabel.setOpaque(false);
 		Sleep.sleep(100);
 
