@@ -41,7 +41,9 @@ public class CodeExecutorJava extends CodeExecutor {
 
 	@Override
 	public void stopExecution() {
+		//System.out.println("CodeExcecutorJava::stopExecution");
 		if (sendThread != null) {
+			//System.out.println("CodeExcecutorJava::send interrupt");
 			sendThread.interrupt();
 		}
 	}
@@ -129,7 +131,10 @@ public class CodeExecutorJava extends CodeExecutor {
 					String command = "";
 					try {
 						xsend.send();
-						command = xsend.getResult();
+						command =  xsend.getResult();
+						if( ! command.equals("okay") ) {
+							System.out.println( "+" + command );
+						}
 					} catch (InterruptedException e) {
 						command = "Ausführung unterbrochen";
 					}

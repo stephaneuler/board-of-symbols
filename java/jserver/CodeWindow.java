@@ -123,7 +123,7 @@ public class CodeWindow extends JFrame implements ActionListener,
 	private JTextArea messageField = new JTextArea();
 	private JTextField snippetNameField = new JTextField();
 	private JLabel snippetNameLabel = new JLabel(newSnippetText);
-	private JLabel statusLabel = new JLabel();
+//	private JLabel statusLabel = new JLabel();
 	private JLabel executionInfoLabel = new JLabel();
 	private JLabel infoLabel = new JLabel();
 	private String snippetName;
@@ -156,22 +156,24 @@ public class CodeWindow extends JFrame implements ActionListener,
 	private RedoAction redoAction = null;
 	private CodeLayouter codeLayouter = new CodeLayouter();
 	private ResourceBundle messages;
+	private Properties properties;
 
 	public CodeWindow(Board board) {
 		this.board = board;
+		properties = board.getProperties();
 		messages = board.getMessages();
 		Locale locale = messages.getLocale();
 		System.out.println("CodeWindow: got " + locale.getLanguage());
 		setStrings();
 
 		board.setFilterMode(true);
-		String a = board.getGraphic().getProperty("author");
+		String a = properties.getProperty("author");
 		if (a != null) {
 			authorName = a;
 		}
-		fileOpenDirectory = board.getGraphic().getProperty("codeDir");
-		XMLFileName = board.getGraphic().getProperty("XMLFileName");
-		String mode = board.getGraphic().getProperty("compiler",
+		fileOpenDirectory = properties.getProperty("codeDir");
+		XMLFileName = properties.getProperty("XMLFileName");
+		String mode = properties.getProperty("compiler",
 				CodeExecutor.gccText);
 		codeExecutor = CodeExecutor.getExecutor(mode, board, this);
 
@@ -211,12 +213,13 @@ public class CodeWindow extends JFrame implements ActionListener,
 		if (!file.exists()) {
 			JOptionPane
 					.showMessageDialog(this, "Datei " + fileName
-							+ " neu anlegen ", "Codes lesen",
+							+ " neu anlegen ", messages.getString("readCodes"),
 							JOptionPane.ERROR_MESSAGE);
 			codeDB.createDocument();
 			codeDB.writeXML();
 		}
-		board.getGraphic().saveProperty("XMLFileName", file.getName());
+		properties.setProperty("XMLFileName", file.getName());
+		board.saveProperties();
 		try {
 			codeDB.readXML();
 		} catch (ParserConfigurationException | SAXException | IOException e2) {
@@ -234,17 +237,18 @@ public class CodeWindow extends JFrame implements ActionListener,
 		if (fileOpenDirectory != null) {
 			chooser.setCurrentDirectory(new File(fileOpenDirectory));
 		}
-		chooser.setDialogTitle("Code Datei");
+		chooser.setDialogTitle(messages.getString("codeFile"));
 		chooser.setDialogType(JFileChooser.OPEN_DIALOG);
 		String fileSuffixes = "xml";
-		FileNameExtensionFilter filter = new FileNameExtensionFilter(" Images",
+		FileNameExtensionFilter filter = new FileNameExtensionFilter(" XML",
 				fileSuffixes);
 		chooser.setFileFilter(filter);
 
 		int retval = chooser.showDialog(null, null);
 		if (retval == JFileChooser.APPROVE_OPTION) {
 			fileOpenDirectory = chooser.getCurrentDirectory().getAbsolutePath();
-			board.getGraphic().saveProperty("codeDir", fileOpenDirectory);
+			properties.setProperty("codeDir", fileOpenDirectory);
+			board.saveProperties();
 			String filename = chooser.getSelectedFile().getAbsolutePath();
 			// System.out.println(filename);
 			return filename;
@@ -255,7 +259,6 @@ public class CodeWindow extends JFrame implements ActionListener,
 	}
 
 	void savePosition() {
-		Properties properties = board.getProperties();
 		properties.setProperty("codeWindowPosX", "" + getBounds().x);
 		properties.setProperty("codeWindowPosY", "" + getBounds().y);
 		properties.setProperty("codeWindowWidth", "" + getBounds().width);
@@ -264,7 +267,6 @@ public class CodeWindow extends JFrame implements ActionListener,
 	}
 
 	private void loadPosition() {
-		Properties properties = board.getProperties();
 		String s;
 		s = properties.getProperty("codeWindowPosX", "" + xpos);
 		xpos = Integer.parseInt(s);
@@ -421,7 +423,7 @@ public class CodeWindow extends JFrame implements ActionListener,
 
 		snippetSelector.setMaximumSize(componentSize);
 		snippetNameLabel.setMaximumSize(componentSize);
-		statusLabel.setMaximumSize(componentSize);
+//		statusLabel.setMaximumSize(componentSize);
 		snippetNameField.setMaximumSize(componentSize);
 		// runButton.setMaximumSize(componentSize);
 		saveButton.setMaximumSize(componentSize);
@@ -431,7 +433,7 @@ public class CodeWindow extends JFrame implements ActionListener,
 		snippetNameField.setAlignmentX(Component.LEFT_ALIGNMENT);
 		snippetNameLabel.setBorder(BorderFactory
 				.createLineBorder(Color.BLUE, 3));
-		statusLabel.setBorder(BorderFactory.createLineBorder(Color.BLUE, 3));
+//		statusLabel.setBorder(BorderFactory.createLineBorder(Color.BLUE, 3));
 
 		codeInput.setPreferredSize(new Dimension(500, 300));
 		codeInput.setFont(normalFont);
@@ -660,6 +662,7 @@ public class CodeWindow extends JFrame implements ActionListener,
 				return;
 			}
 			codeDB.saveAsSnippet(text, codeInput.getText(), authorName);
+			codeHasChanged = false;
 			snippetSelector.addItem(text);
 			snippetSelector
 					.setSelectedIndex(snippetSelector.getItemCount() - 1);
@@ -667,7 +670,6 @@ public class CodeWindow extends JFrame implements ActionListener,
 			snippetNameLabel.setText(snippetName);
 			snippetNameField.setText("");
 			saveButton.setEnabled(true);
-			codeHasChanged = false;
 			updateInfoLabel();
 
 		} else if (cmd.equals(showColorChooserText)) {
@@ -739,7 +741,8 @@ public class CodeWindow extends JFrame implements ActionListener,
 					.showInputDialog(this, authorText, authorName);
 			if (a != null && a.trim().length() > 0) {
 				authorName = a;
-				board.getGraphic().saveProperty("author", authorName);
+				properties.setProperty("author", authorName);
+				board.saveProperties();
 			}
 
 		} else if (cmd.equals(autoLayoutText)) {
@@ -750,7 +753,8 @@ public class CodeWindow extends JFrame implements ActionListener,
 					codeExecutor.getExeCommand());
 			if (a != null && a.trim().length() > 0) {
 				codeExecutor.setExeCommand(a);
-				board.getGraphic().saveProperty("exeCommand", a);
+				properties.setProperty("exeCommand", a);
+				board.saveProperties();
 			}
 
 		} else if (cmd.equals(exeNametext)) {
@@ -764,11 +768,13 @@ public class CodeWindow extends JFrame implements ActionListener,
 					a += ".c";
 				}
 				codeExecutor.setExeName(a);
-				board.getGraphic().saveProperty("exeName", a);
+				properties.setProperty("exeName", a);
+				board.saveProperties();
 			}
 		} else if (CodeExecutor.isCodeExecuterSelection(cmd)) {
 			codeExecutor = CodeExecutor.getExecutor(cmd, board, this);
-			board.getGraphic().saveProperty("compiler", cmd);
+			properties.setProperty("compiler", cmd);
+			board.saveProperties();
 			updateInfoLabel();
 
 		} else if (cmd.equals(codeFileText)) {
@@ -843,14 +849,14 @@ public class CodeWindow extends JFrame implements ActionListener,
 			if (!(codeExecutor instanceof CodeExecutorJava)) {
 				messageField.setText(result);
 			}
-			if (board.getErrorCount() > 0) {
-				statusLabel.setText(board.getErrorCount() + " Fehler");
-				statusLabel.setForeground(Color.RED);
-			} else {
-				statusLabel.setText("keine Fehler");
-				statusLabel.setForeground(Color.GREEN);
-
-			}
+//			if (board.getErrorCount() > 0) {
+//				statusLabel.setText(board.getErrorCount() + " Fehler");
+//				statusLabel.setForeground(Color.RED);
+//			} else {
+//				statusLabel.setText("keine Fehler");
+//				statusLabel.setForeground(Color.GREEN);
+//
+//			}
 
 			codeDB.saveAsLast(codeInput.getText());
 			return true;

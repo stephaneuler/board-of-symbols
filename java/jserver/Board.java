@@ -906,6 +906,7 @@ public class Board implements ActionListener, MouseListener {
 		properties.setProperty("language", language);
 		properties.setProperty("country", country);
 		properties.setProperty("columns", "" + columns);
+		properties.setProperty("rows", "" + rows);
 		properties.setProperty("coding", "" + coding);
 		properties.setProperty("numbering", "" + Symbol.isNumbering());
 		properties.setProperty("fontSize", "" + symbolFontSize);
