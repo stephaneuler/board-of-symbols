@@ -22,6 +22,7 @@ import java.util.List;
  */
 public class CodeExecutorJava extends CodeExecutor {
 	String fileName = "ATest.java";
+	private static String javacPath = "";
 	private Thread sendThread = null;
 
 	// public static void main(String[] args) {
@@ -37,6 +38,14 @@ public class CodeExecutorJava extends CodeExecutor {
 
 	public CodeExecutorJava() {
 		setCompileMode(javaText);
+	}
+
+	public static String getJavacPath() {
+		return javacPath;
+	}
+
+	public static void setJavacPath(String javacPath) {
+		CodeExecutorJava.javacPath = javacPath;
 	}
 
 	@Override
@@ -56,6 +65,17 @@ public class CodeExecutorJava extends CodeExecutor {
 		System.out.println("compileAndExecute fileName: " + fileName);
 		boolean hasErrors = false;
 
+		File jarTest = new File("jserver.jar");
+		if( ! jarTest.exists() ) {
+			messageField.append("jserver.jar nicht gefunden\n");
+			for (ExecutorListener el : listeners) {
+				el.failedCompilation();
+			}
+			return "";
+			
+		}
+		
+		
 		new File("Atest.class").delete();
 
 		// Compile source file.
@@ -68,7 +88,8 @@ public class CodeExecutorJava extends CodeExecutor {
 		//
 
 		ProcessBuilder pb;
-		pb = new ProcessBuilder("javac", "-cp", ".;jserver.jar", fileName);
+		//System.out.println( "Path to javac: "  + javacPath );
+		pb = new ProcessBuilder(javacPath + "javac", "-cp", ".;jserver.jar", fileName);
 		for (ExecutorListener el : listeners) {
 			el.startCompilation();
 		}
