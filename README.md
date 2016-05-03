@@ -7,6 +7,8 @@ BoS now supports both Java and C.
 - if necessary - install java SDK
 - run jserver.jar ( double click or via commandline: java -jar jserver.jar ) 
 - then open a code window (menu "Fenster für Code-Eingabe" or ALT-c) to enter some Java code
+- if javac is not found: add the sdk to the PATH or set the directory name (bin) in the properties menu in CodeWindow
+
 
 ## How to start - C:
 
