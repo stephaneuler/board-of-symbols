@@ -89,7 +89,9 @@ public class CodeExecutorJava extends CodeExecutor {
 
 		ProcessBuilder pb;
 		//System.out.println( "Path to javac: "  + javacPath );
-		pb = new ProcessBuilder(javacPath + "javac", "-cp", ".;jserver.jar", fileName);
+		String classPath = "." + File.pathSeparatorChar + "jserver.jar";
+		//System.out.println( "classpath: "  + classPath );
+		pb = new ProcessBuilder(javacPath + "javac", "-cp", classPath, fileName);
 		for (ExecutorListener el : listeners) {
 			el.startCompilation();
 		}
@@ -153,13 +155,15 @@ public class CodeExecutorJava extends CodeExecutor {
 					try {
 						xsend.send();
 						command =  xsend.getResult();
-						if( ! command.equals("okay") ) {
-							System.out.println( "+" + command );
+						if( ! command.matches("(okay)+") ) {
+							System.out.println( command );
+							sb.append(command);
 						}
 					} catch (InterruptedException e) {
 						command = "Ausführung unterbrochen";
+					} catch( Exception e ) {
+						e.printStackTrace( System.out );
 					}
-					sb.append(command);
 				}
 			});
 			sendThread.start();
