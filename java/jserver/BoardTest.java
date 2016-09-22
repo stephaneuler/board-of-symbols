@@ -1,8 +1,7 @@
 package jserver;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class BoardTest {
@@ -23,6 +22,15 @@ public class BoardTest {
 		int n = board.getSymbolCount();
 		board.addSymbol(new Symbol(new Position(0, 0), 1.));
 		assertEquals("#symbols increased by 1", n + 1, board.getSymbolCount());
+	}
+
+	@Test
+	public void testContent() {
+		BoardSerializer bs = new BoardSerializer();
+
+		bs.serialize(board);
+		String s = bs.write();
+		assertEquals("#hash code content", s.hashCode(), 699796684);
 	}
 
 	@Test

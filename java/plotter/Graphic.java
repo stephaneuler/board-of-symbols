@@ -44,13 +44,14 @@ import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 // Version wer wann was
-// 1.2  se 1303 Screen-Dump, print
-// 1.21 se 1312 addExternMenu
+// 1.2     se  1303 Screen-Dump, print
+// 1.21    se  1312 addExternMenu
+// 1.5     se  1609 diverse Ergänzungen
 
 /**
  * A JFrame to host the plotter panel
  * 
- * @version 1.21 Dez. 2013
+ * @version 1.5 Sep. 2016
  * @author Stephan Euler
  * 
  * 
@@ -69,6 +70,7 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 	private JLabel status = new JLabel();
 	private JMenuBar menuBar = new JMenuBar();
 	private JMenu dataMenu;
+	private JMenu fileMenu;
 	private String[] fileSuffixes = ImageIO.getWriterFileSuffixes();
 	private String fileOpenDirectory = "";
 	private String dumpText = "Zeige Daten";
@@ -166,7 +168,6 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 		basePane.add("East", east);
 		basePane.add("West", west);
 
-		JMenu fileMenu;
 		JMenuItem mi;
 
 		fileMenu = new JMenu(fileText);
@@ -262,6 +263,10 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 	 */
 	public Plotter getPlotter() {
 		return plotter;
+	}
+
+	public JMenu getFileMenu() {
+		return fileMenu;
 	}
 
 	/**
@@ -443,7 +448,29 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 		}
 
 	}
+	
+	public boolean saveImageToFile( String dest ) {
+		Robot robot;
+		try {
+			robot = new Robot();
+		} catch (AWTException e) {
+			e.printStackTrace();
+			return false;
+		}
 
+		Sleep.sleep(500);
+
+		Rectangle r = getBounds();
+		BufferedImage screenShot = robot.createScreenCapture(r);
+		try {
+			ImageIO.write(screenShot, getExtension(dest), new File(dest));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return true;
+	}
+ 
 	class DataSaver<T, V> extends SwingWorker {
 
 		@Override

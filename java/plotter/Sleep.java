@@ -3,10 +3,12 @@ package plotter;
 public class Sleep {
 
 	public static void sleep(int msec) {
-		try {
-			Thread.sleep(msec);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		if (msec > 0) {
+			try {
+				Thread.sleep(msec);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

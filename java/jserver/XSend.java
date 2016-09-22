@@ -47,4 +47,8 @@ public abstract class XSend {
 		this.board = board;
 	}
 
+	public Board getBoard() {
+		return board;
+	}
+
 }

@@ -162,6 +162,7 @@ public class CodeExecutorJava extends CodeExecutor {
 					} catch (InterruptedException e) {
 						command = "Ausführung unterbrochen";
 					} catch( Exception e ) {
+						// copy message so that it appears in the result field
 						e.printStackTrace( System.out );
 					}
 				}

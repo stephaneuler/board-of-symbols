@@ -1,5 +1,7 @@
 package jserver;
 
+import static org.junit.Assert.assertEquals;
+
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -58,6 +60,7 @@ public class Board implements ActionListener, MouseListener {
 
 	public static final String FILTER_PREFIX = ">>";
 
+	private static String hashCodeText;
 	private static String clearColorsText;
 	private static String clearTextText;
 	private static String fontSizeText;
@@ -80,6 +83,7 @@ public class Board implements ActionListener, MouseListener {
 
 	private Graphic graphic;
 	private Plotter plotter;
+	private boolean examMode = false;
 	private int messageCount = 0;
 	private int rows = 10;
 	private int columns = 10;
@@ -150,27 +154,31 @@ public class Board implements ActionListener, MouseListener {
 			}
 		});
 
-		graphic.setTitle("Board, " + messages.getString("boardVersion"));
+		String title = "Board, " + messages.getString("boardVersion");
+		
+		if (examMode) {
+			graphic.setResizable(false);
+			title += " Exam Mode";
+		} else {
+			String p = properties.getProperty("columns");
+			if (p != null) {
+				columns = Integer.parseInt(p);
+			}
+			p = properties.getProperty("rows");
+			if (p != null) {
+				rows = Integer.parseInt(p);
+			}
 
+			Symbol.setNumbering(Boolean.parseBoolean(properties.getProperty("numbering")));
+		}
+		
+		graphic.setTitle( title );
 		plotter.setPreferredSize(500, 500);
 		defaultBackground = plotter.getBackground();
 		graphic.pack();
-
-		String p = properties.getProperty("columns");
-		if (p != null) {
-			columns = Integer.parseInt(p);
-		}
-		p = properties.getProperty("rows");
-		if (p != null) {
-			rows = Integer.parseInt(p);
-		}
-
-		Symbol.setNumbering(Boolean.parseBoolean(properties
-				.getProperty("numbering")));
 		drawSymbols();
 
-		symbolFontSize = Integer.parseInt(properties.getProperty("fontSize", ""
-				+ symbolFontSize));
+		symbolFontSize = Integer.parseInt(properties.getProperty("fontSize", "" + symbolFontSize));
 		Symbol.setFontSize(symbolFontSize);
 
 		sendButton = new JButton(sendText);
@@ -196,6 +204,9 @@ public class Board implements ActionListener, MouseListener {
 		graphic.addExternMenu(myFormMenu());
 		graphic.addExternMenu(myOptionsMenu());
 
+		JMenu fileMenu = graphic.getFileMenu();		
+		Utils.addMenuItem(this, fileMenu, hashCodeText, messages.getString("tooltip.hashCode"));
+		
 		setStatusLineInfo();
 		plotter.addMouseListener(this);
 
@@ -206,10 +217,18 @@ public class Board implements ActionListener, MouseListener {
 		return properties;
 	}
 
+
+	public void setSize(int width, int heigth) {
+		plotter.setPreferredSize(width, heigth);
+		graphic.pack();
+
+	}
+	
 	/**
 	 * Gets the texts from the resource bundle and copies them into variables.
 	 */
 	private void setStrings() {
+		hashCodeText = messages.getString("hashCode");
 		clearColorsText = messages.getString("clearColors");
 		clearTextText = messages.getString("clearTexts");
 		fontSizeText = messages.getString("fontSize");
@@ -250,10 +269,8 @@ public class Board implements ActionListener, MouseListener {
 
 		if (!locale.equals(messages.getLocale())) {
 			String notFound = messages.getString("notFoundUsing");
-			String text = String.format(notFound, "" + locale,
-					"" + messages.getLocale());
-			JOptionPane.showMessageDialog(graphic, text, "Language",
-					JOptionPane.INFORMATION_MESSAGE);
+			String text = String.format(notFound, "" + locale, "" + messages.getLocale());
+			JOptionPane.showMessageDialog(graphic, text, "Language", JOptionPane.INFORMATION_MESSAGE);
 
 		}
 	}
@@ -276,8 +293,7 @@ public class Board implements ActionListener, MouseListener {
 
 	private void setStatusLineInfo() {
 		if (!userDefinedStatusLine) {
-			String info = columns + "x" + rows + " "
-					+ messages.getString("board");
+			String info = columns + "x" + rows + " " + messages.getString("board");
 			plotter.setStatusLine(info);
 		}
 	}
@@ -285,17 +301,14 @@ public class Board implements ActionListener, MouseListener {
 	private JMenu myFormMenu() {
 		JMenu menu = new JMenu(messages.getString("forms"));
 		for (SymbolType type : SymbolType.values()) {
-			JMenuItem mi = Utils.addMenuItem(this, menu, SymbolType.texts.get(type),
-					SymbolType.tooltips.get(type));
+			JMenuItem mi = Utils.addMenuItem(this, menu, SymbolType.texts.get(type), SymbolType.tooltips.get(type));
 			mi.setActionCommand(formPrefix + SymbolType.texts.get(type));
 		}
 
 		menu.addSeparator();
-		Utils.addMenuItem(this, menu, numberingText,
-				"Nummerierung der Elemente anzeigen", "alt N");
+		Utils.addMenuItem(this, menu, numberingText, "Nummerierung der Elemente anzeigen", "alt N");
 
-		alphaMenuItem = Utils.addMenuItem(this, menu, alphaText,
-				"Alpha Wert für  Transparenz (Durchsichtigkeit)");
+		alphaMenuItem = Utils.addMenuItem(this, menu, alphaText, "Alpha Wert für  Transparenz (Durchsichtigkeit)");
 		alphaMenuItem.setEnabled(Symbol.isNumbering());
 
 		return menu;
@@ -308,8 +321,8 @@ public class Board implements ActionListener, MouseListener {
 		String languagesFile = "config/languages.properties";
 		try {
 			InputStream stream;
-			stream =  ClassLoader.getSystemClassLoader().getResourceAsStream(languagesFile);
-			if( stream == null ) {
+			stream = ClassLoader.getSystemClassLoader().getResourceAsStream(languagesFile);
+			if (stream == null) {
 				System.out.println("property file " + languagesFile + " not found");
 				languages.setProperty("Deutsch", "de_DE");
 				languages.setProperty("English (US)", "en_US");
@@ -320,7 +333,7 @@ public class Board implements ActionListener, MouseListener {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		for (String key : languages.stringPropertyNames()) {
 			JMenuItem mi = Utils.addMenuItem(this, menu, key);
 			mi.setActionCommand("LANG_" + languages.getProperty(key));
@@ -331,30 +344,21 @@ public class Board implements ActionListener, MouseListener {
 	private JMenu myBoardMenu() {
 		JMenu menu = new JMenu(messages.getString("board"));
 
-		Utils.addMenuItem(this, menu, clearColorsText,
-				messages.getString("tooltip.clearColors"), "alt R");
-		Utils.addMenuItem(this, menu, clearTextText,
-				messages.getString("tooltip.clearTexts"));
-		Utils.addMenuItem(this, menu, fontSizeText,
-				messages.getString("tooltip.fontSize"));
-		Utils.addMenuItem(this, menu, growText,
-				messages.getString("tooltip.grow"), "alt PLUS");
-		Utils.addMenuItem(this, menu, shrinkText,
-				messages.getString("tooltip.shrink"), "alt MINUS");
-		Utils.addMenuItem(this, menu, bigText,
-				messages.getString("tooltip.big"));
-		Utils.addMenuItem(this, menu, rowText,
-				messages.getString("tooltip.columns"));
-		Utils.addMenuItem(this, menu, colText,
-				messages.getString("tooltip.rows"));
-		Utils.addMenuItem(this, menu, quadText,
-				messages.getString("tooltip.setSquare"), "alt Q");
-		Utils.addMenuItem(this, menu, interactiveText,
-				messages.getString("tooltip.interactive"), "alt I");
+		Utils.addMenuItem(this, menu, clearColorsText, messages.getString("tooltip.clearColors"), "alt R");
+		Utils.addMenuItem(this, menu, clearTextText, messages.getString("tooltip.clearTexts"));
+		Utils.addMenuItem(this, menu, fontSizeText, messages.getString("tooltip.fontSize"));
+		if (!examMode) {
+			Utils.addMenuItem(this, menu, growText, messages.getString("tooltip.grow"), "alt PLUS");
+			Utils.addMenuItem(this, menu, shrinkText, messages.getString("tooltip.shrink"), "alt MINUS");
+			Utils.addMenuItem(this, menu, bigText, messages.getString("tooltip.big"));
+			Utils.addMenuItem(this, menu, rowText, messages.getString("tooltip.columns"));
+			Utils.addMenuItem(this, menu, colText, messages.getString("tooltip.rows"));
+			Utils.addMenuItem(this, menu, quadText, messages.getString("tooltip.setSquare"), "alt Q");
+			Utils.addMenuItem(this, menu, interactiveText, messages.getString("tooltip.interactive"), "alt I");
+		}
 		// Utils.addMenuItem(this, menu, codingText,
 		// "Einblenden der Code-Eingabe");
-		Utils.addMenuItem(this, menu, codingWindowText,
-				messages.getString("tooltip.codingWindow"), "alt C");
+		Utils.addMenuItem(this, menu, codingWindowText, messages.getString("tooltip.codingWindow"), "alt C");
 
 		return menu;
 	}
@@ -393,8 +397,7 @@ public class Board implements ActionListener, MouseListener {
 		// System.out.println( "receiveMessage: " + line);
 		line = line.trim();
 		++messageCount;
-		String info = columns + "x" + rows + " Feld, Nachricht #"
-				+ messageCount + ": " + line;
+		String info = columns + "x" + rows + " Feld, Nachricht #" + messageCount + ": " + line;
 
 		if (line.startsWith(FILTER_PREFIX)) {
 			line = line.substring(FILTER_PREFIX.length()).trim();
@@ -446,7 +449,7 @@ public class Board implements ActionListener, MouseListener {
 			}
 			SymbolType s = SymbolType.getTypeFromShortName(p[2]);
 			if (s == null) {
-				System.out.println( "Error: unknown form: " + p[2]);
+				System.out.println("Error: unknown form: " + p[2]);
 				return "Error: unknown form";
 			}
 			int index = Integer.parseInt(p[1]);
@@ -468,8 +471,7 @@ public class Board implements ActionListener, MouseListener {
 			if (s == null) {
 				return "Error: unknown form";
 			}
-			int index = Integer.parseInt(p[1]) + Integer.parseInt(p[2])
-					* columns;
+			int index = Integer.parseInt(p[1]) + Integer.parseInt(p[2]) * columns;
 			if (index < 0 | index >= nSymbols) {
 				return "ERROR - " + index + " out of Range ";
 			}
@@ -734,7 +736,9 @@ public class Board implements ActionListener, MouseListener {
 	@Override
 	public void actionPerformed(ActionEvent event) {
 		String cmd = event.getActionCommand();
-		System.out.println("Board cmd: " + cmd);
+		if( verbose ) {
+			System.out.println("Board cmd: " + cmd);
+		}
 
 		if (cmd.equals(clearColorsText)) {
 			for (Symbol s : symbols) {
@@ -747,8 +751,7 @@ public class Board implements ActionListener, MouseListener {
 			graphic.repaint();
 
 		} else if (cmd.equals(fontSizeText)) {
-			String a = JOptionPane.showInputDialog(graphic,
-					messages.getString("tooltip.fontSize"), symbolFontSize);
+			String a = JOptionPane.showInputDialog(graphic, messages.getString("tooltip.fontSize"), symbolFontSize);
 			if (a != null) {
 				symbolFontSize = Integer.parseInt(a);
 				Symbol.setFontSize(symbolFontSize);
@@ -761,14 +764,13 @@ public class Board implements ActionListener, MouseListener {
 			}
 			redrawSymbols();
 			graphic.repaint();
-			
-		} else if( cmd.startsWith(formPrefix) ) {
+
+		} else if (cmd.startsWith(formPrefix)) {
 			String formName = cmd.substring(formPrefix.length());
-			if( SymbolType.hasType(formName))  {
-				setNewSymbolType(SymbolType.getTypeFromText(formName) );
-		}
-				
-			
+			if (SymbolType.hasType(formName)) {
+				setNewSymbolType(SymbolType.getTypeFromText(formName));
+			}
+
 		} else if (cmd.equals(numberingText)) {
 			Symbol.toggleNumbering();
 			if (!Symbol.isNumbering()) {
@@ -797,8 +799,7 @@ public class Board implements ActionListener, MouseListener {
 			setStatusLineInfo();
 			graphic.repaint();
 		} else if (cmd.equals(rowText)) {
-			String a = JOptionPane.showInputDialog(graphic,
-					messages.getString("tooltip.rows"), new Integer(rows));
+			String a = JOptionPane.showInputDialog(graphic, messages.getString("tooltip.rows"), new Integer(rows));
 			if (a != null) {
 				rows = Integer.parseInt(a);
 				drawSymbols();
@@ -806,9 +807,8 @@ public class Board implements ActionListener, MouseListener {
 				graphic.repaint();
 			}
 		} else if (cmd.equals(colText)) {
-			String a = JOptionPane
-					.showInputDialog(graphic, messages
-							.getString("tooltip.columns"), new Integer(columns));
+			String a = JOptionPane.showInputDialog(graphic, messages.getString("tooltip.columns"),
+					new Integer(columns));
 			if (a != null) {
 				columns = Integer.parseInt(a);
 				drawSymbols();
@@ -816,8 +816,8 @@ public class Board implements ActionListener, MouseListener {
 				graphic.repaint();
 			}
 		} else if (cmd.equals(quadText)) {
-			String a = JOptionPane.showInputDialog(graphic, messages
-					.getString("tooltip.setSquare"), new Integer(columns));
+			String a = JOptionPane.showInputDialog(graphic, messages.getString("tooltip.setSquare"),
+					new Integer(columns));
 			if (a != null) {
 				columns = Integer.parseInt(a);
 				rows = columns;
@@ -826,14 +826,29 @@ public class Board implements ActionListener, MouseListener {
 				graphic.repaint();
 			}
 		} else if (cmd.equals(alphaText)) {
-			String a = JOptionPane.showInputDialog(graphic,
-					"Neuer Wert Alpha (0..255)", Symbol.getAlpha());
+			String a = JOptionPane.showInputDialog(graphic, "Neuer Wert Alpha (0..255)", Symbol.getAlpha());
 			if (a != null) {
 				int alpha = Integer.parseInt(a);
 				Symbol.setAlpha(alpha);
 				redrawSymbols();
 				graphic.repaint();
 			}
+		} else if (cmd.equals(hashCodeText)) {
+			BoardSerializer bs = new BoardSerializer();
+
+			bs.serialize(this);
+			String s = bs.write();
+			int hc = s.hashCode();
+			String message = "HashCode; ";
+			int mtype = JOptionPane.INFORMATION_MESSAGE;
+			if( hc == -1105758752 ) {
+				message += " OKAY !!!";
+			} else {
+				message += " FAILED";
+				mtype = JOptionPane.ERROR_MESSAGE;
+			}
+			JOptionPane.showMessageDialog(graphic, message, "Hash Code Check", mtype);
+			
 		} else if (cmd.equals(sendText)) {
 			if ("".equals(input.getText()))
 				return;
@@ -854,8 +869,7 @@ public class Board implements ActionListener, MouseListener {
 				}
 			} else {
 				result += "compile ...\n";
-				String fileName = codeExecutor.createTmpSourceFile(codeInput
-						.getText());
+				String fileName = codeExecutor.createTmpSourceFile(codeInput.getText());
 				if (fileName == null) {
 					result += "ERROR : " + getLastError();
 				} else {
@@ -895,11 +909,9 @@ public class Board implements ActionListener, MouseListener {
 			String[] parts = cmd.split("_");
 			language = parts[1];
 			country = parts[2];
-			JOptionPane.showMessageDialog(
-					graphic,
-					messages.getString("languageChanged") + " "
-							+ messages.getString("restartRequired"),
-					"Language", JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(graphic,
+					messages.getString("languageChanged") + " " + messages.getString("restartRequired"), "Language",
+					JOptionPane.INFORMATION_MESSAGE);
 
 		}
 
@@ -987,6 +999,18 @@ public class Board implements ActionListener, MouseListener {
 
 	public void setFilterMode(boolean filterMode) {
 		this.filterMode = filterMode;
+	}
+
+	public int getRows() {
+		return rows;
+	}
+
+	public int getColumns() {
+		return columns;
+	}
+
+	public List<Symbol> getSymbols() {
+		return symbols;
 	}
 
 	@Override

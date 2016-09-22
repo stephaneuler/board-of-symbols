@@ -14,10 +14,15 @@ import plotter.TextObject;
 
 public class Symbol {
 	private static int alpha = 150;
+	private static double barWidth = 0.4;
 	private static boolean numbering = false;
 	private static Font font = new Font("Arial", Font.PLAIN, 12);
 
 	Position pos;
+	public Position getPos() {
+		return pos;
+	}
+
 	private double size;
 	private double fullSize;
 	int index = -1;
@@ -47,6 +52,14 @@ public class Symbol {
 
 	public static int getFontSize() {
 		return font.getSize();
+	}
+
+	public static double getBarWidth() {
+		return barWidth;
+	}
+
+	public static void setBarWidth(double barWidth) {
+		Symbol.barWidth = barWidth;
 	}
 
 	public static boolean isNumbering() {
@@ -139,7 +152,11 @@ public class Symbol {
 	}
 
 	public void setType(SymbolType type) {
-		this.type = type;
+		if( type == SymbolType.RANDOM ) {
+			this.type = SymbolType.getRandom();
+		} else {
+			this.type = type;
+		}
 	}
 
 	/**
@@ -256,6 +273,16 @@ public class Symbol {
 			plotter.addD(key, 2 * size, 0);
 			plotter.setDataLineStyle(key, LineStyle.LINE);
 			plotter.setDataStroke(key, stroke);
+
+		} else if (type == SymbolType.BAR) {
+			plotter.add(key, pos.x - barWidth, pos.y - 0.5);
+			plotter.addD(key, 0, 2 * size);
+			plotter.addD(key, 2 * barWidth, 0);
+			plotter.addD(key, 0, -2 * size);
+			plotter.addD(key, -2 * barWidth, 0);
+//			plotter.addD(key, 0, 2 * size);
+//			plotter.setDataLineStyle(key, LineStyle.LINE);
+//			plotter.setDataStroke(key, stroke);
 
 		} else if (type == SymbolType.PLUS) {
 			plotter.add(key, pos.x, pos.y);
