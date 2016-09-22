@@ -1,7 +1,5 @@
 # board-of-symbols (BoS)
 
-BoS now supports both Java and C. 
-
 ## How to start - Java:
 - download the file jserver.jar 
 - if necessary - install java SDK
