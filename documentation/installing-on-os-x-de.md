@@ -1,15 +1,14 @@
-# Board-of-Symbols
+# board-of-symbols (BoS)
 
 ### Installation on Mac OS X (German)
 ##### Guide contributed by @rjhllr - Fall 2016
 ##### English version available [here!](./installing-on-os-x.md)
-)
 
 #### Vorwort
 
-Diese Anleitung beschreibt die Installation und den Funktionstest der Board-of-Symbols (im Folgenden: BoS) Anfängerprogrammierumgebung auf OS X. Vorausgesetzt wird, dass als Programmiersprache C verwendet werden soll. BoS unterstützt auch Java, dies wird allerdings in dieser Anleitung noch nicht en detail beschrieben. Grundsätzlich muss die Installation von gcc durch die Installation des JDK (Java Development Kit) ersetzt werden. Diese Anleitung wurde auf OS X El Capitan (10.11) getestet.
+Diese Anleitung beschreibt die Installation und den Funktionstest der Board-of-Symbols (im Folgenden: BoS) Anfänger-Programmierumgebung auf OS X. Vorausgesetzt wird, dass als Programmiersprache C verwendet werden soll. BoS unterstützt auch Java, dies wird allerdings in dieser Anleitung noch nicht en detail beschrieben. Grundsätzlich muss die Installation von gcc durch die Installation des JDK (Java Development Kit) ersetzt werden. Diese Anleitung wurde auf OS X El Capitan (10.11) getestet.
 
-> Als fortgeschrittener Nutzer kann die Installation von Homebrew übersprungen werden und die XCode Kommandozeilentools direkt installiert, BoS dann als ZIP-Archiv auf GitHub geladen werden. Die Installation mit Homebrew scheint mir allerdings zukunftssicherer und git sollte ohnehin auf dem Computer eines jeden Entwicklers installiert sein.
+> Als fortgeschrittener Nutzer kann die Installation von Homebrew übersprungen werden und die XCode Kommandozeilentools direkt installiert, BoS dann als ZIP-Archiv von GitHub geladen werden. Die Installation mit Homebrew scheint mir allerdings zukunftssicherer und git sollte ohnehin auf dem Computer eines jeden Entwicklers installiert sein.
 
 ---
 

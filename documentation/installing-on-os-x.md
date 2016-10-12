@@ -1,9 +1,9 @@
-# Board-of-Symbols
+# board-of-symbols (BoS)
 
 ### Installation on Mac OS X (English)
 ##### Guide contributed by @rjhllr - Fall 2016
 ##### German version available [here!](./installing-on-os-x-de.md)
-)
+
 
 #### Preamble
 
