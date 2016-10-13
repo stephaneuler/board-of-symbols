@@ -9,11 +9,16 @@
 
 A short video with the first steps: https://www.youtube.com/watch?v=VLVigtQNIeU&feature=youtu.be
 
-## How to start - C:
+## Getting Started on OS X
+
+See the [guide for installing on OS X](documentation/installing-on-os-x.md).
+
+## Getting Started on Windows
 
 - download the zip-archive
 - unzip the archive
-- if necessary - install gcc (GNU C compiler) via CommandLine/Xcode/MinGW for Windows)
+- make sure to have the JRE installed
+- if necessary - install gcc (GNU C compiler) via MinGW or Microsoft Visual Studio)
 - run jserver.jar ( double click or via commandline: java -jar jserver.jar ) 
 - then open a code window (menu "Fenster für Code-Eingabe") to enter some C code
 
