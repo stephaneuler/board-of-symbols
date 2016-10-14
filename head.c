@@ -96,6 +96,12 @@ void zeichen2(int i, int j, char c) {
     pruefeZeilen();
   }
 }
+void statusText(char *t) {
+  printf(">>t %s\n", t);
+  pruefeZeilen();
+}
+	
+
 void zusammen2( int i, int j, int f, char* form) {
   farbe2( i, j, f );
   form2( i, j, form );
