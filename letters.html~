@@ -41,6 +41,15 @@
            <div>
            This page shows some letters designed by students at THM. 
 	   </div>
+	   <div  class="preview">
+       	   	<script type="text/javascript">
+        		for( i=0; i<b.length; i++ ) {
+           			document.write( '<div class="thumb"><img class="thumbImage" src="' + b[i] +'" onclick="show(' + i +');" ></div>');
+        		}
+       	   	</script>
+           	<div style="clear:both;" />
+    	   </div>
+   
     	   <div class="view">
       		<span class="controll">
     			<img src="images/l.gif" onclick="next(-1);">
@@ -54,16 +63,7 @@
     			<img src="images/r.gif" onclick="next(1);">
       		</span>
      	   </div>
- 	   <div  class="preview">
-       	   	<script type="text/javascript">
-        		for( i=0; i<b.length; i++ ) {
-           			document.write( '<div class="thumb"><img class="thumbImage" src="' + b[i] +'" onclick="show(' + i +');" ></div>');
-        		}
-       	   	</script>
-           	<div style="clear:both;" />
-    	   </div>
-   
-       </section>
+        </section>
 
         <footer>
           Board-of-symbols is maintained by <a href="https://github.com/stephaneuler">Stephan Euler</a><br>
