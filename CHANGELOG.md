@@ -6,3 +6,4 @@
 - 0.9?? dice symbols, BoSL, refactoring, ... (Feb. 8)
 - 0.99 Internationalization support (march 2016)
 - 1.00 smaller improvements and bug fixes (september 2016)
+- 1.01 direct mode, bug fixes (november 2016)
