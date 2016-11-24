@@ -5,6 +5,8 @@
 void dame() {
     int i, j;
     
+    char symbol[5];
+    
     groesse(N, N);
     
     int brett[N][N] = {
@@ -27,7 +29,8 @@ void dame() {
                 symbolGroesse2( i, j, 0.4 );
                 farbe2( i, j, YELLOW );
             } else {
-                form2( i, j, "none" );
+                sprintf_s(symbol, "%s", "none");
+                form2( i, j, symbol );
             }
             if( (i + j ) % 2    == 0 ) {
                 hintergrund2( i, j, 0xafafaf );
@@ -54,13 +57,15 @@ void dame() {
             if( a[0] == '#' ) {
                 sscanf_s( a, "# %d %d %d", &feld, &ix, &iy );
                 if( brett[ix][iy] != 0 ) {
-                    form2( ix, iy, "none" );
+                    sprintf_s(symbol, "%s", "none");
+                    form2( ix, iy, symbol );
                     brett[ix][iy] = 0;
                 } else {
                     brett[ix][iy] = spieler;
                     farbe2( ix, iy, BLUE );
                     symbolGroesse2( ix, iy, 0.4 );
-                    form2( ix, iy , "c" );
+                    sprintf_s(symbol, "%s", "c");
+                    form2( ix, iy , symbol );
                 }
                 
             }
