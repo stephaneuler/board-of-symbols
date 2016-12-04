@@ -7,3 +7,4 @@
 - 0.99 Internationalization support (march 2016)
 - 1.00 smaller improvements and bug fixes (september 2016)
 - 1.01 direct mode, bug fixes (november 2016)
+- 1.02 click events (december 2016)
