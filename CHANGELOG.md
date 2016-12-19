@@ -9,3 +9,4 @@
 - 1.01 direct mode, bug fixes (november 2016)
 - 1.02 click events (december 2016)
 - 1.03 more BoSL commands (december 2016)
+- 1.03a 2 more BoSL commands (december 2016)
