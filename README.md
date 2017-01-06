@@ -1,4 +1,5 @@
 # board-of-symbols (BoS)
+Board of Symbols (BoS) is a project for teaching (learning) C or Java programming.
 
 ## How to start - Java:
 - download the file jserver.jar 
@@ -9,6 +10,7 @@
 
 A short video with the first steps: https://www.youtube.com/watch?v=VLVigtQNIeU&feature=youtu.be
 
+## How to start - C
 ## Getting Started on OS X
 
 See the [guide for installing on OS X](documentation/installing-on-os-x.md).
