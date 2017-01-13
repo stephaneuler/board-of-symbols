@@ -15,6 +15,7 @@ For example the following JS-Code
     }
  
  generates  
+ 
 ![BoS Screen](BoS.PNG)
 
 ## How to start - Java:
