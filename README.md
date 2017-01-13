@@ -1,5 +1,6 @@
 # board-of-symbols (BoS)
 Board of Symbols (BoS) is a project for teaching (learning) C or Java programming.
+![BoS Screen](BoS.PNG)
 
 ## How to start - Java:
 - download the file jserver.jar 
