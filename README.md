@@ -1,5 +1,17 @@
 # board-of-symbols (BoS)
 Board of Symbols (BoS) is a project for teaching (learning) C or Java programming.
+
+ for( x=1; x<6;  x++ ) {
+   for( y=x; y<6; y++ ) {
+      farbe2( x, y, BLUE )
+      if( x == y ) {
+         form2( x, y, "tlu" )
+      } else {
+         form2( x, y, "s" )
+      }
+   }
+ }
+ 
 ![BoS Screen](BoS.PNG)
 
 ## How to start - Java:
