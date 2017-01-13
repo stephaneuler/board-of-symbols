@@ -1,18 +1,20 @@
 # board-of-symbols (BoS)
-Board of Symbols (BoS) is a project for teaching (learning) C or Java programming.
+Board of Symbols (BoS) is an application for teaching (learning) programming. 
+Using a set of given functions small code snippets produce patterns on a NxM board.
+For example the following JS-Code
 
- for( x=1; x<6;  x++ ) {
- 
-    for( y=x; y<6; y++ ) {
-       farbe2( x, y, BLUE )
-       if( x == y ) {
+    for( x=1; x<6;  x++ ) {
+      for( y=x; y<6; y++ ) {
+        farbe2( x, y, BLUE )
+        if( x == y ) {
           form2( x, y, "tlu" )
-       } else {
+        } else {
           form2( x, y, "s" )
        }
+      }
     }
-  }
  
+ generates  
 ![BoS Screen](BoS.PNG)
 
 ## How to start - Java:
