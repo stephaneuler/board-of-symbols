@@ -43,6 +43,8 @@ int sendMessageI2(int i, int j ) {
 
 int sendMessage(char *sendbuf ) {
     
+    char terminateMessage[100];
+    
 #if WINDOWS
     WSADATA wsaData;
     SOCKET ConnectSocket = INVALID_SOCKET;
@@ -119,7 +121,8 @@ int sendMessage(char *sendbuf ) {
     freeaddrinfo(result);
     
     if (ConnectSocket == INVALID_SOCKET) {
-        terminate("Unable to connect to server!\n");
+        sprintf_s(terminateMessage, "%s", "Unable to connect to server!\n");
+        terminate(terminateMessage);
     }
     
     // Send an initial buffer

@@ -1,4 +1,22 @@
 # board-of-symbols (BoS)
+Board of Symbols (BoS) is an application for teaching (learning) programming. 
+Using a set of given functions small code snippets produce patterns on a NxM board.
+For example the following JS-Code
+
+    for( x=1; x<6;  x++ ) {
+      for( y=x; y<6; y++ ) {
+        farbe2( x, y, BLUE )
+        if( x == y ) {
+          form2( x, y, "tlu" )
+        } else {
+          form2( x, y, "s" )
+       }
+      }
+    }
+ 
+ generates  
+ 
+![BoS Screen](BoS.PNG)
 
 ## How to start - Java:
 - download the file jserver.jar 
@@ -9,6 +27,7 @@
 
 A short video with the first steps: https://www.youtube.com/watch?v=VLVigtQNIeU&feature=youtu.be
 
+## How to start - C
 ## Getting Started on OS X
 
 See the [guide for installing on OS X](documentation/installing-on-os-x.md).

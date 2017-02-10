@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<snippet name="switch" locale="de_DE">
+<author>Stephan Euler</author>
+<comment><![CDATA[
+Beispiel fuer eine Switch-Konstruktion
+]]></comment>
+<created>Wed Feb 01 12:52:59 CET 2017</created>
+<language>Java</language>
+<tag>Switch</tag>
+<codeA><![CDATA[
+final int FELD   = 0;
+final int WALD   = 1;
+final int WASSER = 2;
+
+int N = 20;
+
+groesse( N, N );
+
+for( int s=0; s<N; s++ ) {
+   for( int z=0; z<N; z++ ) {
+      int t = (int)(Math.random()*3);
+      switch( t ) {
+      case FELD:
+         form2( s, z, "s" );
+         farbe2( s, z, LAWNGREEN );
+         break;
+      case WALD:
+         form2( s, z, "c" );
+         hintergrund2( s, z, LAWNGREEN );
+         farbe2( s, z, DARKGREEN );
+         break;
+      case WASSER:
+         form2( s, z, "s" );
+         farbe2( s, z, BLUE );
+         break;
+      }
+   }
+}
+]]></codeA>
+<updated>Wed Feb 01 12:55:38 CET 2017</updated>
+</snippet>
