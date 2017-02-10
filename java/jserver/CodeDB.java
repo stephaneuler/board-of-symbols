@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -31,9 +32,10 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
- * This class contains methods to read and write code snippets to a XML file. 
+ * This class contains methods to read and write code snippets to a XML file.
  * The default file name is codes.xml and can be changed by calling setXmlFile.
- * Additionally, the class contains some methods for reading the predefined color names.
+ * Additionally, the class contains some methods for reading the predefined
+ * color names.
  * 
  * @author Euler
  *
@@ -58,7 +60,6 @@ public class CodeDB {
 		return xmlFile.getName();
 	}
 
-
 	/**
 	 * create a document with the root node <code>codes</code>
 	 */
@@ -73,8 +74,8 @@ public class CodeDB {
 			return;
 		}
 		document = builder.newDocument();
-		document.appendChild( document.createElement("codes") );
-		
+		document.appendChild(document.createElement("codes"));
+
 	}
 
 	/**
@@ -84,18 +85,16 @@ public class CodeDB {
 	 * @throws SAXException
 	 * @throws IOException
 	 */
-	void readXML() throws ParserConfigurationException, SAXException,
-			IOException {
+	void readXML() throws ParserConfigurationException, SAXException, IOException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder;
 		builder = factory.newDocumentBuilder();
 		document = builder.parse(xmlFile);
-		setLastEditElement((Element) document.getElementsByTagName("autosave")
-				.item(0));
+		setLastEditElement((Element) document.getElementsByTagName("autosave").item(0));
 	}
 
 	/**
-	 * Write the document to the given file. 
+	 * Write the document to the given file.
 	 */
 	void writeXML() {
 		Transformer tf;
@@ -111,16 +110,17 @@ public class CodeDB {
 	}
 
 	/**
-	 * Save the code as snippet. The methods appends the snippet to the existing list. 
-	 * It does not check for dublicate names. 
+	 * Save the code as snippet. The methods appends the snippet to the existing
+	 * list. It does not check for duplicate names.
 	 * 
 	 * @param name
 	 * @param code
 	 * @param authorName
 	 */
-	public void saveAsSnippet(String name, String code, String authorName) {
+	public void saveAsSnippet(String name, String code, String authorName, Locale locale) {
 		Element snip = document.createElement("snippet");
 		snip.setAttribute("name", name);
+		snip.setAttribute("locale", locale.toString());
 		Element created = document.createElement("created");
 		created.setTextContent(Calendar.getInstance().getTime().toString());
 		Element c2 = document.createElement("codeA");
@@ -133,13 +133,31 @@ public class CodeDB {
 		snip.appendChild(created);
 		snip.appendChild(c2);
 
+		addSnippet(snip);
+	}
+
+	public void deleteSnippet(String name) {
+		Element element = getSnippetByName(name);
+		element.getParentNode().removeChild(element);
+		writeXML();
+		
+	}
+
+	public void addSnippet(Element snip) {
 		Element root = (Element) document.getElementsByTagName("codes").item(0);
 		root.appendChild(snip);
 		writeXML();
+
+	}
+
+	public void importSnippet(Element snip) {
+		Element clone = (Element) document.importNode(snip, true);
+		addSnippet(clone);
+
 	}
 
 	/**
-	 * Overwrite the given snippet with the new code. 
+	 * Overwrite the given snippet with the new code.
 	 * 
 	 * @param snippetName
 	 * @param code
@@ -196,8 +214,7 @@ public class CodeDB {
 				if ("code".equals(c.getNodeName())) {
 					System.out.println("   -> old");
 					Element c2 = document.createElement("codeA");
-					CDATASection cdata = document.createCDATASection("\n"
-							+ c.getTextContent() + "\n");
+					CDATASection cdata = document.createCDATASection("\n" + c.getTextContent() + "\n");
 					c2.appendChild(cdata);
 					s.appendChild(c2);
 					s.removeChild(c);
@@ -221,8 +238,7 @@ public class CodeDB {
 			Node c = children.item(j);
 			if ("codeA".equals(c.getNodeName())) {
 				Node n = c.getLastChild();
-				System.out.println("Node type: " + n.getNodeType() + " "
-						+ n.getNodeName());
+				System.out.println("Node type: " + n.getNodeType() + " " + n.getNodeName());
 				CDATASection section = (CDATASection) c.getLastChild();
 				return section.getTextContent();
 				// geht auch
@@ -263,8 +279,7 @@ public class CodeDB {
 
 		// first try to read file
 		try {
-			BufferedReader reader = new BufferedReader(new FileReader(
-					"colors.h"));
+			BufferedReader reader = new BufferedReader(new FileReader("colors.h"));
 			while (true) {
 				String line = reader.readLine();
 				if (line == null) {
@@ -280,13 +295,13 @@ public class CodeDB {
 		} catch (IOException e) {
 			lastException = e;
 			// no file found, use class ColorNames as source
-			colorValues = ColorNames.getColors();	
+			colorValues = ColorNames.getColors();
 			String[] t = new String[1];
-			String[] cv =  colorValues.keySet().toArray(t);
-			Arrays.sort( cv );
-			for( String c : cv ) {
+			String[] cv = colorValues.keySet().toArray(t);
+			Arrays.sort(cv);
+			for (String c : cv) {
 				colorNames.add(c);
-				colors.add(new Color( colorValues.get(c) ));
+				colors.add(new Color(colorValues.get(c)));
 			}
 		}
 
@@ -308,6 +323,7 @@ public class CodeDB {
 	public Element getLastEditElement() {
 		return lastEditElement;
 	}
+
 	public boolean hasLastEditElement() {
 		return lastEditElement != null;
 	}
@@ -315,7 +331,5 @@ public class CodeDB {
 	public void setLastEditElement(Element lastEditElement) {
 		this.lastEditElement = lastEditElement;
 	}
-
-
 
 }

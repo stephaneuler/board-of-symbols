@@ -1,9 +1,5 @@
 package jserver;
 
-import java.io.PrintStream;
-
-import javax.swing.JTextArea;
-
 /**
  * This is the abstract class with the interface to a board. 
  * It implements the convenience methods to send commands. 
@@ -52,12 +48,12 @@ public abstract class XSendEN  extends XSend {
 		result += board.receiveMessage(  ">>" + i + " " + f );
 	}
 
-	public void grey(int i, int g) {
-		color(i, g << 16 | g << 8 | g);
-	}
-
 	public void color2(int i, int j, int f) {
 		result +=  board.receiveMessage(">># " + i + " " + j + " " + f );
+	}
+
+	public void grey(int i, int g) {
+		color(i, g << 16 | g << 8 | g);
 	}
 
 	public void grey2(int i, int j, int g) {

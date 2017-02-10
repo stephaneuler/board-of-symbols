@@ -17,18 +17,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.ResourceBundle;
 
-import javax.swing.JEditorPane;
 import javax.swing.JOptionPane;
+
 import jserver.OsCheck.OSType;
 
 /**
- * This implementation executes C code. Currently Gnu CC, Dev Cpp and MS Visual Studio are supported. 
+ * This implementation executes C code. Currently Gnu CC, Dev Cpp and MS Visual
+ * Studio are supported.
  * 
  * @author Euler
  *
  */
 public class CodeExecutorC extends CodeExecutor {
+	private static String gccPath = "c:\\Dev-Cpp\\bin\\gcc";
 	private Properties vsProperties = new Properties();
 	private Process executionProzess;
 
@@ -38,9 +41,19 @@ public class CodeExecutorC extends CodeExecutor {
 		setCompileMode(compileMode);
 	}
 
-	public CodeExecutorC(Board world) {
+	public CodeExecutorC(Board board) {
 		this();
-		this.board = world;
+		this.board = board;
+	}
+
+	public static String getGccPath() {
+		return gccPath;
+	}
+
+	public static void setGccPath(String gccPath) {
+		if( gccPath != null ) {
+			CodeExecutorC.gccPath = gccPath;
+		}
 	}
 
 	// public static void main(String[] args) {
@@ -66,12 +79,15 @@ public class CodeExecutorC extends CodeExecutor {
 			stream.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("property file " + propertieFile + " not found");
-			JOptionPane.showMessageDialog(null, "property file "
-					+ propertieFile + " not found", "No property file",
+			JOptionPane.showMessageDialog(null, "property file " + propertieFile + " not found", "No property file",
 					JOptionPane.ERROR_MESSAGE);
 
 		} catch (IOException e) {
 			e.printStackTrace();
+			
+		} catch (IllegalArgumentException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(), "Error while reading VS-File",
+					JOptionPane.ERROR_MESSAGE);
 		}
 		System.out.println(vsProperties.getProperty("path"));
 
@@ -80,30 +96,42 @@ public class CodeExecutorC extends CodeExecutor {
 	@Override
 	public String createTmpSourceFile(String codeInput) {
 
-		try {
-			Files.copy(Paths.get("head.c"), Paths.get(exeName),
-					StandardCopyOption.REPLACE_EXISTING);
-		} catch (Exception e1) {
-			// e1.printStackTrace();
+		codeInput = codeInput.trim();
+		// addMode: add head and trail
+		boolean addMode = ! codeInput.startsWith("#include");
+		//boolean addMode = ! codeInput.matches("^#include *\"bos\\.h.*");
 
-			++errorCount;
-			board.setLastError("can not copy file <<" + e1.getMessage() + ">>");
-			System.out.println("cancel createTmpCFile: " + e1.getMessage());
-			return null;
+		if (addMode) {
+			try {
+				Files.copy(Paths.get("head.c"), Paths.get(exeName), StandardCopyOption.REPLACE_EXISTING);
+			} catch (Exception e1) {
+				// e1.printStackTrace();
+
+				++errorCount;
+				board.setLastError("can not copy file <<" + e1.getMessage() + ">>");
+				System.out.println("cancel createTmpCFile: " + e1.getMessage());
+				return null;
+			}
+		} else {
+			JOptionPane.showMessageDialog(null, "using direct mode" , "direct mode",
+					JOptionPane.INFORMATION_MESSAGE);
+
+
 		}
+
 		try {
-			BufferedWriter fw = new BufferedWriter(
-					new FileWriter(exeName, true));
+			BufferedWriter fw = new BufferedWriter(new FileWriter(exeName, addMode));
 			String[] lines = codeInput.split("\\n");
 			for (String line : lines) {
 				fw.write(line + "\n");
 			}
-			fw.write("}");
-			fw.newLine();
+			if (addMode) {
+				fw.write("}");
+				fw.newLine();
+			}
 			fw.close();
 		} catch (IOException e) {
-			board.setLastError("can not complete file <<" + e.getMessage()
-					+ ">>");
+			board.setLastError("can not complete file <<" + e.getMessage() + ">>");
 			System.out.println("cancel createTmpCFile: " + e.getMessage());
 			return null;
 		}
@@ -112,11 +140,17 @@ public class CodeExecutorC extends CodeExecutor {
 	}
 
 	@Override
+	public void showGeneratedCode(ResourceBundle messages) {
+		showFileContent( exeName, messages.getString("generatedCode") + " - C");
+	}
+
+
+	@Override
 	public String compileAndExecute(String fileName) {
 		StringBuffer result = new StringBuffer();
 		String line;
 
-//		System.out.println( "compileAndExecute fileName: " + fileName );
+		// System.out.println( "compileAndExecute fileName: " + fileName );
 		boolean hasErrors = false;
 		String exeName = null;
 		OSType osType = OsCheck.getOperatingSystemType();
@@ -131,8 +165,7 @@ public class CodeExecutorC extends CodeExecutor {
 				exeName = "./" + fileName.replaceAll("\\.c$", "");
 				exeUseCommand = exeName;
 			} else {
-				result.append("unknown operating system  "
-						+ System.getProperty("os.name", "generic") + "\n");
+				result.append("unknown operating system  " + System.getProperty("os.name", "generic") + "\n");
 				for (ExecutorListener el : listeners) {
 					el.failedCompilation();
 				}
@@ -144,8 +177,7 @@ public class CodeExecutorC extends CodeExecutor {
 		if (compileMode.equals(gccText)) {
 			pb = new ProcessBuilder("gcc", fileName, "-o", exeName);
 		} else if (compileMode.equals(devCText)) {
-			pb = new ProcessBuilder("c:\\Dev-Cpp\\bin\\gcc", fileName, "-o",
-					exeName);
+			pb = new ProcessBuilder(gccPath, fileName, "-o", exeName);
 		} else if (compileMode.equals(vsText)) {
 			// pb = new ProcessBuilder("cmd.exe", "/C", "start", "cl", fileName,
 			// ">", "vslog.txt", "2>&1");
@@ -179,15 +211,13 @@ public class CodeExecutorC extends CodeExecutor {
 		try {
 			Process p = pb.start();
 
-			BufferedReader input = new BufferedReader(new InputStreamReader(
-					p.getInputStream()));
+			BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
 			while ((line = input.readLine()) != null) {
 				System.out.println(line);
 			}
 			input.close();
 
-			BufferedReader error = new BufferedReader(new InputStreamReader(
-					p.getErrorStream()));
+			BufferedReader error = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 			while ((line = error.readLine()) != null) {
 				result.append(line + "\n");
 				hasErrors = true;
@@ -202,8 +232,7 @@ public class CodeExecutorC extends CodeExecutor {
 		// for VS check log file, should be empty (= without errors)
 		if (compileMode.equals(vsText)) {
 			try {
-				List<String> lines = Files.readAllLines(Paths.get(logFileName),
-						Charset.defaultCharset());
+				List<String> lines = Files.readAllLines(Paths.get(logFileName), Charset.defaultCharset());
 				if (lines.size() > 1) {
 					for (int i = 0; i < lines.size(); i++) {
 						result.append("\n" + lines.get(i));
@@ -248,8 +277,7 @@ public class CodeExecutorC extends CodeExecutor {
 				@Override
 				public void run() {
 					System.out.println("Start reader thread");
-					BufferedReader input = new BufferedReader(
-							new InputStreamReader(is));
+					BufferedReader input = new BufferedReader(new InputStreamReader(is));
 					String line;
 					try {
 						while ((line = input.readLine()) != null) {

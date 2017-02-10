@@ -41,7 +41,7 @@ public class CodeExecutorBoSL extends CodeExecutor {
 		String[] lines = codeInput.split("\\n");
 		BufferedWriter fw;
 		try {
-			fw = new BufferedWriter(new FileWriter(fileName, true));
+			fw = new BufferedWriter(new FileWriter(fileName, false));
 			for (String line : lines) {
 				line = line.trim();
 				if (!line.equals("")) {

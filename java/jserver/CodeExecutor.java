@@ -1,8 +1,14 @@
 package jserver;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 
+import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 
 /**
@@ -15,6 +21,7 @@ import javax.swing.JTextArea;
 public abstract class CodeExecutor {
 
 	protected static final String boSLText = "BoSL";
+	protected static final String JSText  = "JS";
 	protected static final String gccText = "GNU_C";
 	protected static final String devCText = "DEV_C";
 	protected static final String vsText = "MS_VS";
@@ -89,6 +96,8 @@ public abstract class CodeExecutor {
 			e = new CodeExecutorJava(board);
 		} else if( mode.equals( boSLText ) ) {
 			e = new CodeExecutorBoSL(board);
+		} else if( mode.equals( JSText ) ) {
+			e = new CodeExecutorJS(board);
 		} else {
 			e = new CodeExecutorC(board);
 		}
@@ -102,7 +111,37 @@ public abstract class CodeExecutor {
 				| cmd.equals(CodeExecutor.vsText)
 				| cmd.equals(CodeExecutor.devCText )
 				| cmd.equals(CodeExecutor.boSLText )
+				| cmd.equals(CodeExecutor.boSLText )
+				| cmd.equals(CodeExecutor.JSText )
 				| cmd.equals(CodeExecutor.javaText);
+	}
+
+	public void showGeneratedCode(ResourceBundle messages) {
+		JOptionPane
+		.showMessageDialog(null,
+				messages.getString("noGeneratedCode"),
+				messages.getString("generatedCode"),
+				JOptionPane.INFORMATION_MESSAGE);
+
+		
+	}
+
+	protected void showFileContent(String fileName, String title) {
+		String code = "";
+		try {
+			List<String> lines = Files.readAllLines(Paths.get(fileName), Charset.defaultCharset());
+			for( int l=0; l<lines.size(); l++ ) {
+				code += String.format("%3d", l + 1) + " " + lines.get(l) + "\n";
+			}
+		} catch (IOException e) {
+			code = e.getLocalizedMessage();
+		}
+	
+		InfoBox info = new InfoBox(board.getGraphic(), "", 400, 400);
+		info.setTitle( title);
+		info.getTextArea().setFont( board.getCodeWindow().getNormalFont() );
+		info.getTextArea().setText( code );
+		info.setVisible(true);
 	}
 
 }

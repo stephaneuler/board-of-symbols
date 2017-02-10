@@ -3,8 +3,14 @@ package jserver;
 import java.io.File;
 import java.util.ResourceBundle;
 
+import javax.swing.BoxLayout;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class Dialogs {
@@ -49,6 +55,16 @@ public class Dialogs {
 			return null;
 		}
 
+	}
+
+	public static int replaceDialog(JTextField source, JTextField dest, ResourceBundle messages) {
+		JPanel panel = new JPanel();
+		panel.setLayout( new BoxLayout(panel, BoxLayout.Y_AXIS));
+		panel.add( new JLabel( "Suche") );
+		panel.add( source );
+		panel.add( new JLabel( "Ersetze") );
+		panel.add( dest );
+		return JOptionPane.showConfirmDialog(null, panel, "Replace", JOptionPane.OK_CANCEL_OPTION);		
 	}
 
 }

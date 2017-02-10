@@ -6,7 +6,25 @@ public class ImageObject {
 	Image image;
 	double x;
 	double y;
+	double worldWidth  = -1;
+	double worldHeight = -1;
 	
+	public double getWorldHeight() {
+		return worldHeight;
+	}
+
+	public void setWorldHeight(double worldHeight) {
+		this.worldHeight = worldHeight;
+	}
+
+	public double getWorldWidth() {
+		return worldWidth;
+	}
+
+	public void setWorldWidth(double worldWidth) {
+		this.worldWidth = worldWidth;
+	}
+
 	public ImageObject(Image image, double x, double y) {
 		super();
 		this.image = image;

@@ -40,6 +40,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRootPane;
 import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -56,7 +57,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  * 
  * 
  */
-
 
 public class Graphic extends JFrame implements ActionListener, Printable {
 
@@ -117,7 +117,7 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 		printTTText = messages.getString("tooltip.print");
 		showStatusText = messages.getString("status");
 		showStatusTTText = messages.getString("tooltip.status");
-		
+
 		plotter = new Plotter("Plotter");
 		plotter.setPreferredSize(new Dimension(500, 300));
 		setup("Graphic " + version);
@@ -181,10 +181,10 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 		mi.addActionListener(this);
 		mi.setToolTipText(printTTText);
 		fileMenu.add(mi);
-		
+
 		mi = new JMenuItem(showStatusText);
 		mi.addActionListener(this);
-		mi.setToolTipText(	showStatusTTText );
+		mi.setToolTipText(showStatusTTText);
 		fileMenu.add(mi);
 
 		setJMenuBar(menuBar);
@@ -224,6 +224,14 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 
 	public void removeBottomComponent(Component comp) {
 		bottom.remove(comp);
+	}
+
+	public void addNorthComponent(Component comp) {
+		top.add(comp);
+	}
+
+	public void addSouthComponent(Component comp) {
+		bottom.add(comp);
 	}
 
 	public void addEastComponent(Component comp) {
@@ -298,12 +306,11 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 		} else if (cmd.equals(showStatusText)) {
 			String status = "";
 			status += "# objects: \n";
-			status += "data: \t" + plotter.getDataObjects().size()+ "\n";
+			status += "data: \t" + plotter.getDataObjects().size() + "\n";
 			status += "text: \t" + plotter.getTextObjectsCount() + "\n";
 			status += "image: \t" + plotter.getImageObjectsCount() + "\n";
 			status += "#paints: \t" + plotter.getPaintCalls() + "\n";
-			JOptionPane.showMessageDialog(this, status, "Plotter status",
-					JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(this, status, "Plotter status", JOptionPane.INFORMATION_MESSAGE);
 
 		} else if (cmd.equals(dumpText)) {
 			SwingWorker<Boolean, Void> worker = new DataDumper<Boolean, Void>();
@@ -325,8 +332,7 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 	}
 
 	@Override
-	public int print(Graphics g, PageFormat pf, int page)
-			throws PrinterException {
+	public int print(Graphics g, PageFormat pf, int page) throws PrinterException {
 		if (page > 0) { /* We have only one page, and 'page' is zero-based */
 			return NO_SUCH_PAGE;
 		}
@@ -351,8 +357,8 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 	}
 
 	public String getProperty(String string, String defValue) {
-		//System.out.println(string + " :  "
-		//		+ properties.getProperty(string, defValue));
+		// System.out.println(string + " : "
+		// + properties.getProperty(string, defValue));
 		return properties.getProperty(string, defValue);
 	}
 
@@ -388,8 +394,7 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 		public Boolean doInBackground() {
 			Robot robot = null;
 			String dest;
-			System.out.println("Save to file , using directory "
-					+ fileOpenDirectory);
+			System.out.println("Save to file , using directory " + fileOpenDirectory);
 
 			JFileChooser chooser = new JFileChooser();
 			if (fileOpenDirectory != null) {
@@ -397,14 +402,12 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 			}
 			chooser.setDialogTitle("Screen Shot");
 			chooser.setDialogType(JFileChooser.SAVE_DIALOG);
-			FileNameExtensionFilter filter = new FileNameExtensionFilter(
-					" Images", fileSuffixes);
+			FileNameExtensionFilter filter = new FileNameExtensionFilter(" Images", fileSuffixes);
 			chooser.setFileFilter(filter);
 
 			int retval = chooser.showDialog(plotter, null);
 			if (retval == JFileChooser.APPROVE_OPTION) {
-				fileOpenDirectory = chooser.getCurrentDirectory()
-						.getAbsolutePath();
+				fileOpenDirectory = chooser.getCurrentDirectory().getAbsolutePath();
 				properties.setProperty("saveDir", fileOpenDirectory);
 				try {
 					properties.store(new FileWriter(propertieFile), "");
@@ -416,10 +419,8 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 				System.out.println(filename);
 				if (!testSuffix(filename)) {
 					System.out.println("Unknown extension");
-					JOptionPane.showMessageDialog(
-							plotter,
-							"Unbekannter Dateityp, bitte wählen aus:"
-									+ Arrays.toString(fileSuffixes));
+					JOptionPane.showMessageDialog(plotter,
+							"Unbekannter Dateityp, bitte wählen aus:" + Arrays.toString(fileSuffixes));
 					return false;
 				}
 				dest = filename;
@@ -448,8 +449,8 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 		}
 
 	}
-	
-	public boolean saveImageToFile( String dest ) {
+
+	public boolean saveImageToFile(String dest) {
 		Robot robot;
 		try {
 			robot = new Robot();
@@ -470,7 +471,17 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 		}
 		return true;
 	}
- 
+
+	public BufferedImage getImage() {
+		Component component = plotter;
+		BufferedImage image = new BufferedImage(component.getWidth(), component.getHeight(),
+				BufferedImage.TYPE_INT_RGB);
+		// call the Component's paint method, using
+		// the Graphics object of the image.
+		component.paint(image.getGraphics()); // alternately use .printAll(..)
+		return image;
+	}
+
 	class DataSaver<T, V> extends SwingWorker {
 
 		@Override
@@ -484,8 +495,7 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 
 			int retval = chooser.showDialog(plotter, null);
 			if (retval == JFileChooser.APPROVE_OPTION) {
-				fileOpenDirectory = chooser.getCurrentDirectory()
-						.getAbsolutePath();
+				fileOpenDirectory = chooser.getCurrentDirectory().getAbsolutePath();
 				properties.setProperty("saveDir", fileOpenDirectory);
 				try {
 					properties.store(new FileWriter(propertieFile), "");
@@ -536,5 +546,10 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 	public void removeDataMenu() {
 		menuBar.remove(dataMenu);
 
+	}
+
+	public JLabel getStatusLabel() {
+		return status;
+		
 	}
 }

@@ -1,10 +1,11 @@
 package jserver;
 
-import static org.junit.Assert.assertEquals;
-
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
@@ -22,6 +23,7 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -33,33 +35,36 @@ import javax.swing.JTextField;
 
 import plotter.Graphic;
 import plotter.Plotter;
+import plotter.Sleep;
 
 // Version wer wann was
-// .94   se 15-07 erste stabile Version
-// .95   se 15-09 kleinere Erweiterungen (Hintergrund, ... )
-// .96   se 15-09 hintergGrund2, symbolGroesse2
+// .94   se 15-07    erste stabile Version
+// .95   se 15-09    kleinere Erweiterungen (Hintergrund, ... )
+// .96   se 15-09    hintergGrund2, symbolGroesse2
 // .97   se 15-10-08 diverse Kleinigkeiten
 // .973  se 15-10-18 Short cuts
 // .974b se 15-11-10 Bugfix filter mode
 // .974c se 15-12-01 save font size
 //       se 16-03    start internationalization
+//       se 17-01    keyboard listener
 
 /**
  * This class implements a NxM board as used for board games like chess or
  * checkers. An instance of Plotter is used for drawing. The plotter is embedded
- * in a Plotter.Graphic Object that provides a simple GUI with menus, buttons,
- * labels, etc. A board has a list of symbols. These symbols can be accessed by
- * index. The method receiveMessage handles commands in the BoS Language (BoSL).
+ * in a Plotter.Graphic object that provides a simple GUI with menus, buttons,
+ * labels, etc. A board has a set of symbols. These symbols can be accessed by
+ * index. The method receiveMessage() handles commands in the BoS Language
+ * (BoSL).
  * 
  * 
  * @author Stephan Euler
- * @version 0.974c Dezember 2015
  * 
  */
-public class Board implements ActionListener, MouseListener {
+public class Board implements ActionListener, MouseListener, KeyListener {
 
 	public static final String FILTER_PREFIX = ">>";
 
+	private static String trainingText = "Training";
 	private static String hashCodeText;
 	private static String clearColorsText;
 	private static String clearTextText;
@@ -73,6 +78,7 @@ public class Board implements ActionListener, MouseListener {
 	private static String interactiveText;
 	private static String codingWindowText;
 	private static String numberingText;
+	private static String linNumberingText = "linNum";
 	private static String alphaText;
 	private static String sendText;
 	private static final String runText = "ausführen";
@@ -96,12 +102,14 @@ public class Board implements ActionListener, MouseListener {
 	private JTextField input = new JTextField();
 	private JLabel waitingCommands = new JLabel(" 0 ");
 	private List<String> commands = new ArrayList<String>();
+	private List<BoardClickListener> boardClickListener = new ArrayList<BoardClickListener>();
 	private JButton sendButton;
 	private boolean interactive = false;
 	private boolean coding = false;
 	private JTextArea codeInput = new JTextArea();
 	private JTextArea messageField = new JTextArea();
 	private JButton runButton = new JButton(runText);
+	private JMenuItem linNumberingItem;
 	private String lastError;
 	private int errorCount;
 	private boolean filterMode = false;
@@ -111,12 +119,14 @@ public class Board implements ActionListener, MouseListener {
 	private boolean userDefinedStatusLine = false;
 	private ResourceBundle messages;
 	private Properties properties = new Properties();
+	private Trainer trainer;
 
 	private String propertieFile = "board.properties";
 	private String language = "de";
 	private String country = "DE";
 
 	private boolean verbose = false;
+	private int hashCode;
 
 	public Board() {
 
@@ -134,6 +144,7 @@ public class Board implements ActionListener, MouseListener {
 		loadMessages();
 		setStrings();
 		SymbolType.setSymbolTexts(messages);
+		Symbol.setBoard(this);
 
 		graphic = new Graphic(messages);
 		plotter = graphic.getPlotter();
@@ -155,7 +166,9 @@ public class Board implements ActionListener, MouseListener {
 		});
 
 		String title = "Board, " + messages.getString("boardVersion");
-		
+
+		CodeExecutorC.setGccPath(properties.getProperty("gccPath"));
+
 		if (examMode) {
 			graphic.setResizable(false);
 			title += " Exam Mode";
@@ -170,9 +183,10 @@ public class Board implements ActionListener, MouseListener {
 			}
 
 			Symbol.setNumbering(Boolean.parseBoolean(properties.getProperty("numbering")));
+			Symbol.setLinearNumbering(Boolean.parseBoolean(properties.getProperty("linNumbering")));
 		}
-		
-		graphic.setTitle( title );
+
+		graphic.setTitle(title);
 		plotter.setPreferredSize(500, 500);
 		defaultBackground = plotter.getBackground();
 		graphic.pack();
@@ -204,12 +218,14 @@ public class Board implements ActionListener, MouseListener {
 		graphic.addExternMenu(myFormMenu());
 		graphic.addExternMenu(myOptionsMenu());
 
-		JMenu fileMenu = graphic.getFileMenu();		
-		Utils.addMenuItem(this, fileMenu, hashCodeText, messages.getString("tooltip.hashCode"));
-		
+		JMenu fileMenu = graphic.getFileMenu();
+		// Utils.addMenuItem(this, fileMenu, hashCodeText,
+		// messages.getString("tooltip.hashCode"));
+		Utils.addMenuItem(this, fileMenu, trainingText);
+
 		setStatusLineInfo();
 		plotter.addMouseListener(this);
-
+		graphic.addKeyListener(this);
 		graphic.repaint();
 	}
 
@@ -217,13 +233,12 @@ public class Board implements ActionListener, MouseListener {
 		return properties;
 	}
 
-
 	public void setSize(int width, int heigth) {
 		plotter.setPreferredSize(width, heigth);
 		graphic.pack();
 
 	}
-	
+
 	/**
 	 * Gets the texts from the resource bundle and copies them into variables.
 	 */
@@ -244,7 +259,6 @@ public class Board implements ActionListener, MouseListener {
 		numberingText = Utils.concat(messages, "numbering", "onOff");
 		alphaText = "Alpha " + messages.getString("value");
 		sendText = messages.getString("send");
-		// TODO Auto-generated method stub
 
 	}
 
@@ -279,6 +293,10 @@ public class Board implements ActionListener, MouseListener {
 		return graphic;
 	}
 
+	public CodeWindow getCodeWindow() {
+		return codeWindow;
+	}
+
 	public Plotter getPlotter() {
 		return plotter;
 	}
@@ -289,6 +307,10 @@ public class Board implements ActionListener, MouseListener {
 
 	public Symbol getSymbol(int i) {
 		return symbols.get(i);
+	}
+
+	public Symbol getSymbol(int x, int y) {
+		return symbols.get( x + y * columns);
 	}
 
 	private void setStatusLineInfo() {
@@ -338,6 +360,9 @@ public class Board implements ActionListener, MouseListener {
 			JMenuItem mi = Utils.addMenuItem(this, menu, key);
 			mi.setActionCommand("LANG_" + languages.getProperty(key));
 		}
+		linNumberingItem = new JCheckBoxMenuItem(linNumberingText, Symbol.isLinearNumbering());
+		linNumberingItem.addActionListener(this);
+		menu.add(linNumberingItem);
 		return menu;
 	}
 
@@ -397,7 +422,8 @@ public class Board implements ActionListener, MouseListener {
 		// System.out.println( "receiveMessage: " + line);
 		line = line.trim();
 		++messageCount;
-		String info = columns + "x" + rows + " Feld, Nachricht #" + messageCount + ": " + line;
+		String info = columns + "x" + rows + " " + messages.getString("board") +" , "  + 
+				messages.getString("message") +  "#" + messageCount + ": " + line;
 
 		if (line.startsWith(FILTER_PREFIX)) {
 			line = line.substring(FILTER_PREFIX.length()).trim();
@@ -412,6 +438,36 @@ public class Board implements ActionListener, MouseListener {
 		}
 
 		String[] p = line.split("\\s+");
+
+		if (line.startsWith("sleep")) {
+			int time = Integer.parseInt(p[1]);
+			Sleep.sleep(time);
+			return "Slept for " + time + " ms";
+		}
+
+		if (line.startsWith("fontsize")) {
+			symbolFontSize = Integer.parseInt(p[1]);
+			Symbol.setFontSize(symbolFontSize);
+			return "Okay";
+		}
+
+		if (line.startsWith("statusfontsize")) {
+			float fs = Float.parseFloat(p[1]);
+			JLabel lab = graphic.getStatusLabel();
+			Font f = lab.getFont();
+			lab.setFont(f.deriveFont(fs));
+			return "Okay";
+		}
+
+		if (line.startsWith("image")) {
+			int index = Integer.parseInt(p[1]) + Integer.parseInt(p[2]) * columns;
+			if (index < 0 | index >= nSymbols) {
+				return "ERROR - " + index + " out of Range ";
+			}
+			symbols.get(index).setImage(p[3], plotter);
+			redrawSymbol(symbols.get(index));
+			return "image " + p[3];
+		}
 
 		if (line.equals("s")) {
 			return "" + columns + " " + rows;
@@ -478,6 +534,16 @@ public class Board implements ActionListener, MouseListener {
 			symbols.get(index).setType(s);
 			redrawSymbol(symbols.get(index));
 			// redrawSymbols();
+			return "okay";
+		}
+
+		// resize forms
+		if (line.startsWith("symbolSizes ")) {
+			double size = Double.parseDouble(p[1]);
+			for (Symbol s : symbols) {
+				s.setSize(size);
+			}
+			redrawSymbols();
 			return "okay";
 		}
 
@@ -638,6 +704,11 @@ public class Board implements ActionListener, MouseListener {
 			return "okay";
 		}
 
+		if (line.startsWith("clearAllText")) {
+			actionPerformed(new ActionEvent(this, 0, clearTextText));
+			return "okay";
+		}
+
 		if (line.startsWith("#TC ")) {
 			int col = Integer.parseInt(p[1]);
 			int row = Integer.parseInt(p[2]);
@@ -736,7 +807,7 @@ public class Board implements ActionListener, MouseListener {
 	@Override
 	public void actionPerformed(ActionEvent event) {
 		String cmd = event.getActionCommand();
-		if( verbose ) {
+		if (verbose) {
 			System.out.println("Board cmd: " + cmd);
 		}
 
@@ -769,6 +840,15 @@ public class Board implements ActionListener, MouseListener {
 			String formName = cmd.substring(formPrefix.length());
 			if (SymbolType.hasType(formName)) {
 				setNewSymbolType(SymbolType.getTypeFromText(formName));
+			}
+
+		} else if (cmd.equals(linNumberingText)) {
+			Symbol.setLinearNumbering(linNumberingItem.isSelected());
+			System.out.println(linNumberingText);
+			if (Symbol.isNumbering()) {
+				plotter.removeAllText();
+				System.out.println("redraw after linNum change");
+				redrawSymbols();
 			}
 
 		} else if (cmd.equals(numberingText)) {
@@ -841,13 +921,20 @@ public class Board implements ActionListener, MouseListener {
 			int hc = s.hashCode();
 			String message = "HashCode; ";
 			int mtype = JOptionPane.INFORMATION_MESSAGE;
-			if( hc == -1105758752 ) {
+			if (hc == hashCode) {
 				message += " OKAY !!!";
 			} else {
 				message += " FAILED";
 				mtype = JOptionPane.ERROR_MESSAGE;
 			}
 			JOptionPane.showMessageDialog(graphic, message, "Hash Code Check", mtype);
+
+		} else if (cmd.equals(trainingText)) {
+			if (trainer == null) {
+				trainer = new Trainer(this);
+				trainer.loadImage();
+			}
+			trainer.setVisible(true);
 			
 		} else if (cmd.equals(sendText)) {
 			if ("".equals(input.getText()))
@@ -921,6 +1008,7 @@ public class Board implements ActionListener, MouseListener {
 		properties.setProperty("rows", "" + rows);
 		properties.setProperty("coding", "" + coding);
 		properties.setProperty("numbering", "" + Symbol.isNumbering());
+		properties.setProperty("linNumbering", "" + Symbol.isLinearNumbering());
 		properties.setProperty("fontSize", "" + symbolFontSize);
 		saveProperties();
 	}
@@ -1016,10 +1104,8 @@ public class Board implements ActionListener, MouseListener {
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		String message = "";
-		// System.out.println(e);
-		int x, y;
-		x = e.getX();
-		y = e.getY();
+		int x = e.getX();
+		int y = e.getY();
 		// System.out.println("Mouse released at " + x + ", " + y);
 		// System.out.println("# of clicks: " + e.getClickCount());
 		// System.out.println("# button: " + e.getButton());
@@ -1032,19 +1118,17 @@ public class Board implements ActionListener, MouseListener {
 		// System.out.println("col, row: " + ix + ", " + iy);
 		int pos = ix + iy * columns;
 
-		// if (e.getClickCount() == 2) {
-		// // System.out.println("pos: " + pos );
-		// updateSignal(pos, 0xff0000);
-		// graphic.repaint();
-		// }
-
 		for (int i = 0; i < e.getClickCount(); i++) {
 			message += "#";
 		}
-		message += " " + pos + " " + ix + " " + iy;
+		message += " " + pos + " " + ix + " " + iy + " " + e.getButton();
 		// System.out.println(message);
 		commands.add(message);
 		waitingCommands.setText(" " + commands.size() + " ");
+
+		for (BoardClickListener bcl : boardClickListener) {
+			bcl.boardClick(new BoardClickEvent(ix, iy, e.getClickCount(), e.getButton()));
+		}
 
 	}
 
@@ -1073,6 +1157,14 @@ public class Board implements ActionListener, MouseListener {
 		symbols.add(s);
 	}
 
+	public int getHashCode() {
+		BoardSerializer bs = new BoardSerializer();
+
+		bs.serialize(this);
+		String s = bs.write();
+		return s.hashCode();
+	}
+
 	public void clearSymbols() {
 		symbols.clear();
 		plotter.removeAllDataObjects();
@@ -1081,6 +1173,41 @@ public class Board implements ActionListener, MouseListener {
 
 	public int getSymbolCount() {
 		return symbols.size();
+	}
+
+	public void reset() {
+		actionPerformed(new ActionEvent(this, 0, clearColorsText));
+		actionPerformed(new ActionEvent(this, 0, clearTextText));
+		setNewSymbolType(SymbolType.CIRCLE);
+		plotter.setBackground(null);
+		plotter.setBorderColor(Color.BLUE);
+
+	}
+
+	public void addClickListener(BoardClickListener listener) {
+		boardClickListener.add(listener);
+
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		// System.out.println( e );
+
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		// System.out.println( e );
+
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		// System.out.println( e );
+		String message = "$ " + e.getKeyCode() + " " + KeyEvent.getKeyText(e.getKeyCode());
+		// System.out.println(message);
+		commands.add(message);
+
 	}
 
 }

@@ -1,5 +1,6 @@
 package plotter;
 
+import java.awt.AWTException;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -9,6 +10,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
+import java.awt.Robot;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.font.FontRenderContext;
@@ -62,15 +64,12 @@ public class Plotter extends JPanel {
 	private static final String version = "1.28 April 2015";
 
 	static int verbose = 0;
-	static Color[] plotColor = { Color.red, Color.green, Color.blue,
-			Color.orange, Color.yellow, Color.magenta };
+	static Color[] plotColor = { Color.red, Color.green, Color.blue, Color.orange, Color.yellow, Color.magenta };
 
 	Map<String, DataObject> dataObjects = new ConcurrentHashMap<String, DataObject>();
 	String currV = "0";
-	private Collection<TextObject> textObjects = Collections
-			.synchronizedCollection(new ArrayList<TextObject>());
-	private Collection<ImageObject> imageObjects = Collections
-			.synchronizedCollection(new ArrayList<ImageObject>());
+	private Collection<TextObject> textObjects = Collections.synchronizedCollection(new ArrayList<TextObject>());
+	private Collection<ImageObject> imageObjects = Collections.synchronizedCollection(new ArrayList<ImageObject>());
 
 	private double xmin = -1;
 	private double xmax = 1;
@@ -106,7 +105,7 @@ public class Plotter extends JPanel {
 
 	private boolean autoIncrementColor = true;
 	private Color defaultColor = Color.BLUE;
-//	private Color backGroundColor;
+	// private Color backGroundColor;
 	private Color borderColor = Color.BLUE;
 
 	private String statusLine;
@@ -137,7 +136,7 @@ public class Plotter extends JPanel {
 	 */
 	public Plotter(String name) {
 		setName(name);
-		
+
 	}
 
 	public int getPaintCalls() {
@@ -231,8 +230,7 @@ public class Plotter extends JPanel {
 	 * @param xOffset
 	 * @param yOffset
 	 */
-	public synchronized void setOffset(String key, double xOffset,
-			double yOffset) {
+	public synchronized void setOffset(String key, double xOffset, double yOffset) {
 		checkKey(key);
 		DataObject d = dataObjects.get(key);
 		d.setxOffset(xOffset);
@@ -372,18 +370,18 @@ public class Plotter extends JPanel {
 		dataObjects.get(key).setColor(c);
 	}
 
-//	public Color getBackGroundColor() {
-//		return backGroundColor;
-//	}
+	// public Color getBackGroundColor() {
+	// return backGroundColor;
+	// }
 
-//	public void setBackGroundColor(Color backGroundColor) {
-//		this.backGroundColor = backGroundColor;
-//		if( backGroundColor == null ) {
-//			backGroundColor = defaultBackGroundColor;
-//		}
-//		System.out.println( "Background: " + backGroundColor);
-//		System.out.println( "Background: " + getBackground() );
-//	}
+	// public void setBackGroundColor(Color backGroundColor) {
+	// this.backGroundColor = backGroundColor;
+	// if( backGroundColor == null ) {
+	// backGroundColor = defaultBackGroundColor;
+	// }
+	// System.out.println( "Background: " + backGroundColor);
+	// System.out.println( "Background: " + getBackground() );
+	// }
 
 	public Color getBorderColor() {
 		return borderColor;
@@ -561,13 +559,13 @@ public class Plotter extends JPanel {
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 
-		++paintCalls ;
-		
+		++paintCalls;
+
 		Graphics2D g2 = (Graphics2D) g;
 
-//		if (backGroundColor != null) {
-//			setBackground(backGroundColor);
-//		}
+		// if (backGroundColor != null) {
+		// setBackground(backGroundColor);
+		// }
 
 		if (verbose > 1) {
 			System.out.println("PAINT");
@@ -575,8 +573,7 @@ public class Plotter extends JPanel {
 		}
 
 		int rectWidth = getSize().width - getInsets().left - getInsets().right;
-		int rectHeight = getSize().height - getInsets().top
-				- getInsets().bottom;
+		int rectHeight = getSize().height - getInsets().top - getInsets().bottom;
 		// System.out.println("x: "
 		// + getSize().width+" "+getInsets().left+" "+getInsets().right);
 		// System.out.println("y: "
@@ -642,10 +639,27 @@ public class Plotter extends JPanel {
 
 		synchronized (imageObjects) {
 			for (ImageObject imageOject : imageObjects) {
-				System.out.println(imageOject);
-				int x = scaleX(imageOject.getX()) - imageOject.getWidth() / 2;
-				int y = scaleY(imageOject.getY()) - imageOject.getHeight() / 2;
-				g2.drawImage(imageOject.image, x, y, null);
+				Image image = imageOject.image;
+				System.out.println("Image: " + image.getHeight(null) + " x " + image.getWidth(null));
+				if (imageOject.worldWidth > 0 | imageOject.worldHeight > 0) {
+					int newWidth = -1;
+					int newHeight = -1;
+					if (imageOject.worldWidth > 0) {
+						newWidth = Math.abs( scaleX(imageOject.worldWidth) - scaleX( 0. ) );
+						System.out.println( "W: " + imageOject.worldWidth + " -> " + newWidth );
+					}
+					if (imageOject.worldHeight > 0) {
+						newHeight = Math.abs( scaleY(imageOject.worldHeight) - scaleY( 0.) );
+						System.out.println( "H: " + imageOject.worldHeight + " -> " + newHeight );
+					}
+					image = imageOject.image.getScaledInstance(newWidth, newHeight, Image.SCALE_DEFAULT);
+					System.out.println("rescaled Image: " + newHeight + " x " + newWidth);
+					System.out.println("rescaled Image: " + image.getHeight(null) + " x " + image.getWidth(null));
+				}
+				int x = scaleX(imageOject.getX()) - image.getWidth(null) / 2;
+				int y = scaleY(imageOject.getY()) - image.getHeight(null) / 2;
+				System.out.println("Pos: " + imageOject.getX() + ", " + imageOject.getY() + "-> " + x + "," + y);
+				g2.drawImage(image, x, y, null);
 			}
 		}
 
@@ -656,12 +670,10 @@ public class Plotter extends JPanel {
 
 			for (double xL : xValues) {
 				int xg = plotLeft + (int) ((xL - xmin) * xfactor);
-				g2.drawLine(xg, plotLow, xg, plotLow
-						- (int) (ticRelHeight * plotHeight));
+				g2.drawLine(xg, plotLow, xg, plotLow - (int) (ticRelHeight * plotHeight));
 				String label = getLabelString(xL, xLabelFormat);
 				int xlabpos = xg - fm.stringWidth(label) / 2;
-				g2.drawString(label, xlabpos, getSize().height
-						- getInsets().bottom);
+				g2.drawString(label, xlabpos, getSize().height - getInsets().bottom);
 			}
 		}
 
@@ -672,22 +684,18 @@ public class Plotter extends JPanel {
 			// now draw them
 			for (double yL : yValues) {
 				int yg = scaleY(yL); // plotLow - (int) ((yL - ymin) * yfactor);
-				g2.drawLine(plotLeft, yg, plotLeft
-						+ (int) (ticRelHeight * plotWidth), yg);
-				g2.drawString(getLabelString(yL, yLabelFormat),
-						getInsets().left, yg);
+				g2.drawLine(plotLeft, yg, plotLeft + (int) (ticRelHeight * plotWidth), yg);
+				g2.drawString(getLabelString(yL, yLabelFormat), getInsets().left, yg);
 			}
 		}
 
 		if (xgrid != null) {
 			for (int i = 0; i < xgrid.length; i++) {
 				int xg = plotLeft + (int) ((xgrid[i] - xmin) * xfactor);
-				g2.drawLine(xg, plotLow, xg, plotLow
-						- (int) (ticRelHeight * plotHeight));
+				g2.drawLine(xg, plotLow, xg, plotLow - (int) (ticRelHeight * plotHeight));
 				if (xlabel != null) {
 					int xlabpos = xg - fm.stringWidth(xlabel[i]) / 2;
-					g2.drawString(xlabel[i], xlabpos, getSize().height
-							- getInsets().bottom);
+					g2.drawString(xlabel[i], xlabpos, getSize().height - getInsets().bottom);
 				}
 			}
 		}
@@ -714,18 +722,19 @@ public class Plotter extends JPanel {
 
 			if (d.hasBackground()) {
 				Point[] corners = d.getCorners();
-//				for (int i = 0; i < tmpXVector.length; i += 2) {
-//					System.out.println(tmpXVector[i] + " " + tmpXVector[i+1]  
-//							+ " " + scaleX(tmpXVector[i]) + " " + scaleY(tmpXVector[i+1] ));
-//				}
-				int iw = scaleX( corners[1].x  ) - scaleX( corners[0].x );
-				int ih = scaleY( corners[1].y  ) - scaleY( corners[0].y );
-//				System.out.println(" iw: " + iw);
-//				System.out.println(corners[0].x + " " +  corners[0].y + " " + width + " x " + height);
-				Shape s =  new Rectangle2D.Double(scaleX(corners[0].x),
-						scaleY(corners[0].y), iw, ih);
-//				System.out.println( s );
-				g2.setColor( d.getBackGroundColor() );
+				// for (int i = 0; i < tmpXVector.length; i += 2) {
+				// System.out.println(tmpXVector[i] + " " + tmpXVector[i+1]
+				// + " " + scaleX(tmpXVector[i]) + " " + scaleY(tmpXVector[i+1]
+				// ));
+				// }
+				int iw = scaleX(corners[1].x) - scaleX(corners[0].x);
+				int ih = scaleY(corners[1].y) - scaleY(corners[0].y);
+				// System.out.println(" iw: " + iw);
+				// System.out.println(corners[0].x + " " + corners[0].y + " " +
+				// width + " x " + height);
+				Shape s = new Rectangle2D.Double(scaleX(corners[0].x), scaleY(corners[0].y), iw, ih);
+				// System.out.println( s );
+				g2.setColor(d.getBackGroundColor());
 				g2.draw(s);
 				g2.fill(s);
 			}
@@ -743,8 +752,7 @@ public class Plotter extends JPanel {
 				double x = scaleX(tmpXVector[i]);
 				double y = scaleY(tmpXVector[i + 1]);
 
-				if (currStyle == LineStyle.LINE | currStyle == LineStyle.BOTH
-						| currStyle == LineStyle.FILL) {
+				if (currStyle == LineStyle.LINE | currStyle == LineStyle.BOTH | currStyle == LineStyle.FILL) {
 					if (i == 0) {
 						pd.moveTo(x, y);
 					} else {
@@ -769,16 +777,13 @@ public class Plotter extends JPanel {
 				}
 
 				if (currStyle == LineStyle.HISTOGRAM) {
-					int width = scaleX(tmpXVector[i] + halfBarWidth)
-							- scaleX(tmpXVector[i] - halfBarWidth);
+					int width = scaleX(tmpXVector[i] + halfBarWidth) - scaleX(tmpXVector[i] - halfBarWidth);
 					int height = scaleY(yref) - (int) y;
 					Shape s;
 					if (height > 0) {
-						s = new Rectangle2D.Double(scaleX(tmpXVector[i]
-								- halfBarWidth), (int) y, width, height);
+						s = new Rectangle2D.Double(scaleX(tmpXVector[i] - halfBarWidth), (int) y, width, height);
 					} else {
-						s = new Rectangle2D.Double(scaleX(tmpXVector[i]
-								- halfBarWidth), scaleY(yref), width, -height);
+						s = new Rectangle2D.Double(scaleX(tmpXVector[i] - halfBarWidth), scaleY(yref), width, -height);
 					}
 					g2.draw(s);
 					g2.fill(s);
@@ -787,23 +792,18 @@ public class Plotter extends JPanel {
 				if (currStyle == LineStyle.YHISTOGRAM) {
 					int width = (int) x - scaleX(xref);
 					Shape s;
-					s = new Rectangle2D.Double(scaleX(xref), y, width,
-							2 * halfBarWidth);
+					s = new Rectangle2D.Double(scaleX(xref), y, width, 2 * halfBarWidth);
 					g2.draw(s);
 					g2.fill(s);
 				}
 
-				if (currStyle == LineStyle.SYMBOL
-						|| currStyle == LineStyle.BOTH
-						|| d.hasLineStyle(LineStyle.SYMBOL)) {
-					g2.drawOval((int) (x - symbolSize / 2),
-							(int) (y - symbolSize / 2), symbolSize, symbolSize);
+				if (currStyle == LineStyle.SYMBOL || currStyle == LineStyle.BOTH || d.hasLineStyle(LineStyle.SYMBOL)) {
+					g2.drawOval((int) (x - symbolSize / 2), (int) (y - symbolSize / 2), symbolSize, symbolSize);
 				}
 
-				if (currStyle == LineStyle.FILLED_SYMBOL
-						|| d.hasLineStyle(LineStyle.FILLED_SYMBOL)) {
-					Shape s = new Ellipse2D.Double((int) (x - symbolSize / 2),
-							(int) (y - symbolSize / 2), symbolSize, symbolSize);
+				if (currStyle == LineStyle.FILLED_SYMBOL || d.hasLineStyle(LineStyle.FILLED_SYMBOL)) {
+					Shape s = new Ellipse2D.Double((int) (x - symbolSize / 2), (int) (y - symbolSize / 2), symbolSize,
+							symbolSize);
 					g2.fill(s);
 					g2.setColor(Color.BLACK);
 					g2.draw(s);
@@ -813,18 +813,14 @@ public class Plotter extends JPanel {
 					g2.drawOval((int) x, (int) y, 1, 1);
 				}
 
-				if (currStyle == LineStyle.VALUE
-						|| d.hasLineStyle(LineStyle.VALUE)) {
-					String t = String.format(valueFormatString,
-							tmpXVector[i + 1]);
+				if (currStyle == LineStyle.VALUE || d.hasLineStyle(LineStyle.VALUE)) {
+					String t = String.format(valueFormatString, tmpXVector[i + 1]);
 					t = t.replaceAll("[,.]0+", "");
 					g2.drawString(t, (int) x - fm.stringWidth(t) / 2, (int) y);
 				}
 
-				if (currStyle == LineStyle.COORD
-						|| d.hasLineStyle(LineStyle.COORD)) {
-					String t = String.format("(%.1f;%.1f)", tmpXVector[i],
-							tmpXVector[i + 1]);
+				if (currStyle == LineStyle.COORD || d.hasLineStyle(LineStyle.COORD)) {
+					String t = String.format("(%.1f;%.1f)", tmpXVector[i], tmpXVector[i + 1]);
 					t = t.replaceAll(",0", "");
 					g2.drawString(t, (int) x - fm.stringWidth(t) / 2, (int) y);
 				}
@@ -850,7 +846,7 @@ public class Plotter extends JPanel {
 				g2.fill(pd);
 			}
 		}
-		drawTextObjects( g2 );
+		drawTextObjects(g2);
 
 	}
 
@@ -864,10 +860,8 @@ public class Plotter extends JPanel {
 
 				// use the glyphVector to get the correct y-position
 				FontRenderContext renderContext = g2.getFontRenderContext();
-				GlyphVector glyphVector = g2.getFont().createGlyphVector(
-						renderContext, tO.getText());
-				Rectangle visualBounds = glyphVector.getVisualBounds()
-						.getBounds();
+				GlyphVector glyphVector = g2.getFont().createGlyphVector(renderContext, tO.getText());
+				Rectangle visualBounds = glyphVector.getVisualBounds().getBounds();
 
 				int xlabpos, ylabpos;
 				if (tO.getOrientation() == TextObject.RIGHT) {
@@ -875,11 +869,9 @@ public class Plotter extends JPanel {
 				} else if (tO.getOrientation() == TextObject.LEFT) {
 					xlabpos = scaleX(tO.getX()) - fm.stringWidth(tO.getText());
 				} else {
-					xlabpos = scaleX(tO.getX()) - fm.stringWidth(tO.getText())
-							/ 2;
+					xlabpos = scaleX(tO.getX()) - fm.stringWidth(tO.getText()) / 2;
 				}
-				ylabpos = scaleY(tO.getY()) - visualBounds.height / 2
-						- visualBounds.y;
+				ylabpos = scaleY(tO.getY()) - visualBounds.height / 2 - visualBounds.y;
 
 				// System.out.println(tO.getText() + " " +tO.getColor());
 				g2.setColor(tO.getColor());
@@ -887,7 +879,7 @@ public class Plotter extends JPanel {
 				g2.setFont(currentFont); // restore default font
 			}
 		}
-		
+
 	}
 
 	/**
@@ -926,14 +918,22 @@ public class Plotter extends JPanel {
 			return String.format(labelFormat, y);
 	}
 
-	private int scaleY(double d) {
+	public int scaleY(double yWorld) {
 		// return (int) (plotLow - (d - ymin) * yfactor);
-		return (int) (yScaleKonst - d * yfactor);
+		return (int) (yScaleKonst - yWorld * yfactor);
 	}
 
-	private int scaleX(double d) {
+	/**
+	 * Calculates the device x-coordinate for a value given in world coordinates.
+	 * If distances are needed: use something like Math.abs( scaleX(1.) - scaleX(0.)) 
+	 * to get the length of 1
+	 * 
+	 * @param xWorld
+	 * @return
+	 */
+	public int scaleX(double xWorld) {
 		// return (int) (plotLeft + (d - xmin) * xfactor);
-		return (int) (xScaleKonst + d * xfactor);
+		return (int) (xScaleKonst + xWorld * xfactor);
 	}
 
 	public double scaleXR(int i) {
@@ -1092,10 +1092,8 @@ public class Plotter extends JPanel {
 		if (textObjects.size() > 1) {
 			status += textObjects.size() + " text objects, ";
 		}
-		status += "x: [" + String.format("%.3g", xmin) + ","
-				+ String.format("%.3g", xmax) + "] ";
-		status += "y: [" + String.format("%.3g", ymin) + ","
-				+ String.format("%.3g", ymax) + "] ";
+		status += "x: [" + String.format("%.3g", xmin) + "," + String.format("%.3g", xmax) + "] ";
+		status += "y: [" + String.format("%.3g", ymin) + "," + String.format("%.3g", ymax) + "] ";
 		return status;
 	}
 
@@ -1349,8 +1347,7 @@ public class Plotter extends JPanel {
 		return to;
 	}
 
-	public TextObject setText(String string, double i, double j, Color color,
-			Font font) {
+	public TextObject setText(String string, double i, double j, Color color, Font font) {
 		TextObject to = setText(string, i, j, color);
 		to.setFont(font);
 		return to;
@@ -1407,6 +1404,10 @@ public class Plotter extends JPanel {
 		return io;
 	}
 
+	public void removeImageObject(ImageObject io) {
+		imageObjects.remove(io);	
+	}
+
 	/**
 	 * Returns a string with information on the current version of Plotter
 	 * 
@@ -1423,5 +1424,6 @@ public class Plotter extends JPanel {
 	public int getImageObjectsCount() {
 		return imageObjects.size();
 	}
+
 
 }

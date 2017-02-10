@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  * This implementation executes Java code.
@@ -50,9 +51,9 @@ public class CodeExecutorJava extends CodeExecutor {
 
 	@Override
 	public void stopExecution() {
-		//System.out.println("CodeExcecutorJava::stopExecution");
+		// System.out.println("CodeExcecutorJava::stopExecution");
 		if (sendThread != null) {
-			//System.out.println("CodeExcecutorJava::send interrupt");
+			// System.out.println("CodeExcecutorJava::send interrupt");
 			sendThread.interrupt();
 		}
 	}
@@ -66,16 +67,15 @@ public class CodeExecutorJava extends CodeExecutor {
 		boolean hasErrors = false;
 
 		File jarTest = new File("jserver.jar");
-		if( ! jarTest.exists() ) {
+		if (!jarTest.exists()) {
 			messageField.append("jserver.jar nicht gefunden\n");
 			for (ExecutorListener el : listeners) {
 				el.failedCompilation();
 			}
 			return "";
-			
+
 		}
-		
-		
+
 		new File("Atest.class").delete();
 
 		// Compile source file.
@@ -88,9 +88,9 @@ public class CodeExecutorJava extends CodeExecutor {
 		//
 
 		ProcessBuilder pb;
-		//System.out.println( "Path to javac: "  + javacPath );
+		// System.out.println( "Path to javac: " + javacPath );
 		String classPath = "." + File.pathSeparatorChar + "jserver.jar";
-		//System.out.println( "classpath: "  + classPath );
+		// System.out.println( "classpath: " + classPath );
 		pb = new ProcessBuilder(javacPath + "javac", "-cp", classPath, fileName);
 		for (ExecutorListener el : listeners) {
 			el.startCompilation();
@@ -105,8 +105,7 @@ public class CodeExecutorJava extends CodeExecutor {
 			// }
 			// input.close();
 
-			BufferedReader error = new BufferedReader(new InputStreamReader(
-					p.getErrorStream()));
+			BufferedReader error = new BufferedReader(new InputStreamReader(p.getErrorStream()));
 			while ((line = error.readLine()) != null) {
 				// result.append(line + "\n");
 				messageField.append(line + "\n");
@@ -141,8 +140,7 @@ public class CodeExecutorJava extends CodeExecutor {
 		File root = new File(".");
 		URLClassLoader classLoader;
 		try {
-			classLoader = URLClassLoader.newInstance(new URL[] { root.toURI()
-					.toURL() });
+			classLoader = URLClassLoader.newInstance(new URL[] { root.toURI().toURL() });
 			Class<?> c = Class.forName("ATest", true, classLoader);
 			final XSend xsend = (XSend) c.newInstance();
 			final StringBuffer sb = new StringBuffer();
@@ -154,16 +152,16 @@ public class CodeExecutorJava extends CodeExecutor {
 					String command = "";
 					try {
 						xsend.send();
-						command =  xsend.getResult();
-						if( ! command.matches("(okay)+") ) {
-							System.out.println( command );
+						command = xsend.getResult();
+						if (!command.matches("(okay)+")) {
+							System.out.println(command);
 							sb.append(command);
 						}
 					} catch (InterruptedException e) {
 						command = "Ausführung unterbrochen";
-					} catch( Exception e ) {
+					} catch (Exception e) {
 						// copy message so that it appears in the result field
-						e.printStackTrace( System.out );
+						e.printStackTrace(System.out);
 					}
 				}
 			});
@@ -176,8 +174,7 @@ public class CodeExecutorJava extends CodeExecutor {
 			}
 			xsend.setDown();
 			result.append(sb);
-		} catch (MalformedURLException | ClassNotFoundException
-				| IllegalAccessException | IllegalArgumentException
+		} catch (MalformedURLException | ClassNotFoundException | IllegalAccessException | IllegalArgumentException
 				| InstantiationException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -194,16 +191,20 @@ public class CodeExecutorJava extends CodeExecutor {
 		// boolean useHeaderFile = true;
 		String language = board.getMessages().getLocale().getLanguage().toUpperCase();
 		try {
-			Files.copy(Paths.get("head.java"), Paths.get(fileName),
-					StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(Paths.get("head.java"), Paths.get(fileName), StandardCopyOption.REPLACE_EXISTING);
 		} catch (Exception e1) {
 			// useHeaderFile = false;
 			try {
 				BufferedWriter fw = new BufferedWriter(new FileWriter(fileName));
 				fw.write("import jserver.*;\n");
 				fw.write("import java.util.*;\n");
+
+				// Probleme bei Abbruch, da exceptions gefangen werden!!!
+				// fw.write("import plotter.Sleep;\n");
+
 				fw.write("public class ATest extends XSend" + language + " {\n");
-				fw.write("public void send()  throws InterruptedException { ;");
+				insertColors(fw);
+				fw.write("public void send()  throws InterruptedException { ");
 				fw.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -211,22 +212,34 @@ public class CodeExecutorJava extends CodeExecutor {
 			}
 		}
 		try {
-			BufferedWriter fw = new BufferedWriter(new FileWriter(fileName,
-					true));
-			insertColors(fw);
+			BufferedWriter fw = new BufferedWriter(new FileWriter(fileName, true));
 			// fw.write("result =\"\";");
 			String[] lines = codeInput.split("\\n");
-			for (String line : lines) {
-				fw.write(line + "\n");
+			if ( isComplete( lines) ) {
+				fw.write("mySend();");
+				fw.write("}");
+				fw.newLine();
+				for (String line : lines) {
+					if (!line.startsWith("@Complete")) {
+						fw.write(line);
+						fw.newLine();
+					}
+				}
+			} else {
+				for (String line : lines) {
+					fw.write(line);
+					fw.newLine();
+				}
+				fw.write("}");
+				fw.newLine();
 			}
-			// fw.write("return result;\n");
-			fw.write("}");
+
+			// close class
 			fw.write("}");
 			fw.newLine();
 			fw.close();
 		} catch (IOException e) {
-			board.setLastError("can not complete file <<" + e.getMessage()
-					+ ">>");
+			board.setLastError("can not complete file <<" + e.getMessage() + ">>");
 			System.out.println("cancel createTmpCFile: " + e.getMessage());
 			return null;
 		}
@@ -236,6 +249,13 @@ public class CodeExecutorJava extends CodeExecutor {
 		return fileName;
 	}
 
+	private boolean isComplete(String[] lines) {
+		for (String line : lines) {
+			if (line.startsWith("@Complete")) return true;
+		}
+		return false;
+	}
+
 	private void insertColors(BufferedWriter fw) {
 		CodeDB codeDB = new CodeDB();
 
@@ -243,14 +263,18 @@ public class CodeExecutorJava extends CodeExecutor {
 		if (colors != null) {
 			for (String s : colors) {
 				try {
-					fw.write(" final int " + s + " = "
-							+ codeDB.getColorValue(s) + "; \n");
+					fw.write(" final int " + s + " = " + codeDB.getColorValue(s) + "; \n");
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
 		}
 
+	}
+
+	@Override
+	public void showGeneratedCode(ResourceBundle messages) {
+		showFileContent(fileName, messages.getString("generatedCode") + " - Java");
 	}
 
 }

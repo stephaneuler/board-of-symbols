@@ -7,7 +7,10 @@ import java.awt.Stroke;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JOptionPane;
+
 import plotter.DataObject;
+import plotter.ImageObject;
 import plotter.LineStyle;
 import plotter.Plotter;
 import plotter.TextObject;
@@ -17,12 +20,10 @@ public class Symbol {
 	private static double barWidth = 0.4;
 	private static boolean numbering = false;
 	private static Font font = new Font("Arial", Font.PLAIN, 12);
+    private static Board board;
+	private static boolean linearNumbering = false;
 
 	Position pos;
-	public Position getPos() {
-		return pos;
-	}
-
 	private double size;
 	private double fullSize;
 	int index = -1;
@@ -38,6 +39,7 @@ public class Symbol {
 	TextObject textObject = null;
 	private List<String> secondaryKeys = new ArrayList<String>();
 	private boolean useAlphaWithText;
+	private ImageObject io;
 
 	public Symbol(Position pos, double size) {
 		super();
@@ -46,6 +48,31 @@ public class Symbol {
 		fullSize = size;
 	}
 
+
+	public Position getPos() {
+		return pos;
+	}
+
+	public static Board getBoard() {
+		return board;
+	}
+
+
+	public static void setBoard(Board board) {
+		Symbol.board = board;
+	}
+
+
+	public static boolean isLinearNumbering() {
+		return linearNumbering;
+	}
+
+
+	public static void setLinearNumbering(boolean linearNumbering) {
+		Symbol.linearNumbering = linearNumbering;
+	}
+
+
 	public static void setFontSize(int s) {
 		font = new Font("Arial", Font.PLAIN, s);
 	}
@@ -53,6 +80,16 @@ public class Symbol {
 	public static int getFontSize() {
 		return font.getSize();
 	}
+
+	public static Font getFont() {
+		return font;
+	}
+
+
+	public static void setFont(Font font) {
+		Symbol.font = font;
+	}
+
 
 	public static double getBarWidth() {
 		return barWidth;
@@ -135,11 +172,11 @@ public class Symbol {
 	}
 
 	public void setHintergrund(Color hintergrund) {
-		//System.out.println("Hintergrund: " + hintergrund);
+		// System.out.println("Hintergrund: " + hintergrund);
 		this.hintergrund = hintergrund;
 	}
 
-	void clearHintergrund() {
+	public void clearHintergrund() {
 		hintergrund = null;
 		if (mitHintergrund != null) {
 			mitHintergrund.setCorners(null);
@@ -152,7 +189,7 @@ public class Symbol {
 	}
 
 	public void setType(SymbolType type) {
-		if( type == SymbolType.RANDOM ) {
+		if (type == SymbolType.RANDOM) {
 			this.type = SymbolType.getRandom();
 		} else {
 			this.type = type;
@@ -173,6 +210,22 @@ public class Symbol {
 	// public void setAktiv(boolean aktiv) {
 	// this.aktiv = aktiv;
 	// }
+
+	public void setImage(String imageFileName, Plotter plotter) {
+		plotter.removeImageObject( io );
+		if( imageFileName.equals("-") ) {
+			return;
+		}
+		io = plotter.setImage(imageFileName, pos.x, pos.y);
+		if( io == null ) {
+			JOptionPane.showMessageDialog(null,
+					"Datei " + imageFileName + " nicht gefunden", "Bilddatei",
+					JOptionPane.ERROR_MESSAGE );
+			return;
+		}
+		io.setWorldWidth(2 * size);
+		io.setWorldHeight(2 * size);
+	}
 
 	public void zeichnen(Plotter plotter) {
 		if (key == null) {
@@ -212,25 +265,26 @@ public class Symbol {
 		}
 
 		if (numbering) {
-			plotter.setDataColor(key,
-					new Color(farbe.getRed(), farbe.getGreen(),
-							farbe.getBlue(), alpha));
-			@SuppressWarnings("unused")
-			TextObject to = plotter.setText("" + index, pos.x, pos.y);
+			plotter.setDataColor(key, new Color(farbe.getRed(), farbe.getGreen(), farbe.getBlue(), alpha));
+			String numText = "" ;
+			if( linearNumbering ) {
+				numText += index;
+			} else {
+				numText += index % board.getRows() + "," + index / board.getRows();
+			}
+			plotter.setText(numText, pos.x, pos.y);
 		} else {
 			plotter.setDataColor(key, farbe);
 		}
 
-		if (text != null ) {
+		if (text != null) {
 			if (useAlphaWithText && text.length() != 0) {
-				plotter.setDataColor(
-						key,
-						new Color(farbe.getRed(), farbe.getGreen(), farbe
-								.getBlue(), alpha));
+				plotter.setDataColor(key, new Color(farbe.getRed(), farbe.getGreen(), farbe.getBlue(), alpha));
 			}
 			// System.out.println("Text:" + text );
 			// if (textObject == null) {
-			while (plotter.removeText(pos.x, pos.y));
+			while (plotter.removeText(pos.x, pos.y))
+				;
 			textObject = plotter.setText(text, pos.x, pos.y);
 			textObject.setColor(textFarbe);
 			textObject.setFont(font);
@@ -245,8 +299,7 @@ public class Symbol {
 				plotter.add(key, x, y);
 			}
 		} else if (Dice.isDiceType(type)) {
-			Dice.draw(key, secondaryKeys, Dice.getValue(type), plotter, pos,
-					size);
+			Dice.draw(key, secondaryKeys, Dice.getValue(type), plotter, pos, size);
 
 		} else if (type == SymbolType.SQUARE) {
 			plotter.add(key, pos.x - size, pos.y - size);
@@ -280,9 +333,9 @@ public class Symbol {
 			plotter.addD(key, 2 * barWidth, 0);
 			plotter.addD(key, 0, -2 * size);
 			plotter.addD(key, -2 * barWidth, 0);
-//			plotter.addD(key, 0, 2 * size);
-//			plotter.setDataLineStyle(key, LineStyle.LINE);
-//			plotter.setDataStroke(key, stroke);
+			// plotter.addD(key, 0, 2 * size);
+			// plotter.setDataLineStyle(key, LineStyle.LINE);
+			// plotter.setDataStroke(key, stroke);
 
 		} else if (type == SymbolType.PLUS) {
 			plotter.add(key, pos.x, pos.y);

@@ -29,7 +29,7 @@ public class CodeLayouter {
 				continue;
 			}
 			line = line.trim();
-			int incIndent = 0;
+			int incIndent = 0;   // additional increment for next lines
 			//System.out.println( "<" + line + ">");
 			lineLoop: for (int i = 0; i < line.length(); i++) {
 				switch (state) {
@@ -37,7 +37,11 @@ public class CodeLayouter {
 					if (line.charAt(i) == '{') {
 						++incIndent;
 					} else if (line.charAt(i) == '}') {
+						if( incIndent > 0 ) {
+							--incIndent;
+						} else {
 						--indent;
+						}
 					} else if (line.charAt(i) == '"') {
 						state = 1;
 					} else if (line.charAt(i) == '\'') {
