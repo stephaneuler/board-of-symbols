@@ -2,7 +2,12 @@
 <snippet name="JS">
 <author>Stephan Euler</author>
 <created>Sat Oct 22 18:08:40 CEST 2016</created>
-<codeA><![CDATA[function male( x, y, fa, fo ) {
+<comment><![CDATA[
+JS-Beispiel mit Funktion
+]]></comment>
+<language>JS</language>
+<codeA><![CDATA[
+function male( x, y, fa, fo ) {
    farbe2(x, y, fa )
    form2( x, y, fo )
 }
