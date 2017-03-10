@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<snippet name="JS">
+<author>Stephan Euler</author>
+<created>Sat Oct 22 18:08:40 CEST 2016</created>
+<codeA><![CDATA[function male( x, y, fa, fo ) {
+   farbe2(x, y, fa )
+   form2( x, y, fo )
+}
+
+
+var i
+for( i=0; i<4; i+=1 ) {
+   male( i, i, RED, "*" )
+   java.lang.Thread.sleep(500)
+   print( i + " ")
+
+}
+
+
+]]></codeA>
+<updated>Tue Feb 07 11:10:54 CET 2017</updated>
+</snippet>
