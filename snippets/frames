@@ -2,6 +2,7 @@
 <snippet locale="de_DE" name="bos-logo">
 <author>Stephan Euler</author>
 <created>Thu Mar 16 10:27:38 CET 2017</created>
+<language>Java</language>
 <codeA><![CDATA[
 
 int n = 8;
