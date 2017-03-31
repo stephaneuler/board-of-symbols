@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<snippet locale="de_DE" name="kartenSammler">
+<author>Stephan Euler</author>
+<created>Fri Mar 31 10:16:00 CEST 2017</created>
+<codeA><![CDATA[
+int karten = 600;
+
+for( int n=1; n<=30; n++ ) {
+   int[] gezogen = new int[karten];
+   int versuche = 0;
+   int fehlt = karten;
+   while (fehlt > 0) {
+      ++versuche;
+      int w = (int) (Math.random() * karten);
+      ++gezogen[w];
+      if (gezogen[w] == 1) {
+         --fehlt;
+      }
+   }
+   System.out.println( n + ". Durchgang, " + versuche + " Karten gekauft");
+}
+]]></codeA>
+</snippet>
