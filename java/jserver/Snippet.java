@@ -2,10 +2,18 @@ package jserver;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.StringWriter;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -58,4 +66,31 @@ public class Snippet {
 		return element.getAttribute("name");
 	}
 
+	String write() {
+		Document document;
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder builder;
+		try {
+			builder = factory.newDocumentBuilder();
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+			return null;
+		}
+		document = builder.newDocument();
+		
+		document.appendChild(document.importNode(element, true));
+		 
+		Transformer tf;
+		StringWriter writer = new StringWriter();
+		StreamResult result = new StreamResult(writer);
+		try {
+			tf = TransformerFactory.newInstance().newTransformer();
+			tf.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+			tf.setOutputProperty(OutputKeys.INDENT, "yes");
+			tf.transform(new DOMSource(document), result);
+		} catch (TransformerFactoryConfigurationError | TransformerException e) {
+			e.printStackTrace();
+		}
+		return writer.toString();
+	}
 }

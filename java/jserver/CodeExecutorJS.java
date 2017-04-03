@@ -1,14 +1,5 @@
 package jserver;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.StringWriter;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -17,9 +8,7 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
 /**
- * This implementation executes primitive commands in the BoS language (BoSL).
- * No compilation is necessary. The commands are send directly to the Board
- * instance. Using the BoSL commands is provided mainly for test purposes.
+ * Executes JS code
  * 
  * @author Euler
  * 

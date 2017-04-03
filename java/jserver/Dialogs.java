@@ -1,6 +1,8 @@
 package jserver;
 
-import java.io.File;
+import java.awt.Font;
+import java.awt.Frame;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import javax.swing.BoxLayout;
@@ -8,10 +10,9 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.filechooser.FileNameExtensionFilter;
+
+import plotter.Graphic;
 
 public class Dialogs {
 
@@ -66,5 +67,26 @@ public class Dialogs {
 		panel.add( dest );
 		return JOptionPane.showConfirmDialog(null, panel, "Replace", JOptionPane.OK_CANCEL_OPTION);		
 	}
+
+	public static void showStrings(List<String> commands, String string, Graphic graphic) {
+		showStrings(commands, string, graphic, null);		
+	}
+	
+	public static void showStrings(List<String> lines, String title, Frame component, Font font) {
+		String code = "";
+			for( int l=0; l<lines.size(); l++ ) {
+				code += String.format("%3d", l + 1) + " " + lines.get(l) + "\n";
+			}
+
+	
+		InfoBox info = new InfoBox(component, "", 400, 400);
+		info.setTitle( title);
+		if( font != null ) {
+			info.getTextArea().setFont( font );
+		}
+		info.getTextArea().setText( code );
+		info.setVisible(true);
+	}
+
 
 }

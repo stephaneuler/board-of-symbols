@@ -22,15 +22,17 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 public class Trainer extends JFrame implements ActionListener {
-	private static final String PROTOCOL_TEXT= "Protocol";
+	private static final String LEVEL_TEXT = "Level";
+	private static final String PROTOCOL_TEXT = "Protocol";
 	private static final String LEVEL_DOWN = "L -";
 	private static final String LEVEL_UP = "L +";
 	private static final long serialVersionUID = 1L;
-	
+
 	Board board;
 	JLabel goal = new JLabel();
 	JLabel result = new JLabel(" ------------ ");
@@ -45,22 +47,27 @@ public class Trainer extends JFrame implements ActionListener {
 	private int attempts = 0;
 	private int hits = 0;
 	private int level = 1;
-	private int maxLevel = 7;
 	private TrainerProtocol protocol = new TrainerProtocol();
 	private Random random = new Random();
-	private int[] hitCount = new int[maxLevel+1];
-	private ResourceBundle messages;
+	private ResourceBundleWrapper messages;
 	private String checkText;
-	//private String startTime = time();
-
+	// private String startTime = time();
+	private TrainerLevel[] levels = { new TrainerLevel(Mode.SINGLE, false, false),
+			new TrainerLevel(Mode.SINGLE, true, false), new TrainerLevel(Mode.SINGLE, true, true),
+			new TrainerLevel(Mode.MULTI, false, false), new TrainerLevel(Mode.MULTI, true, false),
+			new TrainerLevel(Mode.THM, false, false), new TrainerLevel(Mode.ABC, false, false),
+			new TrainerLevel(Mode.STAIRWAY, false, false), new TrainerLevel(Mode.TRIANGLE, false, false),
+			new TrainerLevel(Mode.FRAME, false, false), new TrainerLevel(Mode.ARROW, false, true),
+			new TrainerLevel(Mode.MODULO, false, false), new TrainerLevel(Mode.DICE, false, true) };
+	private int[] hitCount = new int[levels.length + 1];
 
 	public Trainer(Board board) {
 		super("Trainer");
 		this.board = board;
 
-		messages = board.getMessages();
-		
-		setTitle( "Trainer "  + messages.getString("trainerVersion"));
+		messages = board.getMessageWrapper();
+
+		setTitle("Trainer " + messages.getString("trainerVersion"));
 		setStrings();
 
 		setLocation(600, 5);
@@ -71,13 +78,12 @@ public class Trainer extends JFrame implements ActionListener {
 
 	private void setStrings() {
 		checkText = messages.getString("check");
-		
+
 	}
 
 	private String statusText() {
-		return patterns + " " + messages.getString("pattern") + ", " + 
-				attempts + " " + messages.getString("attempts") + " , " + 
-				hits + " " + messages.getString("hits");
+		return patterns + " " + messages.getString("pattern") + ", " + attempts + " " + messages.getString("attempts")
+				+ " , " + hits + " " + messages.getString("hits");
 	}
 
 	public static void main(String[] args) {
@@ -95,11 +101,17 @@ public class Trainer extends JFrame implements ActionListener {
 		JMenu menuInfos;
 		JMenuBar menuBar = new JMenuBar();
 
-		menuInfos = new JMenu("Infos")
-				;
+		menuInfos = new JMenu("Infos");
 		Utils.addMenuItem(this, menuInfos, PROTOCOL_TEXT);
 		menuBar.add(menuInfos);
-		
+
+		JMenu menuLevels = new JMenu("Levels");
+		for (int l = 0; l < levels.length; l++) {
+			JMenuItem li = Utils.addMenuItem(this, menuLevels, levels[l].toString());
+			li.setActionCommand(LEVEL_TEXT + " " + (l + 1));
+		}
+		menuBar.add(menuLevels);
+
 		setJMenuBar(menuBar);
 
 		JPanel basePane = new JPanel();
@@ -110,8 +122,8 @@ public class Trainer extends JFrame implements ActionListener {
 		levelButtonUp = new JButton(LEVEL_UP);
 		levelButtonUp.addActionListener(this);
 		controllBox.add(levelButtonUp);
-		
-		levelLabel = new JLabel( levelText() );
+
+		levelLabel = new JLabel(levelText());
 		controllBox.add(levelLabel);
 
 		levelButtonDown = new JButton(LEVEL_DOWN);
@@ -140,34 +152,23 @@ public class Trainer extends JFrame implements ActionListener {
 	}
 
 	public void loadImage() {
+
 		final XSendAdapter xsa = new XSendAdapter(board);
 		PatternGenerator pg = new PatternGenerator(xsa);
-		if (level == 1) {
-			pg.generate(Mode.SINGLE);
-		} else if (level == 2) {
-			pg.generate(Mode.SINGLE, true);
-		} else if (level == 3) {
-			pg.generate(Mode.MULTI);
-		} else if (level == 4) {
-			pg.generate(Mode.MULTI, true);
-		} else if (level == 5) {
-			pg.generate(Mode.TRIANGLE);
-		} else if (level == 6) {
-			pg.generate(Mode.FRAME);
-		} else if (level == 7) {
-			pg.generate(Mode.ARROW);
-		}
-		hashCode = pg.getHashCode();
+		pg.generate(levels[level - 1]);
+		hashCode = pg.hashCode();
 		BufferedImage image = board.getGraphic().getImage();
 		goal.setIcon(new ImageIcon(image));
 		pack();
 		xsa.loeschen();
 		xsa.formen("c");
-		
+		System.out.println("Trainer: " + board);
+		board.receiveMessage(Board.FILTER_PREFIX + "clearAllText");
+
 		String dirName = "pattern";
-		String filename = dirName+ System.getProperty("file.separator") +"p" + random.nextLong() + ".png";
-		File dir = new File( dirName);
-		if( ! dir.exists() ) {
+		String filename = dirName + System.getProperty("file.separator") + "p" + random.nextLong() + ".png";
+		File dir = new File(dirName);
+		if (!dir.exists()) {
 			dir.mkdirs();
 		}
 		try {
@@ -177,9 +178,9 @@ public class Trainer extends JFrame implements ActionListener {
 		}
 
 		protocol.nextImage();
-		protocol.writeInfo( "time", time() );
-		protocol.writeInfo( "level", ""+level);
-		protocol.writeInfo( "file", ""+ filename);
+		protocol.writeInfo("time", time());
+		protocol.writeInfo("level", "" + level);
+		protocol.writeInfo("file", "" + filename);
 	}
 
 	@Override
@@ -196,15 +197,19 @@ public class Trainer extends JFrame implements ActionListener {
 				++hitCount[level];
 				result.setText("SUPER!");
 				checkButton.setEnabled(false);
-				protocol.writeInfo("hit", time() );
-				protocol.writeCData("code",board.getCodeWindow().getCode() );
+				protocol.writeInfo("hit", time());
+				if (board.getCodeWindow() == null) {
+					protocol.writeCData("code", "???");
+				} else {
+					protocol.writeCData("code", board.getCodeWindow().getCode());
+				}
 			} else {
-				result.setText("Leider nicht!");
+				result.setText(messages.getString("sorryFail"));
 				protocol.writeInfo("fail", time());
 			}
 
 		} else if (cmd.equals(LEVEL_UP)) {
-			if (level < maxLevel) {
+			if (level < levels.length) {
 				++level;
 				levelLabel.setText(levelText());
 				nextImage();
@@ -220,23 +225,29 @@ public class Trainer extends JFrame implements ActionListener {
 		} else if (cmd.equals("next")) {
 			nextImage();
 
+		} else if (cmd.startsWith(LEVEL_TEXT)) {
+			String ls = cmd.substring(LEVEL_TEXT.length()).trim();
+			level = Integer.parseInt(ls);
+			levelLabel.setText(levelText());
+			nextImage();
+
 		} else if (cmd.equals(PROTOCOL_TEXT)) {
-//			String results = "Results:" + System.lineSeparator();
-//			results += "Start: " + startTime + System.lineSeparator();
-//			results += "aktuell: " + time() + System.lineSeparator();
-//			for( int l=1; l<=maxLevel; l++ ) {
-//				results += "Level: " + l + "   " + hitCount[l] + " hits" + System.lineSeparator();
-//			}
-//			JLabel test = new JLabel( protocol.getText() );
-//			JOptionPane.showMessageDialog(this, test,
-//					"Protocol", JOptionPane.INFORMATION_MESSAGE);
-			
+			// String results = "Results:" + System.lineSeparator();
+			// results += "Start: " + startTime + System.lineSeparator();
+			// results += "aktuell: " + time() + System.lineSeparator();
+			// for( int l=1; l<=maxLevel; l++ ) {
+			// results += "Level: " + l + " " + hitCount[l] + " hits" +
+			// System.lineSeparator();
+			// }
+			// JLabel test = new JLabel( protocol.getText() );
+			// JOptionPane.showMessageDialog(this, test,
+			// "Protocol", JOptionPane.INFORMATION_MESSAGE);
+
 			File file = new File(protocol.getHTMLFileName());
 			try {
-			    Desktop.getDesktop().browse(file.toURI());
+				Desktop.getDesktop().browse(file.toURI());
 			} catch (IOException e1) {
-				JOptionPane.showMessageDialog(this, e1.getMessage(),
-						"Protocol", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(this, e1.getMessage(), "Protocol", JOptionPane.ERROR_MESSAGE);
 			}
 
 		}

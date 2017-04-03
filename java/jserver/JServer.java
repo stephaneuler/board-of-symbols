@@ -48,24 +48,29 @@ public class JServer implements Runnable {
 				Socket sockConnected = socket.accept();
 				System.out.println("Connected with " + sockConnected);
 				logger.info("Connected with " + sockConnected);
-				PrintStream ps = new PrintStream(
-						sockConnected.getOutputStream());
+				PrintStream ps = new PrintStream(sockConnected.getOutputStream());
 
 				InputStream isr = sockConnected.getInputStream();
 
 				String line = getLine(isr);
-				System.out.println("> " + line);
-				logger.info(line);
 
-				if (line.startsWith("GET")) {
-					ps.print("Hallo");
+				if (line == null) {
+					System.out.println("No data read!!");
+					logger.info("No data read!!");
+
 				} else {
-					if (board.isFilterMode()) {
-						line = Board.FILTER_PREFIX + line;
-					}
-					// send line to board and return answer to client
-					ps.print(board.receiveMessage(line));
+					System.out.println("> " + line);
+					logger.info(line);
+					if (line.startsWith("GET")) {
+						ps.print("Hallo");
+					} else {
+						if (board.isFilterMode()) {
+							line = Board.FILTER_PREFIX + line;
+						}
+						// send line to board and return answer to client
+						ps.print(board.receiveMessage(line));
 
+					}
 				}
 				isr.close();
 				ps.close();

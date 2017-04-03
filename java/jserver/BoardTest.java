@@ -28,7 +28,7 @@ public class BoardTest {
 	public void testContent() {
 		BoardSerializer bs = new BoardSerializer();
 
-		bs.serialize(board);
+		bs.buildDocument(board);
 		String s = bs.write();
 		assertEquals("#hash code content", s.hashCode(), 699796684);
 	}

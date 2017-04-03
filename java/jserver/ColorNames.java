@@ -2,6 +2,7 @@ package jserver;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class ColorNames {
 	private static Map<String, Integer> colors = new HashMap<String, Integer>();
@@ -156,6 +157,15 @@ public class ColorNames {
 
 	public static void setColors(Map<String, Integer> colors) {
 		ColorNames.colors = colors;
+	}
+
+	public static String getName(int color) {
+		for (Entry<String, Integer> entry : colors.entrySet()) {
+			if (entry.getValue().equals(color)) {
+				return entry.getKey();
+			}
+		}
+		return null;
 	}
 
 }

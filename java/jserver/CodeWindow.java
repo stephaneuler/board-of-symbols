@@ -109,12 +109,13 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 	private static String autoLayoutText;
 	private static String replaceText = "ersetzen";
 	private static String editNewSnippetText;
-	private static String deleteSnippetText = "delete snippet";
+	private static String deleteSnippetText;
 	private static String importSnippetText = "Import";
+	private static String exportSnippetText = "Export";
 	private static String snippetInfoText = "Info";
 	private static String showGeneratedCodeText;
-	private static String resetOnStartText = "reset on start";
-	private static final String lastEditedSnippetText = "<html><em>letztes Snippet</em></html>";
+	private static String resetOnStartText;
+	//private static final String lastEditedSnippetText = "<html><em>letztes Snippet</em></html>";
 
 	private int xsize = 500;
 	private int ysize = 350;
@@ -129,7 +130,7 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 	private JEditorPane codeInput = new JEditorPane();
 	private JTextArea messageField = new JTextArea();
 	private JTextField snippetNameField = new JTextField();
-	//private JLabel snippetNameLabel = new JLabel(newSnippetText);
+	// private JLabel snippetNameLabel = new JLabel(newSnippetText);
 	// private JLabel statusLabel = new JLabel();
 	private JLabel executionInfoLabel = new JLabel();
 	private JLabel infoLabel = new JLabel();
@@ -169,7 +170,7 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 	private Properties properties;
 	private boolean resetOnStart;
 	private String lastSourceText = "";
-	private String lastDestText  = "";
+	private String lastDestText = "";
 
 	public CodeWindow(Board board) {
 		this.board = board;
@@ -185,7 +186,7 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 			authorName = a;
 		}
 		resetOnStart = Boolean.parseBoolean(properties.getProperty("resetOnStart"));
-				
+
 		fileOpenDirectory = properties.getProperty("codeDir");
 		XMLFileName = properties.getProperty("XMLFileName");
 		String mode = properties.getProperty("compiler", CodeExecutor.gccText);
@@ -221,7 +222,8 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 		fontSizeText = Utils.capitalize(messages.getString("fontSize"));
 		helpText = Utils.capitalize(messages.getString("help"));
 		editNewSnippetText = Utils.capitalize(messages.getString("new"));
-		//newSnippetText = "<html><em>" + messages.getString("new") + "</em></html>";
+		// newSnippetText = "<html><em>" + messages.getString("new") +
+		// "</em></html>";
 		version = messages.getString("codeWindowVersion");
 		saveText = messages.getString("save");
 		saveAsText = messages.getString("saveAs");
@@ -233,6 +235,8 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 		stopText = messages.getString("stopExecution");
 		commandsFromFiletext = messages.getString("fromFile");
 		showGeneratedCodeText = messages.getString("generatedCode");
+		deleteSnippetText = messages.getString("deleteSnippet");
+		resetOnStartText = messages.getString("resetOnStart");
 
 	}
 
@@ -377,19 +381,37 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 			snippetSelector.addItem(name);
 		}
 
+		saveButton = new JButton(saveText);
+		saveButton.addActionListener(this);
+		saveButton.setEnabled(false);
+
 		snippetSelector.setActionCommand(loadCommand);
+		String lastSnippetName = properties.getProperty("snippetName");
 		snippetSelector.setSelectedIndex(-1);
+		if( lastSnippetName != null ) {
+			System.out.println( "Try snippet " + lastSnippetName );
+			if( codeDB.hasSnippet(lastSnippetName)  ) {
+				codeInput.setText(codeDB.getSnippetCode(lastSnippetName) );
+				for( int j=0; j<snippetSelector.getItemCount(); j++ ) {
+					if( lastSnippetName.equals(snippetSelector.getItemAt(j))) {
+						snippetName = lastSnippetName;
+						snippetSelector.setSelectedIndex(j);
+						saveButton.setEnabled(true);
+						break;
+					}
+				}
+			}
+		}
+				
+
 		snippetSelector.addActionListener(this);
 
 		runButton.addActionListener(this);
 		stopButton.addActionListener(this);
-		saveButton = new JButton(saveText);
-		saveButton.addActionListener(this);
-		saveButton.setEnabled(false);
 		saveAsButton = new JButton(saveAsText);
 		saveAsButton.addActionListener(this);
 		showColorChooserButton.addActionListener(this);
-		
+
 		snippetInfoButton = new JButton(snippetInfoText);
 		snippetInfoButton.addActionListener(this);
 
@@ -461,7 +483,7 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 		colorSelector.setMaximumSize(new Dimension(componentXSize, componentYSize));
 
 		snippetSelector.setMaximumSize(componentSize);
-		//snippetNameLabel.setMaximumSize(componentSize);
+		// snippetNameLabel.setMaximumSize(componentSize);
 		// statusLabel.setMaximumSize(componentSize);
 		snippetNameField.setMaximumSize(componentSize);
 		// runButton.setMaximumSize(componentSize);
@@ -470,7 +492,8 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 
 		snippetSelector.setAlignmentX(Component.LEFT_ALIGNMENT);
 		snippetNameField.setAlignmentX(Component.LEFT_ALIGNMENT);
-		//snippetNameLabel.setBorder(BorderFactory.createLineBorder(Color.BLUE, 3));
+		// snippetNameLabel.setBorder(BorderFactory.createLineBorder(Color.BLUE,
+		// 3));
 		// statusLabel.setBorder(BorderFactory.createLineBorder(Color.BLUE, 3));
 
 		codeInput.setPreferredSize(new Dimension(500, 300));
@@ -496,10 +519,12 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 		// felhermeldung), C-Mode kein sichtbarer Effekt
 		// DefaultSyntaxKit.initKit();
 		// codeInput.setContentType("text/C");
-		if (codeDB.hasLastEditElement()) {
-			codeInput.setText(codeDB.getLastEditElement().getTextContent());
-			//snippetNameLabel.setText(lastEditedSnippetText);
-		}
+		
+//		if (codeDB.hasLastEditElement()) {
+//			codeInput.setText(codeDB.getLastEditElement().getTextContent());
+//			// snippetNameLabel.setText(lastEditedSnippetText);
+//		}
+		
 		codeHasChanged = false;
 
 		messageField.setColumns(60);
@@ -507,11 +532,11 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 		messageField.setFont(normalFont);
 		JScrollPane scrollPane2 = new JScrollPane(messageField);
 
-		JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, scrollPane, scrollPane2 );
+		JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, scrollPane, scrollPane2);
 		split.setResizeWeight(0.7);
-		center.add( split );
-		//center.add(scrollPane);
-		//center.add(scrollPane2);
+		center.add(split);
+		// center.add(scrollPane);
+		// center.add(scrollPane2);
 
 		JMenu menuProperties;
 		JMenu menuCompile;
@@ -535,6 +560,7 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 
 		Utils.addMenuItem(this, menuCompile, CodeExecutor.boSLText, "BoS Language");
 		Utils.addMenuItem(this, menuCompile, CodeExecutor.JSText, "JavaScript");
+		Utils.addMenuItem(this, menuCompile, CodeExecutor.pythonText, "Python");
 
 		JMenu cMenu = new JMenu("C");
 
@@ -547,14 +573,15 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 		menuCompile.addSeparator();
 		Utils.addMenuItem(this, menuCompile, editNewSnippetText, messages.getString("tooltip.newSnippet"), "control N");
 		Utils.addMenuItem(this, menuCompile, importSnippetText);
+		Utils.addMenuItem(this, menuCompile, exportSnippetText);
 		Utils.addMenuItem(this, menuCompile, showGeneratedCodeText, messages.getString("tooltip.generatedCode"),
 				"control G");
 		menuCompile.addSeparator();
 		Utils.addMenuItem(this, menuCompile, runText, messages.getString("tooltip.compileExecute"), "alt X");
 		Utils.addMenuItem(this, menuCompile, stopText, messages.getString("tooltip.stopExecution"));
-		JMenuItem mi =  new JCheckBoxMenuItem(resetOnStartText, resetOnStart);
+		JMenuItem mi = new JCheckBoxMenuItem(resetOnStartText, resetOnStart);
 		mi.addActionListener(this);
-		menuCompile.add( mi );
+		menuCompile.add(mi);
 		Utils.addMenuItem(this, menuCompile, commandsFromFiletext, messages.getString("tooltip.fromFile"), "alt Y");
 
 		// only usefull for testing / debugging
@@ -593,17 +620,18 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 				.addComponent(editMenu).addComponent(menuHelp).addComponent(infoLabel));
 		verticalGroup.addGroup(layout.createParallelGroup().addComponent(runButton).addComponent(stopButton)
 				.addComponent(executionInfoLabel).addComponent(showColorChooserButton).addComponent(colorSelector));
-		verticalGroup.addGroup(layout.createParallelGroup().addComponent(snippetInfoButton).addComponent(snippetSelector)
-				.addComponent(saveButton).addComponent(saveAsButton).addComponent(snippetNameField).addComponent(deleteSnippetButton));
+		verticalGroup.addGroup(layout.createParallelGroup().addComponent(snippetInfoButton)
+				.addComponent(snippetSelector).addComponent(saveButton).addComponent(saveAsButton)
+				.addComponent(snippetNameField).addComponent(deleteSnippetButton));
 
 		ParallelGroup horizontalGroup = layout.createParallelGroup();
 		horizontalGroup.addGroup(layout.createSequentialGroup().addComponent(menuProperties).addComponent(menuCompile)
 				.addComponent(editMenu).addComponent(menuHelp).addGap(0, 0, Short.MAX_VALUE).addComponent(infoLabel));
 		horizontalGroup.addGroup(layout.createSequentialGroup().addComponent(runButton).addComponent(stopButton)
 				.addComponent(executionInfoLabel).addComponent(showColorChooserButton).addComponent(colorSelector));
-		horizontalGroup
-				.addGroup(layout.createSequentialGroup().addComponent(snippetInfoButton).addComponent(snippetSelector)
-						.addComponent(saveButton).addComponent(saveAsButton).addComponent(snippetNameField).addComponent(deleteSnippetButton));
+		horizontalGroup.addGroup(layout.createSequentialGroup().addComponent(snippetInfoButton)
+				.addComponent(snippetSelector).addComponent(saveButton).addComponent(saveAsButton)
+				.addComponent(snippetNameField).addComponent(deleteSnippetButton));
 
 		layout.setVerticalGroup(verticalGroup);
 		layout.setHorizontalGroup(horizontalGroup);
@@ -619,7 +647,7 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 		System.out.println("CodeWindow cmd: " + cmd);
 
 		if (cmd.equals(runText)) {
-			if( resetOnStart ) {
+			if (resetOnStart) {
 				board.reset();
 			}
 			SwingWorker<Boolean, Void> worker = new CodeRunner<Boolean, Void>();
@@ -648,7 +676,7 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 			snippetSelector.removeActionListener(this);
 			snippetSelector.setSelectedIndex(-1);
 			snippetSelector.addActionListener(this);
-			//snippetNameLabel.setText(newSnippetText);
+			// snippetNameLabel.setText(newSnippetText);
 			saveButton.setEnabled(false);
 			codeHasChanged = false;
 			updateInfoLabel();
@@ -662,69 +690,88 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 			}
 			JComboBox<String> cb = (JComboBox<String>) event.getSource();
 			String selectedSnippetName = (String) cb.getSelectedItem();
-			System.out.println("combo: " + selectedSnippetName);
+			//System.out.println("combo: " + selectedSnippetName);
 			codeInput.setText(codeDB.getSnippetCode(selectedSnippetName));
 			snippetName = selectedSnippetName;
-			//snippetNameLabel.setText(clipText(snippetName, 15));
+			// snippetNameLabel.setText(clipText(snippetName, 15));
 			saveButton.setEnabled(true);
 			codeHasChanged = false;
+			rememberSnippetName( );
 			updateInfoLabel();
+
+		} else if (cmd.equals(exportSnippetText)) {
+			InfoBox info = new InfoBox(this, "", 500, 400);
+			info.setTitle("Export Snippet");
+			info.getTextArea().setFont( normalFont );
+			String exportText = "";
+			if (snippetName == null) {
+				exportText = "No snippet loaded";
+			} else {
+				Element s = codeDB.getSnippetByName(snippetName);
+				Snippet snippet = new Snippet(s);
+				exportText  = snippet.write();
+			}
+
+			info.getTextArea().setText(exportText);
+			info.setVisible(true);
 
 		} else if (cmd.equals(importSnippetText)) {
 			JTextArea ta = new JTextArea(20, 20);
 			int ret = JOptionPane.showConfirmDialog(this, new JScrollPane(ta), "Import", JOptionPane.OK_CANCEL_OPTION);
-			if( ret != JOptionPane.OK_OPTION ) {
+			if (ret != JOptionPane.OK_OPTION) {
 				return;
 			}
 			String xmlString = ta.getText();
 			try {
 				Snippet importedSnippet = new Snippet(xmlString);
 				String text = importedSnippet.getName();
-				//JOptionPane.showMessageDialog(this, importedSnippet.getInfo(), "Imported: " + text, JOptionPane.PLAIN_MESSAGE);
-				codeDB.importSnippet(importedSnippet.getElement() );
+				if (codeDB.hasSnippet(text)) {
+					throw new SnippetException("duplicate snippet name");
+				}
+				// JOptionPane.showMessageDialog(this,
+				// importedSnippet.getInfo(), "Imported: " + text,
+				// JOptionPane.PLAIN_MESSAGE);
+				codeDB.importSnippet(importedSnippet.getElement());
 				codeHasChanged = false;
 				snippetSelector.addItem(text);
 				snippetSelector.setSelectedIndex(snippetSelector.getItemCount() - 1);
 				snippetName = text;
-				snippetNameField.setText("");
+				rememberSnippetName();
 				saveButton.setEnabled(true);
 				updateInfoLabel();
 
-			} catch (ParserConfigurationException | SAXException | IOException e) {
-				JOptionPane.showMessageDialog(this, e.getMessage(), "Import Error",
-						JOptionPane.ERROR_MESSAGE);
-				//e.printStackTrace();
+			} catch (ParserConfigurationException | SAXException | IOException | SnippetException e) {
+				JOptionPane.showMessageDialog(this, e.getMessage(), "Import Error", JOptionPane.ERROR_MESSAGE);
 			}
-			
+
 		} else if (cmd.equals(snippetInfoText)) {
 			InfoBox info = new InfoBox(this, "", 600, 400);
-			info.setTitle( "Snippet Info");
-			info.getTextArea().setFont( board.getCodeWindow().getNormalFont() );
+			info.setTitle("Snippet Info");
+			info.getTextArea().setFont(board.getCodeWindow().getNormalFont());
 			String infoText = "";
-			if( snippetName == null ) {
+			if (snippetName == null) {
 				infoText = "No snippet loaded";
-			} else  {
+			} else {
 				infoText += "Snippet: " + snippetName + "\n";
 				Element s = codeDB.getSnippetByName(snippetName);
-				Snippet snippet = new Snippet( s );
+				Snippet snippet = new Snippet(s);
 				infoText += snippet.getInfo();
-				}
-			info.getTextArea().setText( infoText );
+			}
+			info.getTextArea().setText(infoText);
 			info.setVisible(true);
-			
 
 		} else if (cmd.equals(deleteSnippetText)) {
-			if( snippetName == null ) {
+			if (snippetName == null) {
 				JOptionPane.showMessageDialog(this, "No snippet to delete.", "No Snippet", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 			int ret = JOptionPane.showConfirmDialog(this, "Really delete snippet <<" + snippetName + ">> ?");
-			if( ret != JOptionPane.OK_OPTION ) {
+			if (ret != JOptionPane.OK_OPTION) {
 				return;
 			}
-			codeDB.deleteSnippet( snippetName );
+			codeDB.deleteSnippet(snippetName);
 			snippetSelector.removeItem(snippetName);
-			
+
 		} else if (cmd.equals(saveText)) {
 			codeDB.overwriteSnippet(snippetName, codeInput.getText());
 			codeHasChanged = false;
@@ -751,12 +798,13 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 			String country = properties.getProperty("country", null);
 			Locale locale = new Locale(language, country);
 
-			codeDB.saveAsSnippet(text, codeInput.getText(), authorName, locale );
+			codeDB.saveAsSnippet(text, codeInput.getText(), authorName, locale);
 			codeHasChanged = false;
 			snippetSelector.addItem(text);
 			snippetSelector.setSelectedIndex(snippetSelector.getItemCount() - 1);
 			snippetName = text;
-			//snippetNameLabel.setText(snippetName);
+			rememberSnippetName();
+			// snippetNameLabel.setText(snippetName);
 			snippetNameField.setText("");
 			saveButton.setEnabled(true);
 			updateInfoLabel();
@@ -769,6 +817,7 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 			colorChooserFrame.setVisible(true);
 
 		} else if (cmd.equals(colorSelectorCommand)) {
+			@SuppressWarnings("unchecked")
 			JComboBox<String> cb = (JComboBox<String>) event.getSource();
 			String color = (String) cb.getSelectedItem();
 			Document doc = codeInput.getDocument();
@@ -776,7 +825,6 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 			try {
 				doc.insertString(pos, color, null);
 			} catch (BadLocationException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -786,7 +834,6 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 				Document doc = codeInput.getDocument();
 				doc.insertString(pos, cmd.substring(METHOD_PREFIX.length()), null);
 			} catch (BadLocationException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -832,19 +879,18 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 			}
 
 		} else if (cmd.equals(replaceText)) {
-			JTextField source = new JTextField( lastSourceText );
-			JTextField dest = new JTextField( lastDestText );
-			int ret = Dialogs.replaceDialog( source, dest, messages );
-			if( ret == JOptionPane.OK_OPTION ) {
+			JTextField source = new JTextField(lastSourceText);
+			JTextField dest = new JTextField(lastDestText);
+			int ret = Dialogs.replaceDialog(source, dest, messages);
+			if (ret == JOptionPane.OK_OPTION) {
 				String text = codeInput.getText();
 				lastSourceText = source.getText();
-				lastDestText  = dest.getText();
-				text = text.replaceAll(lastSourceText, lastDestText );
+				lastDestText = dest.getText();
+				text = text.replaceAll(lastSourceText, lastDestText);
 				codeInput.setText(text);
 				codeHasChanged = true;
 			}
 
-			
 		} else if (cmd.equals(autoLayoutText)) {
 			codeInput.setText(codeLayouter.autoLayout(codeInput.getText()));
 
@@ -908,14 +954,18 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 					JOptionPane.INFORMATION_MESSAGE);
 
 		} else if (cmd.equals(resetOnStartText)) {
-			resetOnStart = ! resetOnStart;
-				properties.setProperty("resetOnStart", "" + resetOnStart);
-				board.saveProperties();
+			resetOnStart = !resetOnStart;
+			properties.setProperty("resetOnStart", "" + resetOnStart);
+			board.saveProperties();
 
-			
 		} else if (cmd.equals(showGeneratedCodeText)) {
 			codeExecutor.showGeneratedCode(messages);
 		}
+	}
+
+	private void rememberSnippetName() {
+		properties.setProperty("snippetName", snippetName);
+		board.saveProperties();
 	}
 
 	private String clipText(String text, int maxLength) {
@@ -961,9 +1011,9 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 				result = "... \n" + result.substring(result.length() - maxLength);
 				// result = "zu viele Zeilen \n";
 			}
-			if ( codeExecutor instanceof CodeExecutorJS ) {
+			if (codeExecutor instanceof CodeExecutorJS) {
 				messageField.append(result);
-			} else 	if (!(codeExecutor instanceof CodeExecutorJava)  ) {
+			} else if (!(codeExecutor instanceof CodeExecutorJava)) {
 				messageField.append(result);
 			}
 			// if (board.getErrorCount() > 0) {

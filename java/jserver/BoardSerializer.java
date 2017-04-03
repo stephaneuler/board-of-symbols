@@ -21,34 +21,6 @@ import org.w3c.dom.Node;
 public class BoardSerializer {
 	private Document document;
 
-	public static void main(String[] args) {
-		Board b = new Board();
-		BoardSerializer bs = new BoardSerializer();
-
-		b.receiveMessage("2 0xff");
-		bs.serialize(b);
-		String s = bs.write();
-		System.out.println( s );
-		System.out.println( "Length: " + s.length() );
-		System.out.println( "Hash: " + s.hashCode() );
-
-	}
-
-	String write() {
-		Transformer tf;
-		StringWriter writer = new StringWriter();
-	       StreamResult result = new StreamResult(writer);
-	 		try {
-			tf = TransformerFactory.newInstance().newTransformer();
-			tf.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-			tf.setOutputProperty(OutputKeys.INDENT, "yes");
-			tf.transform(new DOMSource(document), result);
-		} catch (TransformerFactoryConfigurationError | TransformerException e) {
-			e.printStackTrace();
-		}
-	 		return writer.toString();
-	}
-
 	public BoardSerializer() {
 		super();
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -60,33 +32,71 @@ public class BoardSerializer {
 			return;
 		}
 		document = builder.newDocument();
+	
+	}
+
+	public static void main(String[] args) {
+		Board b = new Board();
+		BoardSerializer bs = new BoardSerializer();
+
+		b.receiveMessage("2 0xff");
+		bs.buildDocument(b);
+		String s = bs.write();
+		System.out.println(s);
+		System.out.println("Length: " + s.length());
+		System.out.println("Hash: " + s.hashCode());
+
+		b.receiveMessage("T 2 Hallo");
+		bs = new BoardSerializer();
+		bs.buildDocument(b);
+	    s = bs.write();
+		System.out.println("Length: " + s.length());
+		System.out.println("Hash: " + s.hashCode());
 
 	}
 
-	void serialize(Board b) {
+	String write() {
+		Transformer tf;
+		StringWriter writer = new StringWriter();
+		StreamResult result = new StreamResult(writer);
+		try {
+			tf = TransformerFactory.newInstance().newTransformer();
+			tf.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+			tf.setOutputProperty(OutputKeys.INDENT, "yes");
+			tf.transform(new DOMSource(document), result);
+		} catch (TransformerFactoryConfigurationError | TransformerException e) {
+			e.printStackTrace();
+		}
+		return writer.toString();
+	}
+
+	void buildDocument(Board b) {
 		Node root = document.appendChild(document.createElement("board"));
 		addChild(root, "rows", "" + b.getRows());
 		addChild(root, "columns", "" + b.getColumns());
 		List<Symbol> symbols = b.getSymbols();
 		for (Symbol s : symbols) {
 			Node sn = addChild(root, "symbol");
-			addChild(sn, "pos", s.getPos().toString() ) ;
-			addChild(sn, "type", s.getType().toString() ) ;
-			addChild(sn, "color", ""+s.getFarbe());
+			addChild(sn, "pos", s.getPos().toString());
+			addChild(sn, "type", s.getType().toString());
+			addChild(sn, "color", "" + s.getFarbe());
+			if( s.hasText() ) {
+				addChild(sn, "text", "" + s.getText());
+			}
 		}
 
 	}
 
-	private Node addChild(Node root, String name, String value) {
+	private Node addChild(Node node, String name, String value) {
 		Element created = document.createElement(name);
 		created.setTextContent(value);
-		root.appendChild(created);
+		node.appendChild(created);
 		return created;
 	}
 
-	private Node addChild(Node root, String name) {
+	private Node addChild(Node node, String name) {
 		Element created = document.createElement(name);
-		root.appendChild(created);
+		node.appendChild(created);
 		return created;
 	}
 

@@ -3,26 +3,33 @@ package jserver;
 import java.util.Random;
 
 enum Mode {
-	SINGLE, MULTI, TRIANGLE, FRAME, ARROW
+	SINGLE, MULTI, TRIANGLE, FRAME, ARROW, STAIRWAY, THM, ABC, MODULO, DICE
 }
 
+/**
+ * Generator for BoS-patterns. The method generate() draws a pattern on a board
+ * using the given mode. Parameters such as position, size and color vary
+ * randomly.
+ * 
+ * @author Euler
+ *
+ */
 public class PatternGenerator {
+	// parameters for the random variations
 	Random random = new Random();
 	int[] colors = { XSendAdapter.RED, XSendAdapter.GREEN, XSendAdapter.BLUE, XSendAdapter.YELLOW };
 	String[] forms = { "s", "c", "d", "*", "+" };
+	String[] bgForms = { "+", "/", "\\", "none" };
+
 	int N = 10;
 	int hashCode;
+	Board board;
 	XSendAdapter xsa;
-	Board b;
-
-	public int getHashCode() {
-		return hashCode;
-	}
 
 	public PatternGenerator(XSendAdapter xsa) {
 		super();
 		this.xsa = xsa;
-		b = xsa.getBoard();
+		board = xsa.getBoard();
 		xsa.groesse(N, N);
 	}
 
@@ -30,15 +37,20 @@ public class PatternGenerator {
 		super();
 		N = n;
 		xsa = new XSendAdapter();
-		b = xsa.getBoard();
+		board = xsa.getBoard();
 		xsa.groesse(N, N);
+	}
+
+	@Override
+	public int hashCode() {
+		return hashCode;
 	}
 
 	public static void main(String[] args) {
 		PatternGenerator pg = new PatternGenerator(10);
 		// pg.generateAll();
 
-		pg.generate(Mode.ARROW, true);
+		pg.generate(Mode.STAIRWAY, true);
 	}
 
 	public void generateAll() {
@@ -49,9 +61,8 @@ public class PatternGenerator {
 	}
 
 	private void saveToFile() {
-		// System.out.println( s );
 		String filename = "pattern/p" + random.nextLong() + ".png";
-		b.getGraphic().saveImageToFile(filename);
+		board.getGraphic().saveImageToFile(filename);
 		System.out.println(filename + "  Hash: " + hashCode);
 	}
 
@@ -63,9 +74,26 @@ public class PatternGenerator {
 		generate(mode, false);
 	}
 
-	public void generate(Mode mode, boolean randomForm) {
+	void generate(Mode mode, boolean c) {
+		generate(mode, c, false);
+	}
+
+	public void generate(TrainerLevel trainerLevel) {
+		generate(trainerLevel.mode, trainerLevel.randomForm, trainerLevel.useBackGroundForm);
+	}
+
+	/**
+	 * @param mode
+	 *            the pattern mode
+	 * @param randomForm
+	 *            if true use a random form
+	 * @param useBG
+	 *            if true fill the board with one of the background forms
+	 */
+	public void generate(Mode mode, boolean randomForm, boolean useBG) {
 		BoardSerializer bs = new BoardSerializer();
-		b.receiveMessage("statusfontsize 20");
+		board.receiveMessage(Board.FILTER_PREFIX +"statusfontsize 18");
+		xsa.board.receiveMessage(Board.FILTER_PREFIX +"clearAllText");
 		xsa.loeschen();
 		xsa.formen("c");
 
@@ -78,8 +106,23 @@ public class PatternGenerator {
 		} while (zinc == 1 && sinc == 1);
 
 		int color = colors[random.nextInt(colors.length)];
-		xsa.statusText("Mode: " + mode.toString() + " Farbe: 0x" + Integer.toHexString(color).toUpperCase() );
+		String status = "Mode: " + mode.toString() + " Farbe: ";
+		String colorName = ColorNames.getName( color );
+		if( colorName == null ) {
+			status += "0x" + Integer.toHexString(color).toUpperCase();
+		} else {
+			status += colorName;
+		}
+		xsa.statusText( status );
 		String form = forms[random.nextInt(forms.length)];
+
+		if (useBG) {
+			String bgform = bgForms[random.nextInt(bgForms.length)];
+			while (form.equals(bgform)) {
+				bgform = forms[random.nextInt(forms.length)];
+			}
+			xsa.formen(bgform);
+		}
 
 		if (mode == Mode.SINGLE) {
 			xsa.farbe2(sstart, zstart, color);
@@ -125,7 +168,7 @@ public class PatternGenerator {
 			zstart = 1 + random.nextInt(2);
 			sstart = 1 + random.nextInt(2);
 			int max = (zstart > sstart) ? zstart : sstart;
-			int size = N - 2* max;
+			int size = N - 2 * max;
 			int tip = random.nextInt(4);
 			switch (tip) {
 			case 0:
@@ -134,27 +177,64 @@ public class PatternGenerator {
 				Painter.linie(xsa, sstart, zstart, 1, 1, size, color, "c");
 				break;
 			case 1:
-				Painter.waagrecht(xsa, sstart, zstart+size-1, size, color, "c");
+				Painter.waagrecht(xsa, sstart, zstart + size - 1, size, color, "c");
 				Painter.senkrecht(xsa, sstart, zstart, size, color, "c");
-				Painter.linie(xsa, sstart, zstart+size-1, 1, -1, size, color, "c");
+				Painter.linie(xsa, sstart, zstart + size - 1, 1, -1, size, color, "c");
 				break;
 			case 2:
-				Painter.waagrecht(xsa, sstart, zstart+size-1, size, color, "c");
-				Painter.senkrecht(xsa, sstart+size-1, zstart, size, color, "c");
+				Painter.waagrecht(xsa, sstart, zstart + size - 1, size, color, "c");
+				Painter.senkrecht(xsa, sstart + size - 1, zstart, size, color, "c");
 				Painter.linie(xsa, sstart, zstart, 1, 1, size, color, "c");
 				break;
 			case 3:
 				Painter.waagrecht(xsa, sstart, zstart, size, color, "c");
-				Painter.senkrecht(xsa, sstart+size-1, zstart, size, color, "c");
-				Painter.linie(xsa, sstart+size-1, zstart, -1, 1, size, color, "c");
+				Painter.senkrecht(xsa, sstart + size - 1, zstart, size, color, "c");
+				Painter.linie(xsa, sstart + size - 1, zstart, -1, 1, size, color, "c");
 				break;
 			}
+
+		} else if (mode == Mode.STAIRWAY) {
+			int width = 3 + random.nextInt(2);
+			for( int s=sstart; s<N-width; s++ ) {
+				Painter.waagrecht(xsa, s, zstart+(s-sstart), width, color, "s" );
+			}
+			
+		} else if (mode == Mode.THM) {
+			xsa.text2(sstart, zstart, "T");
+			xsa.text2(sstart+1, zstart, "H");
+			xsa.text2(sstart+2, zstart, "M");
+			
+		} else if (mode == Mode.ABC) {
+			for( int i=zstart; i<26; i+= zinc ) {
+				char c = (char)('A'+i);
+				xsa.farbe(sstart, color);
+				xsa.text(sstart, ""+c);
+				++sstart;
+			}
+			
+		} else if (mode == Mode.MODULO) {
+			int m = 5 + random.nextInt(4);
+			for( int i=0; i<N*N; i++ ) {
+				xsa.text(i, ""+i%m);
+			}
+
+		} else if (mode == Mode.DICE) {
+			int bgColor = colors[random.nextInt(colors.length)];
+			xsa.farben( bgColor);
+			for( int i=1; i<=6; i++ ) {
+			   for( int j=1; j<=6; j++ ) {
+				   xsa.form2( i+1, 1+j, "d"+ i );     
+				   xsa.farbe2( i+1, 1+j, color );     
+			   }
+			}
+
 		}
 
-		bs.serialize(b);
+		bs.buildDocument(board);
 		String s = bs.write();
 		hashCode = s.hashCode();
 
 	}
+
 
 }

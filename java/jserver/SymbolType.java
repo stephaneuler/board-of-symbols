@@ -26,6 +26,7 @@ public enum SymbolType {
 	static Properties shortForm = new Properties();
 	static Map<SymbolType, String> texts = new HashMap<SymbolType, String>();
 	static Map<SymbolType, String> tooltips = new HashMap<SymbolType, String>();
+	static SymbolType[] values = values();
 	static Random random = new Random();
 
 	static {
@@ -68,7 +69,7 @@ public enum SymbolType {
 	 */
 	public static SymbolType getRandom() {
 		// -2 to ignore RANDOM and NONE type
-		return values()[random.nextInt( values().length -2 )];
+		return values[random.nextInt( values.length -2 )];
 	}
 
 	private static void updateShortForms() {

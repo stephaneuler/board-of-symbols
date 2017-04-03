@@ -26,6 +26,7 @@ public abstract class CodeExecutor {
 	protected static final String devCText = "DEV_C";
 	protected static final String vsText = "MS_VS";
 	protected static final String javaText = "Java";
+	protected static final String pythonText = "Python";
 	protected static final String logFileName = "v2.log";
 	protected Board board;
 	protected List<ExecutorListener> listeners = new ArrayList<ExecutorListener>();
@@ -98,6 +99,8 @@ public abstract class CodeExecutor {
 			e = new CodeExecutorBoSL(board);
 		} else if( mode.equals( JSText ) ) {
 			e = new CodeExecutorJS(board);
+		} else if( mode.equals( pythonText ) ) {
+			e = new CodeExecutorPython(board);
 		} else {
 			e = new CodeExecutorC(board);
 		}
@@ -113,6 +116,7 @@ public abstract class CodeExecutor {
 				| cmd.equals(CodeExecutor.boSLText )
 				| cmd.equals(CodeExecutor.boSLText )
 				| cmd.equals(CodeExecutor.JSText )
+				| cmd.equals(CodeExecutor.pythonText )
 				| cmd.equals(CodeExecutor.javaText);
 	}
 

@@ -91,6 +91,19 @@ public class Utils {
 		return result.trim();
 	}
 
+	public static String concat(ResourceBundleWrapper messages, String... strings) {
+		String result = "";
+
+		for (String s : strings) {
+			if (s.matches("\\W*")) {
+				result += s;
+			} else {
+				result += " " + messages.getString(s);
+			}
+		}
+		return result.trim();
+	}
+
 	public static String capitalize(String string) {
 		return string.substring(0, 1).toUpperCase() + string.substring(1);
 	}

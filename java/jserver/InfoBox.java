@@ -7,6 +7,7 @@ import java.awt.Frame;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
@@ -40,5 +41,13 @@ class InfoBox extends JFrame implements ActionListener {
 	public void actionPerformed(ActionEvent event) {
 		setVisible(false);
 		dispose();
+	}
+
+	public void setText(List<String> lines) {
+		String code = "";
+		for( int l=0; l<lines.size(); l++ ) {
+			code += String.format("%3d", l + 1) + " " + lines.get(l) + "\n";
+		}
+		textArea.setText(code);		
 	}
 }

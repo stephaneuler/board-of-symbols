@@ -9,6 +9,8 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
+import org.w3c.dom.Node;
+
 import plotter.DataObject;
 import plotter.ImageObject;
 import plotter.LineStyle;
@@ -20,7 +22,7 @@ public class Symbol {
 	private static double barWidth = 0.4;
 	private static boolean numbering = false;
 	private static Font font = new Font("Arial", Font.PLAIN, 12);
-    private static Board board;
+	private static Board board;
 	private static boolean linearNumbering = false;
 
 	Position pos;
@@ -48,7 +50,6 @@ public class Symbol {
 		fullSize = size;
 	}
 
-
 	public Position getPos() {
 		return pos;
 	}
@@ -57,21 +58,17 @@ public class Symbol {
 		return board;
 	}
 
-
 	public static void setBoard(Board board) {
 		Symbol.board = board;
 	}
-
 
 	public static boolean isLinearNumbering() {
 		return linearNumbering;
 	}
 
-
 	public static void setLinearNumbering(boolean linearNumbering) {
 		Symbol.linearNumbering = linearNumbering;
 	}
-
 
 	public static void setFontSize(int s) {
 		font = new Font("Arial", Font.PLAIN, s);
@@ -85,11 +82,9 @@ public class Symbol {
 		return font;
 	}
 
-
 	public static void setFont(Font font) {
 		Symbol.font = font;
 	}
-
 
 	public static double getBarWidth() {
 		return barWidth;
@@ -109,6 +104,10 @@ public class Symbol {
 
 	public String getText() {
 		return text;
+	}
+
+	public boolean hasText() {
+		return text != null;
 	}
 
 	public void setText(String text) {
@@ -212,15 +211,14 @@ public class Symbol {
 	// }
 
 	public void setImage(String imageFileName, Plotter plotter) {
-		plotter.removeImageObject( io );
-		if( imageFileName.equals("-") ) {
+		plotter.removeImageObject(io);
+		if (imageFileName.equals("-")) {
 			return;
 		}
 		io = plotter.setImage(imageFileName, pos.x, pos.y);
-		if( io == null ) {
-			JOptionPane.showMessageDialog(null,
-					"Datei " + imageFileName + " nicht gefunden", "Bilddatei",
-					JOptionPane.ERROR_MESSAGE );
+		if (io == null) {
+			JOptionPane.showMessageDialog(null, "Datei " + imageFileName + " nicht gefunden", "Bilddatei",
+					JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		io.setWorldWidth(2 * size);
@@ -266,8 +264,8 @@ public class Symbol {
 
 		if (numbering) {
 			plotter.setDataColor(key, new Color(farbe.getRed(), farbe.getGreen(), farbe.getBlue(), alpha));
-			String numText = "" ;
-			if( linearNumbering ) {
+			String numText = "";
+			if (linearNumbering) {
 				numText += index;
 			} else {
 				numText += index % board.getRows() + "," + index / board.getRows();
