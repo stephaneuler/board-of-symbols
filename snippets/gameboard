@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<snippet locale="de_DE" name="board">
+<author>Stephan Euler</author>
+<created>Wed May 10 14:52:54 CEST 2017</created>
+<codeA><![CDATA[
+
+int[][] brett = {
+   {1, 0, 1, 0, 0, 0, 2, 0 },
+   {0, 1, 0, 0, 0, 2, 0, 2 },
+   {1, 0, 1, 0, 0, 0, 2, 0 },
+   {0, 1, 0, 0, 0, 2, 0, 2 },
+   {1, 0, 1, 0, 0, 0, 2, 0 },
+   {0, 1, 0, 0, 0, 2, 0, 2 },
+   {1, 0, 1, 0, 0, 0, 2, 0 },
+   {0, 1, 0, 0, 0, 2, 0, 2 }
+};
+for( int x=0; x<brett.length; x++ ) {
+   for( int y=0; y<brett.length; y++ ) {
+      if( brett[x][y] == 1 ) {
+         farbe2( x, y, BLUE );
+         symbolGroesse2( x, y, 0.4 );
+      } else if( brett[x][y] == 2 ) {
+         symbolGroesse2( x, y, 0.4 );
+         farbe2( x, y, YELLOW );
+      } else {
+         form2( x, y, "none" );
+      }
+      if( (x + y ) % 2 == 0 ) {
+         hintergrund2( x, y, LIGHTGRAY );
+      } else {
+         hintergrund2( x, y , WHITE );
+      }
+   }
+}
+
+]]></codeA>
+</snippet>
