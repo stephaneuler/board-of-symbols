@@ -5,8 +5,8 @@
 <codeA><![CDATA[
 @Complete
 
-int sleepTime = 500;
-int N = 5;
+int sleepTime = 50;
+int N = 64;
 int[][] tuerme = new int[3][N];
 int anzahlSchritte = 0;
 int[] colors = new int[N];
@@ -35,15 +35,20 @@ void mySend() throws InterruptedException {
 void zeichnen() {
    formen( "none" );
    for (int n = 0; n < 3; n++) {
-      double x = n * (N + 1);
       for (int s = 0; s < N; s++) {
-         if (tuerme[n][s] != 0) {
-            int scheibe = tuerme[n][s];
-            form2(n, s, "-");
-            symbolGroesse2(n, s, (double) scheibe / N / 2);
-            farbe2(n, s, colors[scheibe-1]);
-         }
+         scheibe( n, s );
       }
+   }
+}
+
+void scheibe( int n, int s ) {
+   if (tuerme[n][s] != 0) {
+      int scheibe = tuerme[n][s];
+      form2(n, s, "-");
+      symbolGroesse2(n, s, (double) scheibe / N / 2);
+      farbe2(n, s, colors[scheibe-1]);
+   } else {
+      form2(n, s, "none");
    }
 }
 
@@ -51,7 +56,7 @@ void lege(int n, int von, int nach, int zwischen) throws InterruptedException {
    if (n > 0) {
       lege(n - 1, von, zwischen, nach);
       ziehe( von, nach );
-      zeichnen();
+      //zeichnen();
       statusText("N="+N + " Zug Nr. " + anzahlSchritte);
       Thread.sleep( sleepTime);
       lege(n - 1, zwischen, nach, von);
@@ -64,9 +69,11 @@ private void ziehe(int von, int nach) {
       if( tuerme[von][i] != 0 ) {
          int scheibe = tuerme[von][i];
          tuerme[von][i] = 0;
+         scheibe( von, i );
          for( int j=0; j<N; j++ ) {
             if( tuerme[nach][j] == 0) {
                tuerme[nach][j] = scheibe;
+               scheibe( nach, j );
                return;
             }
          }
@@ -74,7 +81,6 @@ private void ziehe(int von, int nach) {
    }
    
 }
-
 ]]></codeA>
-<updated>Wed May 24 13:15:50 CEST 2017</updated>
+<updated>Wed May 24 13:27:35 CEST 2017</updated>
 </snippet>
