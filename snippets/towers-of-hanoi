@@ -2,6 +2,11 @@
 <snippet locale="de_DE" name="hanoi">
 <author>Stephan Euler</author>
 <created>Wed May 24 13:12:33 CEST 2017</created>
+<comment><![CDATA[
+Rekursive Programmierung zur Loesung des Tuerme von Hanoi Problems
+]]></comment>
+<language>Java</language>
+<tag>Recursion</tag>
 <codeA><![CDATA[
 @Complete
 
