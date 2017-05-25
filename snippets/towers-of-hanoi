@@ -10,8 +10,8 @@ Rekursive Programmierung zur Loesung des Tuerme von Hanoi Problems
 <codeA><![CDATA[
 @Complete
 
-int sleepTime = 50;
-int N = 64;
+int sleepTime = 500;
+int N = 5;
 int[][] tuerme = new int[3][N];
 int anzahlSchritte = 0;
 int[] colors = new int[N];
