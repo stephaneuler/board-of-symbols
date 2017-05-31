@@ -1062,7 +1062,7 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 		commandInfo.setText( commands );
 	}
 
-	void saveProperties() {
+	public void saveProperties() {
 		try {
 			properties.store(new FileWriter(propertieFile), "");
 		} catch (IOException e) {

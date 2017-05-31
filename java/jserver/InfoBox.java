@@ -14,7 +14,7 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 
 @SuppressWarnings("serial")
-class InfoBox extends JFrame implements ActionListener {
+public class InfoBox extends JFrame implements ActionListener {
 	JEditorPane textArea;
 
 	public JEditorPane getTextArea() {

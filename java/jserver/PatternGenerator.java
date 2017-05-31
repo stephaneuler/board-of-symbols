@@ -3,7 +3,7 @@ package jserver;
 import java.util.Random;
 
 enum Mode {
-	SINGLE, MULTI, TRIANGLE, FRAME, ARROW, STAIRWAY, THM, ABC, MODULO, DICE
+	SINGLE, MULTI, TRIANGLE, FRAME, ARROW, STAIRWAY, THM, ABC, MODULO, DICE, STRIPES, X, Y
 }
 
 /**
@@ -50,7 +50,7 @@ public class PatternGenerator {
 		PatternGenerator pg = new PatternGenerator(10);
 		// pg.generateAll();
 
-		pg.generate(Mode.STAIRWAY, true);
+		pg.generate(Mode.Y, true);
 	}
 
 	public void generateAll() {
@@ -164,6 +164,25 @@ public class PatternGenerator {
 			xsa.form2(sstart + size - 1, zstart, "tlu");
 			xsa.form2(sstart + size - 1, zstart + size - 1, "tld");
 
+		} else if (mode == Mode.X) {
+			int x = N/2 +  random.nextInt(3) - 1;
+			int y = N/2 +  random.nextInt(3) - 1;
+			int size = 2;
+			xsa.formen( "d1" );
+			xsa.farben( XSendAdapter.BLUE  );
+			Painter.linie(xsa, x - size, y - size, 1, 1, 2*size + 1, color, form);
+			Painter.linie(xsa, x - size, y + size, 1, -1, 2*size + 1, color, form);
+			
+		} else if (mode == Mode.Y) {
+			int x = N/2 +  random.nextInt(3) - 1;
+			int y = N/2 +  random.nextInt(3) - 1;
+			int size = 3;
+			xsa.formen( "d1" );
+			xsa.farben( XSendAdapter.BLUE  );
+			Painter.linie(xsa, x, y , 1, 1, size, color, "/");
+			Painter.linie(xsa, x, y , -1, 1, size, color, "\\");
+			Painter.linie(xsa, x, y , 0, -1, y, color, "|");
+			
 		} else if (mode == Mode.ARROW) {
 			zstart = 1 + random.nextInt(2);
 			sstart = 1 + random.nextInt(2);
@@ -228,6 +247,17 @@ public class PatternGenerator {
 			   }
 			}
 
+		} else if (mode == Mode.STRIPES) {
+			xsa.formen("s");
+			int M = N/2 + + random.nextInt(5) - 2;
+			for( int y= 0; y<N; y+= 2 ) {
+				for( int x=0; x<M; x++ ) {
+					xsa.farbe2( x,  y, color);
+				}
+				for( int x=M; x<N; x++ ) {
+					xsa.farbe2( x,  y+1, color);
+				}
+			}
 		}
 
 		bs.buildDocument(board);

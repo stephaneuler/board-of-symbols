@@ -189,7 +189,7 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 
 		fileOpenDirectory = properties.getProperty("codeDir");
 		XMLFileName = properties.getProperty("XMLFileName");
-		String mode = properties.getProperty("compiler", CodeExecutor.gccText);
+		String mode = properties.getProperty("compiler", CodeExecutor.javaText);
 		codeExecutor = CodeExecutor.getExecutor(mode, board, this);
 		CodeExecutorJava.setJavacPath(properties.getProperty("javacPath", ""));
 

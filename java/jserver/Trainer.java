@@ -57,8 +57,9 @@ public class Trainer extends JFrame implements ActionListener {
 			new TrainerLevel(Mode.MULTI, false, false), new TrainerLevel(Mode.MULTI, true, false),
 			new TrainerLevel(Mode.THM, false, false), new TrainerLevel(Mode.ABC, false, false),
 			new TrainerLevel(Mode.STAIRWAY, false, false), new TrainerLevel(Mode.TRIANGLE, false, false),
-			new TrainerLevel(Mode.FRAME, false, false), new TrainerLevel(Mode.ARROW, false, true),
-			new TrainerLevel(Mode.MODULO, false, false), new TrainerLevel(Mode.DICE, false, true) };
+			new TrainerLevel(Mode.FRAME, false, false), new TrainerLevel(Mode.X, true, false), new TrainerLevel(Mode.Y, true, false),
+			new TrainerLevel(Mode.ARROW, false, true), new TrainerLevel(Mode.MODULO, false, false),
+			new TrainerLevel(Mode.DICE, false, true), new TrainerLevel(Mode.STRIPES, false, false) };
 	private int[] hitCount = new int[levels.length + 1];
 
 	public Trainer(Board board) {

@@ -6,6 +6,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.event.ActionEvent;
@@ -110,6 +111,11 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 	}
 
 	public Graphic(ResourceBundle messages) {
+		this(messages, null);
+
+	}
+
+	public Graphic(ResourceBundle messages, Image icon) {
 		fileText = messages.getString("file");
 		saveText = messages.getString("imageSave");
 		saveTTText = messages.getString("tooltip.imageSave");
@@ -117,6 +123,10 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 		printTTText = messages.getString("tooltip.print");
 		showStatusText = messages.getString("status");
 		showStatusTTText = messages.getString("tooltip.status");
+
+		if (icon != null) {
+			setIconImage(icon);
+		}
 
 		plotter = new Plotter("Plotter");
 		plotter.setPreferredSize(new Dimension(500, 300));
@@ -375,6 +385,9 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 
 	private String getExtension(String filename) {
 		String[] parts = filename.split("\\.");
+		if( parts.length == 1 ) {
+			return null;
+		}
 		return parts[parts.length - 1];
 	}
 
@@ -416,7 +429,10 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 					e.printStackTrace();
 				}
 				String filename = chooser.getSelectedFile().getAbsolutePath();
-				System.out.println(filename);
+				if( getExtension(filename) == null ) {
+					filename += ".png";
+				}
+ 				System.out.println(filename);
 				if (!testSuffix(filename)) {
 					System.out.println("Unknown extension");
 					JOptionPane.showMessageDialog(plotter,
@@ -550,6 +566,6 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 
 	public JLabel getStatusLabel() {
 		return status;
-		
+
 	}
 }
