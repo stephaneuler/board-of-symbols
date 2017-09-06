@@ -3,6 +3,9 @@ package jserver;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 
 import javax.swing.JTextArea;
 

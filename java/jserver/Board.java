@@ -41,15 +41,16 @@ import plotter.Plotter;
 import plotter.Sleep;
 
 // Version wer wann was
-// .94   se 15-07    erste stabile Version
-// .95   se 15-09    kleinere Erweiterungen (Hintergrund, ... )
-// .96   se 15-09    hintergGrund2, symbolGroesse2
-// .97   se 15-10-08 diverse Kleinigkeiten
-// .973  se 15-10-18 Short cuts
-// .974b se 15-11-10 Bugfix filter mode
-// .974c se 15-12-01 save font size
-//       se 16-03    start internationalization
-//       se 17-01    keyboard listener
+// .94     se 15-07    erste stabile Version
+// .95     se 15-09    kleinere Erweiterungen (Hintergrund, ... )
+// .96     se 15-09    hintergGrund2, symbolGroesse2
+// .97     se 15-10-08 diverse Kleinigkeiten
+// .973    se 15-10-18 Short cuts
+// .974b   se 15-11-10 Bugfix filter mode
+// .974c   se 15-12-01 save font size
+//         se 16-03    start internationalization
+//         se 17-01    keyboard listener
+// 1.15    se 17-08    font selector
 
 /**
  * This class implements a NxM board as used for board games like chess or
@@ -72,6 +73,7 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 	private static String clearColorsText;
 	private static String clearTextText;
 	private static String fontSizeText;
+	private static String fontTypeText = "Font";
 	private static String growText;
 	private static String shrinkText;
 	private static String bigText;
@@ -126,6 +128,7 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 	private Properties properties = new Properties();
 	private Trainer trainer;
 	private InfoBox commandInfo; 
+	private FontSelector fontSelector;
 
 
 	private String propertieFile = "board.properties";
@@ -397,6 +400,7 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 		Utils.addMenuItem(this, menu, clearColorsText, messages.getString("tooltip.clearColors"), "alt R");
 		Utils.addMenuItem(this, menu, clearTextText, messages.getString("tooltip.clearTexts"));
 		Utils.addMenuItem(this, menu, fontSizeText, messages.getString("tooltip.fontSize"));
+		Utils.addMenuItem(this, menu, fontTypeText, messages.getString("tooltip.fontSize"));
 		if (!examMode) {
 			Utils.addMenuItem(this, menu, growText, messages.getString("tooltip.grow"), "alt PLUS");
 			Utils.addMenuItem(this, menu, shrinkText, messages.getString("tooltip.shrink"), "alt MINUS");
@@ -409,7 +413,9 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 		// Utils.addMenuItem(this, menu, codingText,
 		// "Einblenden der Code-Eingabe");
 		Utils.addMenuItem(this, menu, codingWindowText, messages.getString("tooltip.codingWindow"), "alt C");
+		
 
+		
 		return menu;
 	}
 
@@ -473,6 +479,14 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 		if (line.startsWith("fontsize")) {
 			symbolFontSize = Integer.parseInt(p[1]);
 			Symbol.setFontSize(symbolFontSize);
+			return "Okay";
+		}
+
+		if (line.startsWith("fonttype")) {
+			String type = line.substring("fonttype".length() + 1 );
+			System.out.println( ">>>" + type + "<<<" );
+			Symbol.setFontType(type);
+			redrawSymbols();
 			return "Okay";
 		}
 
@@ -863,6 +877,13 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 				symbolFontSize = Integer.parseInt(a);
 				Symbol.setFontSize(symbolFontSize);
 			}
+
+		} else if (cmd.equals(fontTypeText)) {
+			if( fontSelector == null ) {
+				fontSelector = new FontSelector( this );
+			}
+			fontSelector.setExtendedState(JFrame.NORMAL);
+			fontSelector.setVisible(true);
 
 		} else if (cmd.equals(clearTextText)) {
 			System.out.println("Board:" + clearTextText);

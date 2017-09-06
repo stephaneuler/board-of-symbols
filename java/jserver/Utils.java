@@ -1,6 +1,10 @@
 package jserver;
 
+import java.awt.Font;
+import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import javax.swing.JMenu;
@@ -23,8 +27,7 @@ public class Utils {
 	 * @param text
 	 * @return
 	 */
-	public static JMenuItem addMenuItem(ActionListener li, JMenu menu,
-			String text) {
+	public static JMenuItem addMenuItem(ActionListener li, JMenu menu, String text) {
 		JMenuItem mi = new JMenuItem(text);
 		mi.addActionListener(li);
 		menu.add(mi);
@@ -41,8 +44,7 @@ public class Utils {
 	 * @param tip
 	 * @return the new JMenuItem
 	 */
-	public static JMenuItem addMenuItem(ActionListener li, JMenu menu,
-			String text, String tip) {
+	public static JMenuItem addMenuItem(ActionListener li, JMenu menu, String text, String tip) {
 		JMenuItem mi = new JMenuItem(text);
 		mi.addActionListener(li);
 		mi.setToolTipText(tip);
@@ -61,21 +63,22 @@ public class Utils {
 	 * @param key
 	 * @return
 	 */
-	public static JMenuItem addMenuItem(ActionListener li, JMenu menu,
-			String text, String tip, String key) {
+	public static JMenuItem addMenuItem(ActionListener li, JMenu menu, String text, String tip, String key) {
 		JMenuItem mi = addMenuItem(li, menu, text, tip);
 		mi.setAccelerator(KeyStroke.getKeyStroke(key));
 		return mi;
 	}
 
 	/**
-	 * Takes a resouce bundle and a variable number of strings and 
-	 * concatenates all strings for the given keys. 
-	 * A string that contains only non-word characters is included directly in the resulting string
-	 * and not used as a key. 
+	 * Takes a resouce bundle and a variable number of strings and concatenates
+	 * all strings for the given keys. A string that contains only non-word
+	 * characters is included directly in the resulting string and not used as a
+	 * key.
 	 * 
-	 * @param messages the resource bundle
-	 * @param strings the keys for concatenation
+	 * @param messages
+	 *            the resource bundle
+	 * @param strings
+	 *            the keys for concatenation
 	 * @return the resulting string
 	 */
 	public static String concat(ResourceBundle messages, String... strings) {
@@ -106,6 +109,21 @@ public class Utils {
 
 	public static String capitalize(String string) {
 		return string.substring(0, 1).toUpperCase() + string.substring(1);
+	}
+
+	public static void fillFontMenu(JMenu fontMenu) {
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		Font[] fonts = ge.getAllFonts();
+
+		List<String> names = new ArrayList<>();
+		for (Font f : fonts) {
+			String name = f.getFamily();
+			if (!names.contains(name)) {
+				addMenuItem(null, fontMenu, name);
+				names.add(name);
+			}
+		}
+
 	}
 
 }

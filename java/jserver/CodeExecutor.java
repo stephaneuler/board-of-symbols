@@ -148,4 +148,8 @@ public abstract class CodeExecutor {
 		info.setVisible(true);
 	}
 
+	public String getCompleteTemplate() {
+		return "";
+	}
+
 }

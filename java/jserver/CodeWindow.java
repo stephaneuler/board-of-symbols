@@ -70,7 +70,7 @@ import plotter.Sleep;
  * This is the GUI for writing and executing code for BoS.
  * 
  * @author Euler
- * @version 0.1 July 2015
+ * @version 1.11 May 2017
  * 
  */
 // Version wer wann was
@@ -79,6 +79,7 @@ import plotter.Sleep;
 // .96 se 15-10-25 load xml file
 // .98 se 15-12-05 Java support
 // .98a se 15-12-15 Bug bei fehlendem ini-Eintrag compiler
+// 1.11 se 17-06-06 templates fuer complete snippets
 
 @SuppressWarnings("serial")
 public class CodeWindow extends JFrame implements ActionListener, DocumentListener, ExecutorListener {
@@ -109,6 +110,7 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 	private static String autoLayoutText;
 	private static String replaceText = "ersetzen";
 	private static String editNewSnippetText;
+	private static String editNewCompleteSnippetText = "new c";
 	private static String deleteSnippetText;
 	private static String importSnippetText = "Import";
 	private static String exportSnippetText = "Export";
@@ -222,6 +224,7 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 		fontSizeText = Utils.capitalize(messages.getString("fontSize"));
 		helpText = Utils.capitalize(messages.getString("help"));
 		editNewSnippetText = Utils.capitalize(messages.getString("new"));
+		editNewCompleteSnippetText = Utils.capitalize(messages.getString("new") + " complete");
 		// newSnippetText = "<html><em>" + messages.getString("new") +
 		// "</em></html>";
 		version = messages.getString("codeWindowVersion");
@@ -572,6 +575,7 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 
 		menuCompile.addSeparator();
 		Utils.addMenuItem(this, menuCompile, editNewSnippetText, messages.getString("tooltip.newSnippet"), "control N");
+		Utils.addMenuItem(this, menuCompile, editNewCompleteSnippetText, messages.getString("tooltip.newCompleteSnippet") );
 		Utils.addMenuItem(this, menuCompile, importSnippetText);
 		Utils.addMenuItem(this, menuCompile, exportSnippetText);
 		Utils.addMenuItem(this, menuCompile, showGeneratedCodeText, messages.getString("tooltip.generatedCode"),
@@ -663,14 +667,18 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 			String result = fileExecuter.compileAndExecute("commands.txt");
 			messageField.setText(result);
 
-		} else if (cmd.equals(editNewSnippetText)) {
+		} else if (cmd.equals(editNewSnippetText) || cmd.equals(editNewCompleteSnippetText)) {
 			if (codeHasChanged) {
 				int reply = Dialogs.codeHasChangedDialog(messages);
 				if (reply == JOptionPane.NO_OPTION) {
 					return;
 				}
 			}
-			codeInput.setText("");
+			if(cmd.equals(editNewCompleteSnippetText) ) {
+				codeInput.setText( codeExecutor.getCompleteTemplate() );
+			} else {
+				codeInput.setText("");
+			}
 			snippetName = null;
 			// remove action listen temporarily to avoid load action
 			snippetSelector.removeActionListener(this);

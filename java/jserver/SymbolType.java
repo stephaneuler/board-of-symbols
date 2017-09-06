@@ -19,7 +19,7 @@ import java.util.ResourceBundle;
  *
  */
 public enum SymbolType {
-	CIRCLE, SQUARE, DIAMOND, STAR, PLUS, VLINE, HLINE, BAR, UP, DOWN, 
+	CIRCLE, SQUARE, DIAMOND, STAR, PLUS, VLINE, HLINE, BAR, BLOCK, UP, DOWN, 
 	TRIANGLE_LD, TRIANGLE_RD, TRIANGLE_LU, TRIANGLE_RU, DICE_1,  DICE_2, DICE_3, DICE_4,  DICE_5, DICE_6, 
 	RANDOM, NONE;
 
@@ -38,6 +38,7 @@ public enum SymbolType {
 		texts.put(VLINE, "senkrechte Linien");
 		texts.put(HLINE, "horizontale Linien");
 		texts.put(BAR, "Säulen");
+		texts.put(BLOCK, "Block");
 		texts.put(UP, "schräge Linien /");
 		texts.put(DOWN, "schräge Linien \\");
 		texts.put(TRIANGLE_LD, "Dreiecke, links unten");
@@ -81,6 +82,7 @@ public enum SymbolType {
 		shortForm.setProperty("|", texts.get(VLINE));
 		shortForm.setProperty("-", texts.get(HLINE));
 		shortForm.setProperty("b", texts.get(BAR));
+		shortForm.setProperty("B", texts.get(BLOCK));
 		shortForm.setProperty("/", texts.get(UP));
 		shortForm.setProperty("\\", texts.get(DOWN));
 		shortForm.setProperty("tld", texts.get(TRIANGLE_LD));
@@ -133,6 +135,7 @@ public enum SymbolType {
 		texts.put(VLINE, messages.getString("verticalLine"));
 		texts.put(HLINE, messages.getString("horizontalLine"));
 		texts.put(BAR, messages.getString("bar"));
+		texts.put(BLOCK, messages.getString("block"));
 		texts.put(UP, messages.getString("slantedLine") + " /");
 		texts.put(DOWN, messages.getString("slantedLine") + " \\");
 		texts.put(TRIANGLE_LD, Utils.concat( messages, "triangle", ",", "left", "down") );

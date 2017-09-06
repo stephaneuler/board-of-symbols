@@ -159,7 +159,7 @@ public class CodeExecutorJava extends CodeExecutor {
 						}
 					} catch (InterruptedException e) {
 						command = "Ausführung unterbrochen";
-					} catch (Exception e) {
+					} catch (Exception |  Error e) {
 						// copy message so that it appears in the result field
 						e.printStackTrace(System.out);
 					}
@@ -275,6 +275,18 @@ public class CodeExecutorJava extends CodeExecutor {
 	@Override
 	public void showGeneratedCode(ResourceBundle messages) {
 		showFileContent(fileName, messages.getString("generatedCode") + " - Java");
+	}
+
+	@Override
+	public String getCompleteTemplate() {
+		String template = "@Complete" + System.lineSeparator(); 
+		template += ""+ System.lineSeparator();
+		template += "// methode to start with"+ System.lineSeparator();
+		template += "void mySend() {"+ System.lineSeparator();
+		template += "	// replace with own code"+ System.lineSeparator();
+		template += "	System.out.println(\"BoS\");"+ System.lineSeparator();
+		template += "}"+ System.lineSeparator();
+		return template;
 	}
 
 }

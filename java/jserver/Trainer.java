@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Random;
-import java.util.ResourceBundle;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -55,11 +54,13 @@ public class Trainer extends JFrame implements ActionListener {
 	private TrainerLevel[] levels = { new TrainerLevel(Mode.SINGLE, false, false),
 			new TrainerLevel(Mode.SINGLE, true, false), new TrainerLevel(Mode.SINGLE, true, true),
 			new TrainerLevel(Mode.MULTI, false, false), new TrainerLevel(Mode.MULTI, true, false),
-			new TrainerLevel(Mode.THM, false, false), new TrainerLevel(Mode.ABC, false, false),
-			new TrainerLevel(Mode.STAIRWAY, false, false), new TrainerLevel(Mode.TRIANGLE, false, false),
-			new TrainerLevel(Mode.FRAME, false, false), new TrainerLevel(Mode.X, true, false), new TrainerLevel(Mode.Y, true, false),
-			new TrainerLevel(Mode.ARROW, false, true), new TrainerLevel(Mode.MODULO, false, false),
-			new TrainerLevel(Mode.DICE, false, true), new TrainerLevel(Mode.STRIPES, false, false) };
+			new TrainerLevel(Mode.STRIPES, false, false), new TrainerLevel(Mode.STAIRWAY, false, false),
+			new TrainerLevel(Mode.TRIANGLE, false, false), new TrainerLevel(Mode.FRAME, false, false),
+			new TrainerLevel(Mode.X, true, false), new TrainerLevel(Mode.Y, true, false),
+			new TrainerLevel(Mode.ARROW, false, false), new TrainerLevel(Mode.ARROW, false, true),
+			new TrainerLevel(Mode.TREE, false, false),
+			new TrainerLevel(Mode.DICE, false, true), new TrainerLevel(Mode.THM, false, false),
+			new TrainerLevel(Mode.ABC, false, false), new TrainerLevel(Mode.MODULO, false, false) };
 	private int[] hitCount = new int[levels.length + 1];
 
 	public Trainer(Board board) {

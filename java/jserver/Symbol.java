@@ -20,8 +20,10 @@ import plotter.TextObject;
 public class Symbol {
 	private static int alpha = 150;
 	private static double barWidth = 0.4;
+	private static double blockHeigth = 0.4;
 	private static boolean numbering = false;
-	private static Font font = new Font("Arial", Font.PLAIN, 12);
+	private static String fontFamilie = "Arial";
+	private static Font font = new Font(fontFamilie, Font.PLAIN, 12);
 	private static Board board;
 	private static boolean linearNumbering = false;
 
@@ -70,8 +72,13 @@ public class Symbol {
 		Symbol.linearNumbering = linearNumbering;
 	}
 
+	public static void setFontType(String name) {
+		fontFamilie = name;
+		font = new Font(fontFamilie, Font.PLAIN, font.getSize());
+	}
+
 	public static void setFontSize(int s) {
-		font = new Font("Arial", Font.PLAIN, s);
+		font = new Font(fontFamilie, Font.PLAIN, s);
 	}
 
 	public static int getFontSize() {
@@ -334,6 +341,13 @@ public class Symbol {
 			// plotter.addD(key, 0, 2 * size);
 			// plotter.setDataLineStyle(key, LineStyle.LINE);
 			// plotter.setDataStroke(key, stroke);
+
+		} else if (type == SymbolType.BLOCK) {
+			plotter.add(key, pos.x - size, pos.y - blockHeigth);
+			plotter.addD(key, 2 * size, 0);
+			plotter.addD(key, 0, 2 * blockHeigth );
+			plotter.addD(key, -2 * size, 0 );
+			plotter.addD(key, 0, -2 * blockHeigth );
 
 		} else if (type == SymbolType.PLUS) {
 			plotter.add(key, pos.x, pos.y);
