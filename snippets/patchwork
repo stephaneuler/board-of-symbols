@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<snippet locale="en_US" name="xxx">
+<snippet locale="en_US" name="patchwork">
 <comment><![CDATA[
 Fills the board with random colors
 ]]></comment>
