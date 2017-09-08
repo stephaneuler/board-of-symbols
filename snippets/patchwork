@@ -9,9 +9,8 @@ Fills the board with random colors
 <codeA><![CDATA[
 int N = 50;
 
-size( N, N );
-forms("s");
-colors( BLUE );
+size( N, N );    // size of the board
+forms("s");      // use squares
 
 for( int x=0; x<N; x++ ) {
    for( int y=0; y<N; y++ ) {
