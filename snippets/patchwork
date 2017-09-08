@@ -4,6 +4,7 @@
 Fills the board with random colors
 ]]></comment>
 <author>Stephan Euler</author>
+<language>Java</language>
 <created>Fri Sep 08 12:20:54 CEST 2017</created>
 <codeA><![CDATA[
 int N = 50;
