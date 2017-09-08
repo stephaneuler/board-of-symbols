@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <snippet locale="en_US" name="xxx">
+<comment><![CDATA[
+Fills the board with random colors
+]]></comment>
 <author>Stephan Euler</author>
 <created>Fri Sep 08 12:20:54 CEST 2017</created>
 <codeA><![CDATA[
