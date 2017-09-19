@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<snippet locale="de_DE" name="unicode_c">
+<author>Stephan Euler</author>
+<created>Tue Sep 19 15:11:02 CEST 2017</created>
+<codeA><![CDATA[
+groesse( 5, 1 );
+formen( "s" );
+farben( 0xe8e8e8 );
+
+printf( ">>fonttype Dialog\n" );
+//Lateinischer Großbuchstabe E mit Hatschek
+text( 0, "&#x011A;" );
+//Griechischer Großbuchstabe Delta
+text( 1, "&#x0394;" );
+//Kyrillischer Großbuchstabe abchasisches Cha
+text( 2, "&#x04A8;" );
+//CJK-Ideogramm
+text( 3, "&#x340f;" );
+//BLACK TRUCK
+text( 4, "&#x26DF;" );
+]]></codeA>
+<updated>Tue Sep 19 17:16:58 CEST 2017</updated>
+</snippet>
