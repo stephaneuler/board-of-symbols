@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<snippet locale="de_DE" name="unicode">
+<author>Stephan Euler</author>
+<created>Mon Aug 21 11:44:14 CEST 2017</created>
+<codeA><![CDATA[
+groesse( 8, 4 );
+formen( "s" );
+farben( 0xe8e8e8 );
+
+getBoard().receiveMessage( ">>fontsize 32" );
+getBoard().receiveMessage( ">>fonttype Dialog" );
+
+//Lateinischer Großbuchstabe E mit Hatschek
+zeichen( 0, '\u011A' );
+//Griechischer Großbuchstabe Delta
+zeichen( 1, '\u0394' );
+//Kyrillischer Großbuchstabe abchasisches Cha
+zeichen( 2, '\u04A8' );
+// römische Zahl
+zeichen( 3, '\u216C' );
+//BLACK TRUCK
+text( 4, "&#x26DF;" );
+
+// CJK-Ideogramme 
+for( int z=0; z<24; z++ ) {
+   zeichen(z + 8,  (char)('\u3400' + z));
+}
+
+]]></codeA>
+<updated>Mon Oct 09 10:12:42 CEST 2017</updated>
+</snippet>
