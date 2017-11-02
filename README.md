@@ -47,7 +47,7 @@ See the [guide for installing on OS X](documentation/installing-on-os-x.md).
 in order to execute the compile and link command cl some environment variables have to be set. The program reads these variables from the file vc.properties. You can build a version for your system as follows:
 
 - open a command window
-- go to the Visual Studio directories and run vsvarsall.bat script 
+- go to the Visual Studio directories and run the script vsvarsall.bat (in Visual Studio Community 2017: vcvars64.bat)  
 - in the command window return to the jserver directory
 - type: set > vc.properties 
 - open this file in an editor and replace all backslashs \  with double backslashs \\\\ 

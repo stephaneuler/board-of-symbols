@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<snippet locale="en_US" name="patchwork">
+<comment><![CDATA[
+Fills the board with random colors
+]]></comment>
+<author>Stephan Euler</author>
+<language>Java</language>
+<created>Fri Sep 08 12:20:54 CEST 2017</created>
+<codeA><![CDATA[
+int N = 50;
+
+size( N, N );    // size of the board
+forms("s");      // use squares
+
+for( int x=0; x<N; x++ ) {
+   for( int y=0; y<N; y++ ) {
+      color2( x, y, (int)(Math.random() * 256 * 256 *256 ) );
+   }
+}
+
+]]></codeA>
+</snippet>
