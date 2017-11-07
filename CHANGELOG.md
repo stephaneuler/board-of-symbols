@@ -12,3 +12,4 @@
 - 1.03a 2 more BoSL commands (december 2016)
 - 1.11a template for complete mode (may 2017)
 - 1.15  font selector, new form "block" (sept 2017)
+- 1.15c help menu in Board, help on forms (nov 2017)
