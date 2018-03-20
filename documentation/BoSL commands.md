@@ -1,5 +1,9 @@
-#BoS Language
-
+# BoS Language
+The board receives commands in the BoS language (BoSL). 
+In most cases the programmer does not use this language directly. 
+For all basic commands functions are provided. 
+The function *color2(2,3,RED)* for example changes the color of the symbol at position *(2,3)*. 
+Internally the function sends the BoSL command *# 2 3 0xff0000 \n*.
 
 ## List of additional commands
 
