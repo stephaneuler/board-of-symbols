@@ -15,7 +15,7 @@ In this case a command can be send directly as
 It is fairly easy to add more commands in this way. Some of them are, however, 
 more or less experimental and not fully tested (mainly the commands dealing with images). 
 Therefore they should be used with some care. 
-
+Snippets in Java and C using this approach to draw unicode symbols in a larger font are included in the snippets directory. 
 
 ## List of additional commands
 
