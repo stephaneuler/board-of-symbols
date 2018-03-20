@@ -6,9 +6,15 @@ The function *color2(2,3,RED)* for example changes the color of the symbol at po
 Internally the function sends the BoSL command *# 2 3 0xff0000 \n*.
 
 Usually users do not need to use the BoSL commands directly. 
-There are, however, a number of advanced commands without cooresponding function wrapper. 
+There are, however, a number of advanced commands without corresponding function wrappers. 
+In this case a command can be send directly as 
 
-    `board.receiveMessage( command );`
+    board.receiveMessage( command );
+
+(Java version). The currently implemented commands are listed below. 
+It is fairly easy to add more commands in this way. Some of them are, however, 
+more or less experimental and not fully tested (mainly the commands dealing with images). 
+Therefore they should be used with some care. 
 
 
 ## List of additional commands
