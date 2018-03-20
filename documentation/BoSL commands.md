@@ -1,4 +1,7 @@
-# List of commands
+#BoS Language
+
+
+## List of additional commands
 
 * `n` toggles numbering of symbols
 * `s` returns the size of the board
