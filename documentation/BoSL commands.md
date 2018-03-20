@@ -1,6 +1,6 @@
-List of commands
+# List of commands
 
-* n schaltet die Nummerierung der Symbole ein oder wieder aus.
+* `n` toggles numbering of symbols
 *   s! gibt die Größe (Anzahl Zeilen und Spalten) zurück.
 *   sleep n! Board wartet für die angegebene Zeit (Wert in Millisekunden).
 *   image! $x$ $y$ $dateiname$ das Bild aus der angegebenen Datei wird an der Stelle $(x,y)$ angezeigt.
