@@ -18,6 +18,8 @@ Therefore they should be used with some care.
 Snippets in Java and C using this approach to draw unicode symbols in a larger font are included in the snippets directory. 
 In snippet mode the prefix *>>* is required. 
 
+https://github.com/stephaneuler/board-of-symbols/tree/master/snippets
+
 ## List of additional commands
 
 * `n` toggles numbering of symbols
