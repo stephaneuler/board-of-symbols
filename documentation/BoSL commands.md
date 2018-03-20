@@ -5,6 +5,12 @@ For all basic commands functions are provided.
 The function *color2(2,3,RED)* for example changes the color of the symbol at position *(2,3)*. 
 Internally the function sends the BoSL command *# 2 3 0xff0000 \n*.
 
+Usually users do not need to use the BoSL commands directly. 
+There are, however, a number of advanced commands without cooresponding function wrapper. 
+
+    `board.receiveMessage( command );`
+
+
 ## List of additional commands
 
 * `n` toggles numbering of symbols
