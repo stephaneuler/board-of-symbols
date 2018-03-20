@@ -1,20 +1,19 @@
 # List of commands
 
 * `n` toggles numbering of symbols
-* `s` gibt die Größe (Anzahl Zeilen und Spalten) zurück.
-* `sleep n` Board wartet für die angegebene Zeit (Wert in Millisekunden).
-* `image` *x* *y* *dateiname* das Bild aus der angegebenen Datei wird an der Stelle *(x,y)* angezeigt.
-Dabei wird es auf die Größe des Symbols skaliert.
-Ein eventuell an dieser Stelle bereits vorhandenes Bild wird gelöscht.
-*  `image` *x* *y* -` das Bild an der Stelle *(x,y)* wird gelöscht.
-*   `bgImage` *dateiname* das Bild wird als Hintergrund eingefügt.
-*   `fontsize` *n* setzt die Font-Größe für alle weiteren Texte.
-*   `clearAllText` löscht alle Symbol-Texte.
-*   `statusfontsize` *n* Setzt die Font-Größe für die Statuszeile.
-*   `fonttype` *name* Wählt einen Font aus.
-*   `symbolSizes` *r* verändert die Größe aller Symbole.
-*   \emph{m1 f1 m2 f2 m3 f3} *\ldots* (eine Folge von Paaren Feldnummer-Farbe), die angegebenen Felder werden in der jeweiligen Farbe gezeichnet.
-*   `clearCommands` löscht alle ausstehenden Eingaben.
-*   `button` *text* *region* legt einen Knopf (Button) in der angegebenen Region (\emph{east}, \emph{south}, \emph{west}, \emph{north}) an. Beim Betätigen wird der angegebene Text als Eingabe geschickt.
-*   `clearAllButtons` entfernt alle angelegten Eingabe-Knöpfe.
-*   `toggleInput` blendet das Eingabefeld ein oder aus.
+* `s` returns the size of the board
+* `sleep n` BoS waits for the given time (in milliseconds)
+* `image` *x* *y* *filename* shows the image from the give file  at the position *(x,y)*.
+The image is scaled to the size of the symbol (that can be changed with the function symbolSize(). 
+*  `image` *x* *y* -` removes the image at position *(x,y)*
+*  `bgImage` *filename* use the image as background (no scaling)
+*  `fontsize` *n* sets the font size for symbol texts
+*  `clearAllText` removes all texts
+*  `statusfontsize` *n* sets the font size for the status text
+*  `fonttype` *name* set the font for symbol texts
+*  `symbolSizes` *r* changes the size of all symbols
+*  *m1 f1 m2 f2 m3 f3 ...* (a sequence of pairs index - color) changes the color of the specified fields
+*  `clearCommands` clears the command queue
+*  `button` *text* *region*  adds a button in the given region (\emph{east}, \emph{south}, \emph{west}, \emph{north}). A click on this button adds the text to the command queue. 
+*  `clearAllButtons` removes all buttons
+*  `toggleInput` toggles the input field
