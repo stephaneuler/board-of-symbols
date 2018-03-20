@@ -19,8 +19,6 @@ Snippets in Java and C using this approach to draw unicode symbols in a larger f
 [directory](https://github.com/stephaneuler/board-of-symbols/tree/master/snippets "snippet directory"). 
 In snippet mode the prefix *>>* is required. 
 
-https://github.com/stephaneuler/board-of-symbols/tree/master/snippets
-
 ## List of additional commands
 
 * `n` toggles numbering of symbols
