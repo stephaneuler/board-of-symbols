@@ -4,3 +4,5 @@ Some additional links:
 * [BoS Gallery](https://hosting.iem.thm.de/user/euler/gallery2/index.php?inhalt=home "some screenshots from BoS projects")
 * [BoS Live (in German, using JavaScript)](https://hosting.iem.thm.de/user/euler/gallery2/index.php?inhalt=live "first live version")
 * [BoS channel on youtube](https://www.youtube.com/channel/UCElCYEug97vk-LvFMI6k3ow/videos "some videos")
+* [The Plotter class (base for BoS)](https://hosting.iem.thm.de/user/euler/plotter/index.php "plotter docu")
+
