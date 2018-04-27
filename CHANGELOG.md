@@ -1,6 +1,7 @@
 ## Version 
 
-- 1.16 more BoSL commands (dez 2017)
+- 1.17 fixed bug in snippet loader, new menu item help-info, tested with Java 10 (April 2018)   = jserver_177.jar
+- * 1.16 more BoSL commands (dez 2017)   = jserver.jar
 - 1.15d better template for C (nov 2017)
 - 1.15c help menu in Board, help on forms (nov 2017)
 - 1.15  font selector, new form "block" (sept 2017)
