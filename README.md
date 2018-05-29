@@ -5,18 +5,20 @@ For example the following JS-Code
 
     for( x=1; x<6;  x++ ) {
       for( y=x; y<6; y++ ) {
-        farbe2( x, y, BLUE )
+        farbe2( x, y, BLUE )  // EN: color2(x,y,BLUE)
         if( x == y ) {
           form2( x, y, "tlu" )
         } else {
           form2( x, y, "s" )
-       }
+       } 
       }
     }
  
  generates  
  
 ![BoS Screen](BoS.PNG)
+
+The example uses the German version. You can change the language in the menu Optionen. This also changes the function names. 
 
 ## How to start - Java:
 - download the file jserver.jar 

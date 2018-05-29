@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<snippet locale="de_DE" name="java-direct">
+<author>Stephan Euler</author>
+<created>Tue Mar 20 11:18:47 CET 2018</created>
+<codeA><![CDATA[Board b = getBoard();
+
+b.receiveMessage( ">>fonttype Dialog\n" );
+b.receiveMessage( ">>fontsize 64 \n" );
+
+text( 0, "&#x011A;" );
+text( 1, "&#x0394;" );
+text( 2, "&#x04A8;" );
+text( 3, "&#x340f;" );
+text( 4, "&#x26DF;" );]]></codeA>
+<updated>Tue Mar 20 11:30:13 CET 2018</updated>
+</snippet>
