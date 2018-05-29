@@ -1,9 +1,12 @@
 package jserver;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 enum Mode {
-	SINGLE, MULTI, TRIANGLE, FRAME, ARROW, TREE, STAIRWAY, THM, ABC, MODULO, DICE, STRIPES, X, Y
+	SINGLE, MULTI, ALL_SYMBOLS, TRIANGLE, FRAME, ARROW, TREE, STAIRWAY, THM, ABC, MODULO, DICE, STRIPES, X, Y
 }
 
 /**
@@ -50,7 +53,7 @@ public class PatternGenerator {
 		PatternGenerator pg = new PatternGenerator(10);
 		// pg.generateAll();
 
-		pg.generate(Mode.TREE, true);
+		pg.generate(Mode.ALL_SYMBOLS, true);
 	}
 
 	public void generateAll() {
@@ -93,6 +96,7 @@ public class PatternGenerator {
 	public void generate(Mode mode, boolean randomForm, boolean useBG) {
 		BoardSerializer bs = new BoardSerializer();
 		board.receiveMessage(Board.FILTER_PREFIX + "statusfontsize 18");
+		board.receiveMessage(Board.FILTER_PREFIX + "fontsize 32");
 		xsa.board.receiveMessage(Board.FILTER_PREFIX + "clearAllText");
 		xsa.loeschen();
 		xsa.formen("c");
@@ -139,6 +143,19 @@ public class PatternGenerator {
 					}
 				}
 			}
+
+		} else if (mode == Mode.ALL_SYMBOLS) {
+			SymbolType[] types =  SymbolType.values();
+			List<Integer> ind = new ArrayList<>();
+			for( int i=0; i<N*N; i++ ) {
+				ind.add( i );
+			}
+			Collections.shuffle(ind);
+			for( int i=0; i<types.length-2; i++ ) {
+				xsa.form(ind.get(i), SymbolType.getShort( types[i] ) );
+				xsa.farbe(ind.get(i), color);
+			}
+
 
 		} else if (mode == Mode.TRIANGLE) {
 			sinc = 1 + random.nextInt(2);

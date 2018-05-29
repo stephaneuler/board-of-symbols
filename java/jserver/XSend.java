@@ -160,7 +160,7 @@ public abstract class XSend {
 	public static final int IVORY = 16777200;
 	public static final int WHITE = 16777215;
 
-	Board board = null;
+	public Board board = null;
 	public String result = "";
 	static PrintStream stdout = System.out;
 

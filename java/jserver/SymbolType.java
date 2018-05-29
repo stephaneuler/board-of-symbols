@@ -1,5 +1,6 @@
 package jserver;
 
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -161,6 +162,18 @@ public enum SymbolType {
 		updateShortForms();
 		// TODO Auto-generated method stub
 		
+	}
+
+	public static String getShort(SymbolType symbolType) {
+		Enumeration  keys = shortForm.propertyNames();
+		while( keys.hasMoreElements() ) {
+		String shortF = (String)keys.nextElement();
+			String text = shortForm.getProperty( shortF );
+			if( text.equals( texts.get(symbolType) ) ) {
+				return shortF;
+			}
+		}
+		return null;
 	}
 
 }

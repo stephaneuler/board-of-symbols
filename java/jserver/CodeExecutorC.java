@@ -113,10 +113,7 @@ public class CodeExecutorC extends CodeExecutor {
 				return null;
 			}
 		} else {
-			JOptionPane.showMessageDialog(null, "using direct mode" , "direct mode",
-					JOptionPane.INFORMATION_MESSAGE);
-
-
+			board.getCodeWindow().showDirectMessage();
 		}
 
 		try {
@@ -327,6 +324,16 @@ public class CodeExecutorC extends CodeExecutor {
 		if (executionProzess != null) {
 			executionProzess.destroy();
 		}
+	}
+
+	@Override
+	public String getCompleteTemplate() {
+		String code = "#include \"bos.h\"";
+		code += System.lineSeparator();
+		code += System.lineSeparator();
+		code += "int main() {" + System.lineSeparator();
+		code += "}" + System.lineSeparator();
+		return code;
 	}
 
 }

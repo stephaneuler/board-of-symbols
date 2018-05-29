@@ -7,6 +7,8 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import plotter.InfoBox;
+
 /**
  * Executes JS code
  * 

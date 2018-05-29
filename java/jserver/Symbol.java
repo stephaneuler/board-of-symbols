@@ -26,6 +26,7 @@ public class Symbol {
 	private static Font font = new Font(fontFamilie, Font.PLAIN, 12);
 	private static Board board;
 	private static boolean linearNumbering = false;
+	private static Color BoSColor = Color.LIGHT_GRAY;
 
 	Position pos;
 	private double size;
@@ -34,7 +35,7 @@ public class Symbol {
 	// boolean aktiv;
 	String key = null;
 	SymbolType type = SymbolType.CIRCLE;
-	protected Color farbe = Color.LIGHT_GRAY;
+	protected Color farbe = BoSColor;
 	protected Color textFarbe = Color.BLACK;
 	protected Color hintergrund;;
 	private Stroke stroke = new BasicStroke(5.f);
@@ -50,6 +51,14 @@ public class Symbol {
 		this.pos = pos;
 		this.size = size;
 		fullSize = size;
+	}
+
+	public static Color getBoSColor() {
+		return BoSColor;
+	}
+
+	public static void setBoSColor(Color boSColor) {
+		BoSColor = boSColor;
 	}
 
 	public Position getPos() {
@@ -253,7 +262,7 @@ public class Symbol {
 	}
 
 	public void reset() {
-		farbe = Color.LIGHT_GRAY;
+		farbe = BoSColor;
 		hintergrund = null;
 		clearHintergrund();
 	}
@@ -275,7 +284,7 @@ public class Symbol {
 			if (linearNumbering) {
 				numText += index;
 			} else {
-				numText += index % board.getRows() + "," + index / board.getRows();
+				numText += index % board.getColumns() + "," + index / board.getColumns();
 			}
 			plotter.setText(numText, pos.x, pos.y);
 		} else {
@@ -297,6 +306,7 @@ public class Symbol {
 			// textObject.setText(text);
 			// }
 		}
+		
 		if (type == SymbolType.CIRCLE) {
 			for (double t = 0; t < 2 * Math.PI; t += 0.03) {
 				double x = pos.x + size * Math.cos(t);

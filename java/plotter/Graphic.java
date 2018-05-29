@@ -33,6 +33,7 @@ import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -41,9 +42,9 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRootPane;
 import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
 
 // Version wer wann was
 // 1.2     se  1303 Screen-Dump, print
@@ -65,7 +66,7 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 	static int verbose = 0;
 	static int xsize = 800;
 	static int ysize = 550;
-	private static String version = "1.21 Dez. 2013";
+	private static String version = "1.3 Sep. 2017";
 
 	private Plotter plotter = null;
 	private JLabel status = new JLabel();
@@ -143,10 +144,8 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 			stream.close();
 			fileOpenDirectory = properties.getProperty("saveDir");
 		} catch (FileNotFoundException e) {
-			// e.printStackTrace();
 			System.out.println("property file " + propertieFile + " not found");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -323,8 +322,24 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 			JOptionPane.showMessageDialog(this, status, "Plotter status", JOptionPane.INFORMATION_MESSAGE);
 
 		} else if (cmd.equals(dumpText)) {
-			SwingWorker<Boolean, Void> worker = new DataDumper<Boolean, Void>();
-			worker.execute();
+			String text = "";
+			Map<String, DataObject> m = plotter.getDataObjects();
+			int i = 0;
+			for (String o : m.keySet()) {
+				text += "Set " + i + ": " + o + ": ";
+				++i;
+				text += m.get(o).dumpString();
+				text += System.lineSeparator();
+			}
+
+			
+			InfoBox info = new InfoBox(this, "", 400, 400);
+			info.setTitle( "Data");
+			info.getTextArea().setText( text );
+			info.setVisible(true);
+
+			//SwingWorker<Boolean, Void> worker = new DataDumper<Boolean, Void>();
+			//worker.execute();
 		} else if (cmd.equals(printText)) {
 			PrinterJob job = PrinterJob.getPrinterJob();
 			job.setPrintable(this);
@@ -543,22 +558,6 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 
 	}
 
-	class DataDumper<T, V> extends SwingWorker {
-
-		@Override
-		public Boolean doInBackground() {
-			Map<String, DataObject> m = plotter.getDataObjects();
-			int i = 0;
-			for (String o : m.keySet()) {
-				System.out.println(i + ". " + o + ": ");
-				++i;
-				System.out.println(m.get(o).dumpString());
-			}
-			return true;
-		}
-
-	}
-
 	public void removeDataMenu() {
 		menuBar.remove(dataMenu);
 
@@ -567,5 +566,31 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 	public JLabel getStatusLabel() {
 		return status;
 
+	}
+
+	public void addComponent(Component b, String region) {
+		switch( region.toUpperCase() ) {
+		case "EAST" : 
+			addEastComponent( b );
+			return;
+		case "WEST" : 
+			addWestComponent( b );
+			return;
+		case "SOUTH" : 
+			addSouthComponent( b );
+			return;
+		case "NORTH" : 
+			addNorthComponent( b );
+			return;
+		}
+		
+	}
+
+	public void removeBorderComponents() {
+		Box[] boxes = {top, bottom, east, west};
+		for( Box box : boxes ) {
+			box.removeAll();
+		}
+		top.add(status);
 	}
 }

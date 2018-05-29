@@ -1,8 +1,6 @@
 package plotter;
 
-import java.awt.AWTException;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -10,7 +8,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
-import java.awt.Robot;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.font.FontRenderContext;
@@ -52,6 +49,7 @@ import javax.swing.JPanel;
 //                verbose setter / getter
 // 1.27 se 140307 clearRange
 // 1.28 se 150422 lineStyle COORD
+// 1.29 se 180419 grid 
 
 /**
  * @author Euler
@@ -61,7 +59,7 @@ public class Plotter extends JPanel {
 
 	private static final long serialVersionUID = 8220278066243017406L;
 
-	private static final String version = "1.28 April 2015";
+	private static final String version = "1.29 April 2018";
 
 	static int verbose = 0;
 	static Color[] plotColor = { Color.red, Color.green, Color.blue, Color.orange, Color.yellow, Color.magenta };
@@ -78,6 +76,7 @@ public class Plotter extends JPanel {
 	private double[] xgrid = null;
 	private double[] ygrid = null;
 	private String[] xlabel = null;
+	private String[] ylabel = null;
 	private boolean dynYscale = true;
 	private boolean dynXscale = true;
 	private double xl = 0.05;
@@ -89,6 +88,9 @@ public class Plotter extends JPanel {
 
 	private double autoXgrid = 0; // distance between xtics (sec)
 	private double ticRelHeight = 0.05;
+	private int ticAbsHeight = 0;
+	private double ticRelWidth = 0.05;
+	private int ticAbsWidth = 0;
 	private int symbolSize = 2;
 	private double autoYgrid = 0;
 	private LineStyle plotMode = LineStyle.LINE;
@@ -111,6 +113,8 @@ public class Plotter extends JPanel {
 	private String statusLine;
 	private String valueFormatString = "%f";
 	private int paintCalls = 0;
+
+	private BufferedImage backgroundImage;
 
 	/**
 	 * @param statusLine
@@ -137,6 +141,40 @@ public class Plotter extends JPanel {
 	public Plotter(String name) {
 		setName(name);
 
+	}
+
+	public BufferedImage getBackgroundImage() {
+		return backgroundImage;
+	}
+
+	public void setTicRelSize(double size ) {
+		setXTicRelSize( size );
+		setYTicRelSize( size );
+	}
+
+	public void setTicAbsSize(int size ) {
+		setXTicAbsSize( size );
+		setYTicAbsSize( size );
+	}
+
+	public void setXTicRelSize(double ticRelHeight) {
+		this.ticRelHeight = ticRelHeight;
+	}
+
+	public void setXTicAbsSize(int ticAbsHeight) {
+		this.ticAbsHeight = ticAbsHeight;
+	}
+
+	public void setYTicRelSize(double ticRelWidth) {
+		this.ticRelWidth = ticRelWidth;
+	}
+
+	public void setYTicAbsSize(int ticAbsWidth) {
+		this.ticAbsWidth = ticAbsWidth;
+	}
+
+	public void setBackgroundImage(BufferedImage backgroundImage) {
+		this.backgroundImage = backgroundImage;
 	}
 
 	public int getPaintCalls() {
@@ -243,8 +281,8 @@ public class Plotter extends JPanel {
 	}
 
 	/**
-	 * Add a point to the current data set using coordinates relative to the
-	 * last point
+	 * Add a point to the current data set using coordinates relative to the last
+	 * point
 	 * 
 	 * @param x
 	 *            dx coordinate
@@ -256,8 +294,8 @@ public class Plotter extends JPanel {
 	}
 
 	/**
-	 * Add a point to the specified data set using coordinates relative to the
-	 * last point
+	 * Add a point to the specified data set using coordinates relative to the last
+	 * point
 	 * 
 	 * @param key
 	 *            key for the data set
@@ -468,10 +506,33 @@ public class Plotter extends JPanel {
 	 * 
 	 * @param label
 	 */
+	public void setLabel(String[] label) {
+		setXLabel( label );
+		setYLabel( label );
+	}
+
+	/**
+	 * Define labels for the x and y ticks.
+	 * 
+	 * @param label
+	 */
+
 	public void setXLabel(String[] label) {
 		xlabel = new String[label.length];
 		for (int i = 0; i < label.length; i++) {
 			xlabel[i] = label[i];
+		}
+	}
+
+	/**
+	 * Define labels for the y ticks.
+	 * 
+	 * @param label
+	 */
+	public void setYLabel(String[] label) {
+		ylabel = new String[label.length];
+		for (int i = 0; i < label.length; i++) {
+			ylabel[i] = label[i];
 		}
 	}
 
@@ -572,6 +633,11 @@ public class Plotter extends JPanel {
 			System.out.println(getBackground());
 		}
 
+		if (backgroundImage != null) {
+			// Image dimg = backgroundImage.getScaledInstance(getWidth(), getHeight(),
+			// Image.SCALE_SMOOTH);
+			g.drawImage(backgroundImage, 0, 0, this);
+		}
 		int rectWidth = getSize().width - getInsets().left - getInsets().right;
 		int rectHeight = getSize().height - getInsets().top - getInsets().bottom;
 		// System.out.println("x: "
@@ -623,7 +689,8 @@ public class Plotter extends JPanel {
 		// (int) (plotLeft + (d - xmin) * xfactor);
 		xScaleKonst = plotLeft - xmin * xfactor;
 
-		g2.setColor(Color.BLUE);
+		// Start with the lines
+		g2.setColor(borderColor);
 		for (double yL : yLine) {
 			int yg = plotLow - (int) ((yL - ymin) * yfactor);
 			g2.drawLine(plotLeft, yg, plotRight, yg);
@@ -634,7 +701,7 @@ public class Plotter extends JPanel {
 			g2.drawLine(xg, plotLow, xg, plotUp);
 		}
 
-		g2.setColor(borderColor);
+		// now rectancle
 		g2.drawRect(plotLeft, plotUp, plotWidth, plotHeight);
 
 		synchronized (imageObjects) {
@@ -645,12 +712,12 @@ public class Plotter extends JPanel {
 					int newWidth = -1;
 					int newHeight = -1;
 					if (imageOject.worldWidth > 0) {
-						newWidth = Math.abs( scaleX(imageOject.worldWidth) - scaleX( 0. ) );
-						System.out.println( "W: " + imageOject.worldWidth + " -> " + newWidth );
+						newWidth = Math.abs(scaleX(imageOject.worldWidth) - scaleX(0.));
+						System.out.println("W: " + imageOject.worldWidth + " -> " + newWidth);
 					}
 					if (imageOject.worldHeight > 0) {
-						newHeight = Math.abs( scaleY(imageOject.worldHeight) - scaleY( 0.) );
-						System.out.println( "H: " + imageOject.worldHeight + " -> " + newHeight );
+						newHeight = Math.abs(scaleY(imageOject.worldHeight) - scaleY(0.));
+						System.out.println("H: " + imageOject.worldHeight + " -> " + newHeight);
 					}
 					image = imageOject.image.getScaledInstance(newWidth, newHeight, Image.SCALE_DEFAULT);
 					System.out.println("rescaled Image: " + newHeight + " x " + newWidth);
@@ -665,12 +732,25 @@ public class Plotter extends JPanel {
 
 		FontMetrics fm = g2.getFontMetrics();
 
+		int xTicSize;
+		if (ticAbsHeight != 0) {
+			xTicSize = ticAbsHeight;
+		} else {
+			xTicSize = (int) (ticRelHeight * plotHeight);
+		}
+		int yTicSize;
+		if (ticAbsWidth != 0) {
+			yTicSize = ticAbsWidth;
+		} else {
+			yTicSize = (int) (ticRelWidth * plotWidth);
+		}
+
 		if (autoXgrid > 0) {
 			List<Double> xValues = calcAutoGrid(xmin, xmax, autoXgrid);
 
 			for (double xL : xValues) {
 				int xg = plotLeft + (int) ((xL - xmin) * xfactor);
-				g2.drawLine(xg, plotLow, xg, plotLow - (int) (ticRelHeight * plotHeight));
+				g2.drawLine(xg, plotLow, xg, plotLow - xTicSize);
 				String label = getLabelString(xL, xLabelFormat);
 				int xlabpos = xg - fm.stringWidth(label) / 2;
 				g2.drawString(label, xlabpos, getSize().height - getInsets().bottom);
@@ -682,9 +762,10 @@ public class Plotter extends JPanel {
 			List<Double> yValues = calcAutoGrid(ymin, ymax, autoYgrid);
 
 			// now draw them
+			System.out.println(ticAbsWidth + " " + yTicSize);
 			for (double yL : yValues) {
 				int yg = scaleY(yL); // plotLow - (int) ((yL - ymin) * yfactor);
-				g2.drawLine(plotLeft, yg, plotLeft + (int) (ticRelHeight * plotWidth), yg);
+				g2.drawLine(plotLeft, yg, plotLeft + yTicSize, yg);
 				g2.drawString(getLabelString(yL, yLabelFormat), getInsets().left, yg);
 			}
 		}
@@ -692,11 +773,15 @@ public class Plotter extends JPanel {
 		if (xgrid != null) {
 			for (int i = 0; i < xgrid.length; i++) {
 				int xg = plotLeft + (int) ((xgrid[i] - xmin) * xfactor);
-				g2.drawLine(xg, plotLow, xg, plotLow - (int) (ticRelHeight * plotHeight));
-				if (xlabel != null) {
-					int xlabpos = xg - fm.stringWidth(xlabel[i]) / 2;
-					g2.drawString(xlabel[i], xlabpos, getSize().height - getInsets().bottom);
+				g2.drawLine(xg, plotLow, xg, plotLow - xTicSize);
+				String lab = "";
+				if (xlabel != null & i < xlabel.length) {
+					lab = xlabel[i];
+				} else {
+					lab = getLabelString(xgrid[i], xLabelFormat);
 				}
+				int xlabpos = xg - fm.stringWidth(xlabel[i]) / 2;
+				g2.drawString(xlabel[i], xlabpos, getSize().height - getInsets().bottom);
 			}
 		}
 
@@ -704,12 +789,20 @@ public class Plotter extends JPanel {
 			for (int i = 0; i < ygrid.length; i++) {
 				if (ygrid[i] >= ymin && ygrid[i] <= ymax) {
 					int yg = plotLow - (int) ((ygrid[i] - ymin) * yfactor);
-					g2.drawLine(plotLeft, yg, plotRight, yg);
-					g2.drawString("" + ygrid[i], getInsets().left, yg);
+					// g2.drawLine(plotLeft, yg, plotRight, yg);
+					g2.drawLine(plotLeft, yg, plotLeft + yTicSize, yg);
+					String lab = "";
+					if (ylabel != null & i < ylabel.length) {
+						lab = ylabel[i];
+					} else {
+						lab = getLabelString(ygrid[i], yLabelFormat);
+					}
+					g2.drawString(lab, getInsets().left, yg);
 				}
 			}
 		}
 
+		g2.setColor(Color.BLUE);
 		// if (dataObjects.size() > 0) {
 		int xcol = 0;
 		for (DataObject d : dataObjects.values()) {
@@ -875,7 +968,12 @@ public class Plotter extends JPanel {
 
 				// System.out.println(tO.getText() + " " +tO.getColor());
 				g2.setColor(tO.getColor());
-				g2.drawString(tO.getText(), xlabpos, ylabpos);
+				String text = tO.getText();
+				// g2.drawString(tO.getText(), xlabpos, ylabpos);
+				for (String line : text.split("\n")) {
+					g2.drawString(line, xlabpos, ylabpos);
+					ylabpos += g2.getFontMetrics().getHeight();
+				}
 				g2.setFont(currentFont); // restore default font
 			}
 		}
@@ -924,8 +1022,8 @@ public class Plotter extends JPanel {
 	}
 
 	/**
-	 * Calculates the device x-coordinate for a value given in world coordinates.
-	 * If distances are needed: use something like Math.abs( scaleX(1.) - scaleX(0.)) 
+	 * Calculates the device x-coordinate for a value given in world coordinates. If
+	 * distances are needed: use something like Math.abs( scaleX(1.) - scaleX(0.))
 	 * to get the length of 1
 	 * 
 	 * @param xWorld
@@ -944,13 +1042,18 @@ public class Plotter extends JPanel {
 		return (yScaleKonst - i) / yfactor;
 	}
 
+	@Deprecated
+	public String nextVector() {
+		return nextDataSet();
+	}
+
 	/**
 	 * Switch to next data set.
 	 * 
 	 * This creates a new empty data set. The new set is default target for
 	 * subsequent calls of the methode <code>add</code>.
 	 */
-	public String nextVector() {
+	public String nextDataSet() {
 		int i = 1;
 		do {
 			currV = "" + i;
@@ -964,14 +1067,19 @@ public class Plotter extends JPanel {
 	/**
 	 * Switch to next data set and use the given name.
 	 * 
-	 * If necessary this creates a new empty data set. The new set is default
-	 * target for subsequent calls of the methode <code>add</code>.
+	 * If necessary this creates a new empty data set. The new set is default target
+	 * for subsequent calls of the methode <code>add</code>.
 	 * 
 	 * @param name
 	 *            Name of the new data set
 	 */
-	public void nextVector(String name) {
+	public void nextDataSet(String name) {
 		currV = name;
+	}
+
+	@Deprecated
+	public void nextVector(String name) {
+		nextDataSet(name);
 	}
 
 	/**
@@ -1117,11 +1225,11 @@ public class Plotter extends JPanel {
 	}
 
 	/**
-	 * Define the formatting of the labels of the y-axis. The given string will
-	 * be used in <code>String.format(labelFormat, y)</code> to format a value
-	 * <code>y</code>. For example <code>"%f.2%%"</code> will print numbers with
-	 * two decimal place and a %-symbol. Default is <code>null</code>, i. e. the
-	 * label is converted directly into a String.
+	 * Define the formatting of the labels of the y-axis. The given string will be
+	 * used in <code>String.format(labelFormat, y)</code> to format a value
+	 * <code>y</code>. For example <code>"%f.2%%"</code> will print numbers with two
+	 * decimal place and a %-symbol. Default is <code>null</code>, i. e. the label
+	 * is converted directly into a String.
 	 * 
 	 * @param labelFormat
 	 *            the yLabelFormat to set
@@ -1131,11 +1239,11 @@ public class Plotter extends JPanel {
 	}
 
 	/**
-	 * Define the formatting of the labels of the x-axis. The given string will
-	 * be used in <code>String.format(labelFormat, x)</code> to format a value
-	 * <code>x</code>. For example <code>"%.2f%%"</code> will print numbers with
-	 * two decimal place and a %-symbol. Default is <code>null</code>, i. e. the
-	 * label is converted directly into a String.
+	 * Define the formatting of the labels of the x-axis. The given string will be
+	 * used in <code>String.format(labelFormat, x)</code> to format a value
+	 * <code>x</code>. For example <code>"%.2f%%"</code> will print numbers with two
+	 * decimal place and a %-symbol. Default is <code>null</code>, i. e. the label
+	 * is converted directly into a String.
 	 * 
 	 * @param labelFormat
 	 *            the xLabelFormat to set
@@ -1289,8 +1397,8 @@ public class Plotter extends JPanel {
 	}
 
 	/**
-	 * Remove the first text object at the given position. Returns
-	 * <code>true</code> if this plotter contained the specified element.
+	 * Remove the first text object at the given position. Returns <code>true</code>
+	 * if this plotter contained the specified element.
 	 * 
 	 * @param x
 	 *            x postion
@@ -1405,7 +1513,7 @@ public class Plotter extends JPanel {
 	}
 
 	public void removeImageObject(ImageObject io) {
-		imageObjects.remove(io);	
+		imageObjects.remove(io);
 	}
 
 	/**
@@ -1424,6 +1532,5 @@ public class Plotter extends JPanel {
 	public int getImageObjectsCount() {
 		return imageObjects.size();
 	}
-
 
 }

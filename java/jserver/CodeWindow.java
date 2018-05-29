@@ -64,6 +64,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
+import plotter.InfoBox;
 import plotter.Sleep;
 
 /**
@@ -117,7 +118,9 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 	private static String snippetInfoText = "Info";
 	private static String showGeneratedCodeText;
 	private static String resetOnStartText;
-	//private static final String lastEditedSnippetText = "<html><em>letztes Snippet</em></html>";
+	private static String infoDirectText;
+	// private static final String lastEditedSnippetText = "<html><em>letztes
+	// Snippet</em></html>";
 
 	private int xsize = 500;
 	private int ysize = 350;
@@ -171,6 +174,8 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 	private ResourceBundle messages;
 	private Properties properties;
 	private boolean resetOnStart;
+	private boolean infoDirect = true;
+
 	private String lastSourceText = "";
 	private String lastDestText = "";
 
@@ -240,6 +245,8 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 		showGeneratedCodeText = messages.getString("generatedCode");
 		deleteSnippetText = messages.getString("deleteSnippet");
 		resetOnStartText = messages.getString("resetOnStart");
+		// TODO text
+		infoDirectText = "infoDirect"; // messages.getString("infoDirect");
 
 	}
 
@@ -391,12 +398,12 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 		snippetSelector.setActionCommand(loadCommand);
 		String lastSnippetName = properties.getProperty("snippetName");
 		snippetSelector.setSelectedIndex(-1);
-		if( lastSnippetName != null ) {
-			System.out.println( "Try snippet " + lastSnippetName );
-			if( codeDB.hasSnippet(lastSnippetName)  ) {
-				codeInput.setText(codeDB.getSnippetCode(lastSnippetName) );
-				for( int j=0; j<snippetSelector.getItemCount(); j++ ) {
-					if( lastSnippetName.equals(snippetSelector.getItemAt(j))) {
+		if (lastSnippetName != null) {
+			System.out.println("Try snippet " + lastSnippetName);
+			if (codeDB.hasSnippet(lastSnippetName)) {
+				codeInput.setText(codeDB.getSnippetCode(lastSnippetName));
+				for (int j = 0; j < snippetSelector.getItemCount(); j++) {
+					if (lastSnippetName.equals(snippetSelector.getItemAt(j))) {
 						snippetName = lastSnippetName;
 						snippetSelector.setSelectedIndex(j);
 						saveButton.setEnabled(true);
@@ -405,7 +412,6 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 				}
 			}
 		}
-				
 
 		snippetSelector.addActionListener(this);
 
@@ -522,12 +528,12 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 		// felhermeldung), C-Mode kein sichtbarer Effekt
 		// DefaultSyntaxKit.initKit();
 		// codeInput.setContentType("text/C");
-		
-//		if (codeDB.hasLastEditElement()) {
-//			codeInput.setText(codeDB.getLastEditElement().getTextContent());
-//			// snippetNameLabel.setText(lastEditedSnippetText);
-//		}
-		
+
+		// if (codeDB.hasLastEditElement()) {
+		// codeInput.setText(codeDB.getLastEditElement().getTextContent());
+		// // snippetNameLabel.setText(lastEditedSnippetText);
+		// }
+
 		codeHasChanged = false;
 
 		messageField.setColumns(60);
@@ -575,7 +581,8 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 
 		menuCompile.addSeparator();
 		Utils.addMenuItem(this, menuCompile, editNewSnippetText, messages.getString("tooltip.newSnippet"), "control N");
-		Utils.addMenuItem(this, menuCompile, editNewCompleteSnippetText, messages.getString("tooltip.newCompleteSnippet") );
+		Utils.addMenuItem(this, menuCompile, editNewCompleteSnippetText,
+				messages.getString("tooltip.newCompleteSnippet"));
 		Utils.addMenuItem(this, menuCompile, importSnippetText);
 		Utils.addMenuItem(this, menuCompile, exportSnippetText);
 		Utils.addMenuItem(this, menuCompile, showGeneratedCodeText, messages.getString("tooltip.generatedCode"),
@@ -584,6 +591,9 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 		Utils.addMenuItem(this, menuCompile, runText, messages.getString("tooltip.compileExecute"), "alt X");
 		Utils.addMenuItem(this, menuCompile, stopText, messages.getString("tooltip.stopExecution"));
 		JMenuItem mi = new JCheckBoxMenuItem(resetOnStartText, resetOnStart);
+		mi.addActionListener(this);
+		menuCompile.add(mi);
+		mi = new JCheckBoxMenuItem(infoDirectText, infoDirect);
 		mi.addActionListener(this);
 		menuCompile.add(mi);
 		Utils.addMenuItem(this, menuCompile, commandsFromFiletext, messages.getString("tooltip.fromFile"), "alt Y");
@@ -674,8 +684,8 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 					return;
 				}
 			}
-			if(cmd.equals(editNewCompleteSnippetText) ) {
-				codeInput.setText( codeExecutor.getCompleteTemplate() );
+			if (cmd.equals(editNewCompleteSnippetText)) {
+				codeInput.setText(codeExecutor.getCompleteTemplate());
 			} else {
 				codeInput.setText("");
 			}
@@ -698,26 +708,26 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 			}
 			JComboBox<String> cb = (JComboBox<String>) event.getSource();
 			String selectedSnippetName = (String) cb.getSelectedItem();
-			//System.out.println("combo: " + selectedSnippetName);
+			// System.out.println("combo: " + selectedSnippetName);
 			codeInput.setText(codeDB.getSnippetCode(selectedSnippetName));
 			snippetName = selectedSnippetName;
 			// snippetNameLabel.setText(clipText(snippetName, 15));
 			saveButton.setEnabled(true);
 			codeHasChanged = false;
-			rememberSnippetName( );
+			rememberSnippetName();
 			updateInfoLabel();
 
 		} else if (cmd.equals(exportSnippetText)) {
 			InfoBox info = new InfoBox(this, "", 500, 400);
 			info.setTitle("Export Snippet");
-			info.getTextArea().setFont( normalFont );
+			info.getTextArea().setFont(normalFont);
 			String exportText = "";
 			if (snippetName == null) {
 				exportText = "No snippet loaded";
 			} else {
 				Element s = codeDB.getSnippetByName(snippetName);
 				Snippet snippet = new Snippet(s);
-				exportText  = snippet.write();
+				exportText = snippet.write();
 			}
 
 			info.getTextArea().setText(exportText);
@@ -966,6 +976,11 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 			properties.setProperty("resetOnStart", "" + resetOnStart);
 			board.saveProperties();
 
+		} else if (cmd.equals(infoDirectText)) {
+			infoDirect = !infoDirect;
+			properties.setProperty("infoDirect", "" + resetOnStart);
+			board.saveProperties();
+
 		} else if (cmd.equals(showGeneratedCodeText)) {
 			codeExecutor.showGeneratedCode(messages);
 		}
@@ -1184,6 +1199,15 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 
 	public String getCode() {
 		return codeInput.getText();
+	}
+
+	public void showDirectMessage() {
+		if (infoDirect) {
+			JOptionPane.showMessageDialog(null, "using direct mode", "direct mode", JOptionPane.INFORMATION_MESSAGE);
+		} else {
+			messageField.append("using direct mode");
+		}
+
 	}
 
 }

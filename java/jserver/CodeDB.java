@@ -237,12 +237,23 @@ public class CodeDB {
 		for (int j = 0; j < children.getLength(); j++) {
 			Node c = children.item(j);
 			if ("codeA".equals(c.getNodeName())) {
-				Node n = c.getLastChild();
-				System.out.println("Node type: " + n.getNodeType() + " " + n.getNodeName());
-				CDATASection section = (CDATASection) c.getLastChild();
-				return section.getTextContent();
-				// geht auch
-				// return n.getNodeValue();
+				NodeList cc = c.getChildNodes();
+				for( int jj = 0; jj < cc.getLength(); jj++ ) {
+					Node n = cc.item(jj);
+					//System.out.println("in codeA, Node type: " + n.getNodeType() + " " + n.getNodeName());
+					if( n.getNodeType() == Node.CDATA_SECTION_NODE ) {
+						return n.getNodeValue();
+					}
+				}
+// alt, 27.04.18
+//				Node n = c.getLastChild();
+//				System.out.println("in codeA, Node type: " + n.getNodeType() + " " + n.getNodeName());
+//				//CDATASection section = (CDATASection) c.getLastChild();
+//				//return section.getTextContent();
+//				// geht auch (nicht mehr 27.04.18)
+//				 System.out.println( "Node: " + n );
+//				 System.out.println( "Value: " + n.getNodeValue());
+//				 return n.getNodeValue();
 			}
 			if ("code".equals(c.getNodeName())) {
 				return c.getTextContent();

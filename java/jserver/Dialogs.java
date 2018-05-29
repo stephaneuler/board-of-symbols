@@ -13,6 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import plotter.Graphic;
+import plotter.InfoBox;
 
 public class Dialogs {
 

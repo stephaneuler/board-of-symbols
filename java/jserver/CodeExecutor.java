@@ -11,6 +11,8 @@ import java.util.ResourceBundle;
 import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 
+import plotter.InfoBox;
+
 /**
  * This class defines common behaviors for code executors. 
  * A subclass has to implement the details for a given programming language.
