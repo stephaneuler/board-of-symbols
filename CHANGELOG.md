@@ -1,5 +1,6 @@
 ## Version 
 
+- 1.19 improved i18n, use locale from snippet (July 2018)   = jserver_119.jar
 - 1.18 image import, new trainer level SIZES (June 2018)   = jserver_118.jar
 - 1.17 fixed bug in snippet loader, new menu item help-info, tested with Java 10 (April 2018)   = jserver_117.jar
 - * 1.16 more BoSL commands (dez 2017)   = jserver.jar
