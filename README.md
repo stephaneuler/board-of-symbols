@@ -21,7 +21,7 @@ For example the following JS-Code
 The example uses the German version. You can change the language in the menu Optionen. This also changes the function names. 
 
 ## How to start - Java:
-- download the file jserver.jar 
+- download the file jserver.jar (older or newer version named jserver_xxx.jar have to be renamed to jserver.jar after download)
 - if necessary - install java SDK
 - run jserver.jar ( double click or via commandline: java -jar jserver.jar ) 
 - then open a code window (menu "Fenster für Code-Eingabe" or ALT-c) to enter some Java code
