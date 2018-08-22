@@ -35,6 +35,7 @@ The image is scaled to the size of the symbol (that can be changed with the func
 *  `symbolSizes` *r* changes the size of all symbols
 *  *m1 f1 m2 f2 m3 f3 ...* (a sequence of pairs index - color) changes the color of the specified fields
 *  `clearCommands` clears the command queue
-*  `button` *text* *region*  adds a button in the given region (\emph{east}, \emph{south}, \emph{west}, \emph{north}). A click on this button adds the text to the command queue. 
+*  `button` *text* *region*  adds a button in the given region (east, south,  west ,  north). A click on this button adds the text to the command queue. 
 *  `clearAllButtons` removes all buttons
 *  `toggleInput` toggles the input field
+*  `showInput` shows the input field
