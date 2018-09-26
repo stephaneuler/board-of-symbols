@@ -1,6 +1,6 @@
 ## Version 
 
-- 1.2 language selector, analyser, new trainer levels, ... (September 2018)
+- 1.2 language selector, analyser, function help, new trainer levels, ... (September 2018)
 - 1.19 improved i18n, use locale from snippet (June2018)   
 - 1.18 image import, new trainer level SIZES (June 2018) 
 - 1.17 fixed bug in snippet loader, new menu item help-info, tested with Java 10 (April 2018) 
