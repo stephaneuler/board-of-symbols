@@ -1,5 +1,6 @@
 ## Version 
 
+- 1.3 changed drawing of circles (Januar 2019)
 - 1.2.2 keep history of code files, more minor changes (November 2018)
 - 1.2.1 improved javac-path selector (October 2018)
 - 1.2 language selector, analyser, function help, new trainer levels, ... (September 2018)
