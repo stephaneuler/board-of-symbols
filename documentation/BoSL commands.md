@@ -26,7 +26,7 @@ In snippet mode the prefix *>>* is required.
 * `sleep n` BoS waits for the given time (in milliseconds)
 * `image` *x* *y* *filename* shows the image from the give file  at the position *(x,y)*.
 The image is scaled to the size of the symbol (that can be changed with the function symbolSize(). 
-*  `image` *x* *y* -` removes the image at position *(x,y)*
+*  `image` *x* *y* - removes the image at position *(x,y)*
 *  `bgImage` *filename* use the image as background (no scaling)
 *  `fontsize` *n* sets the font size for symbol texts
 *  `clearAllText` removes all texts
