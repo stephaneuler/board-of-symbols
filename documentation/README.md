@@ -1,4 +1,9 @@
 This directory contains some documentation for BoS. 
+* installing- ... additional info on installation 
+* bos_en_2: slides from a talk about BoS
+* BoSL commands: list of advanced commands in the boS Language
+* BoSBlueJ: using BoS from BlueJ
+* c-skript: learning C with BoS (in German)
 
 Some additional links:
 * [BoS Gallery](https://hosting.iem.thm.de/user/euler/gallery2/index.php?inhalt=home "some screenshots from BoS projects")

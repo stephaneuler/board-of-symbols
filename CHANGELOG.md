@@ -1,7 +1,13 @@
 ## Version 
 
-- 1.17 fixed bug in snippet loader, new menu item help-info, tested with Java 10 (April 2018)   = jserver_177.jar
-- * 1.16 more BoSL commands (dez 2017)   = jserver.jar
+- 1.3 changed drawing of circles (Januar 2019)
+- 1.2.2 keep history of code files, more minor changes (November 2018)
+- 1.2.1 improved javac-path selector (October 2018)
+- 1.2 language selector, analyser, function help, new trainer levels, ... (September 2018)
+- 1.19 improved i18n, use locale from snippet (June2018)   
+- 1.18 image import, new trainer level SIZES (June 2018) 
+- 1.17 fixed bug in snippet loader, new menu item help-info, tested with Java 10 (April 2018) 
+- 1.16 more BoSL commands (dez 2017) 
 - 1.15d better template for C (nov 2017)
 - 1.15c help menu in Board, help on forms (nov 2017)
 - 1.15  font selector, new form "block" (sept 2017)

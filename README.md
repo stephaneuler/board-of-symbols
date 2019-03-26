@@ -21,7 +21,7 @@ For example the following JS-Code
 The example uses the German version. You can change the language in the menu Optionen. This also changes the function names. 
 
 ## How to start - Java:
-- download the file jserver.jar 
+- download the file jserver.jar (older or newer version named jserver_xxx.jar have to be renamed to jserver.jar after download)
 - if necessary - install java SDK
 - run jserver.jar ( double click or via commandline: java -jar jserver.jar ) 
 - then open a code window (menu "Fenster für Code-Eingabe" or ALT-c) to enter some Java code
@@ -30,11 +30,11 @@ The example uses the German version. You can change the language in the menu Opt
 A short video with the first steps: https://www.youtube.com/watch?v=VLVigtQNIeU&feature=youtu.be
 
 ## How to start - C
-## Getting Started on OS X
+### Getting Started on OS X
 
 See the [guide for installing on OS X](documentation/installing-on-os-x.md).
 
-## Getting Started on Windows
+### Getting Started on Windows
 
 - download the zip-archive
 - unzip the archive
@@ -44,7 +44,7 @@ See the [guide for installing on OS X](documentation/installing-on-os-x.md).
 - then open a code window (menu "Fenster für Code-Eingabe") to enter some C code
 
 
-## For Visual Studio Compiler users:
+### For Visual Studio Compiler users:
 
 in order to execute the compile and link command cl some environment variables have to be set. The program reads these variables from the file vc.properties. You can build a version for your system as follows:
 
@@ -55,17 +55,17 @@ in order to execute the compile and link command cl some environment variables h
 - open this file in an editor and replace all backslashs \  with double backslashs \\\\ 
 
 
-## Integration in a Visual Studio project: 
+### Integration in a Visual Studio project: 
 
 In the directory *applicaton_vs* you find all required .cpp and .h files. Copy them into your project folder. Afterwards please add all these files in Visual Studio within your projects header and source folders. Make sure to replace the stdafx.h file with the one you find in the *application_vs* folder.
 
 
-## Integration in an Xcode project:
+### Integration in an Xcode project:
 
 In Xcode, create a new CommandLine Application as C++ and simply drop in all necessary files. If asked, please be sure to set the checkbox “Copy files if needed”.
 
 
-## Integration in a MINGW project:
+### Integration in a MINGW project:
 
 When using MINGW, please add the following files (expecting the installation folder was C:\MinGW\) in this given order to your linker objects/files:
 
@@ -73,15 +73,15 @@ When using MINGW, please add the following files (expecting the installation fol
  - "C:\MinGW\lib\libmswsock.a"
  - "C:\MinGW\lib\libadvapi32.a"
  
-#### For Eclipse C++: 
+### For Eclipse C++: 
 
 Right click on your project -> Properties -> C/C++ Build -> Settings -> "Tool Settings" -> MinGW C++ Linker -> Miscellaneous -> "Other objects" (lower part) -> Add object
 
-#### For DEV C++:
+### For DEV C++:
 
 At the moment not possible.
 
-#### Netbeans C++:
+### Netbeans C++:
 
 To be done.
 
