@@ -32,7 +32,7 @@ public class BoardSerializer {
 			return;
 		}
 		document = builder.newDocument();
-	
+
 	}
 
 	public static void main(String[] args) {
@@ -49,7 +49,7 @@ public class BoardSerializer {
 		b.receiveMessage("T 2 Hallo");
 		bs = new BoardSerializer();
 		bs.buildDocument(b);
-	    s = bs.write();
+		s = bs.write();
 		System.out.println("Length: " + s.length());
 		System.out.println("Hash: " + s.hashCode());
 
@@ -62,7 +62,7 @@ public class BoardSerializer {
 		try {
 			tf = TransformerFactory.newInstance().newTransformer();
 			tf.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-			tf.setOutputProperty(OutputKeys.INDENT, "yes");
+			//tf.setOutputProperty(OutputKeys.INDENT, "yes");
 			tf.transform(new DOMSource(document), result);
 		} catch (TransformerFactoryConfigurationError | TransformerException e) {
 			e.printStackTrace();
@@ -80,7 +80,11 @@ public class BoardSerializer {
 			addChild(sn, "pos", s.getPos().toString());
 			addChild(sn, "type", s.getType().toString());
 			addChild(sn, "color", "" + s.getFarbe());
-			if( s.hasText() ) {
+			if (s.getHintergrund() != null) {
+				addChild(sn, "bgColor", "" + s.getHintergrund());
+			}
+			addChild(sn, "size", "" + s.getSize());
+			if (s.hasText()) {
 				addChild(sn, "text", "" + s.getText());
 			}
 		}

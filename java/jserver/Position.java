@@ -13,7 +13,7 @@ public class Position {
 	}
 
 	void zeichnen(Plotter plotter) {
-		plotter.nextVector();
+		plotter.nextDataSet();
 		plotter.add(x, y);
 		plotter.setDataLineStyle(LineStyle.SYMBOL);
 		plotter.setSymbolSize(5);

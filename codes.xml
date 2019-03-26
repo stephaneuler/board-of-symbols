@@ -1,7 +1,10 @@
-<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<codes>
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?><codes>
 <autosave>
-farbe( 12, BLUE );
+int i;
+int farben[] = { RED, BLUE, GREEN, OLIVE, YELLOW, 0xCDD718};
+for( i=0; i&lt;130; i++ ) {
+    farbe(i, farben[i % (sizeof( farben) / sizeof( int )) ] );
+}
 </autosave>
 <snippet name="modulo">
 <code>

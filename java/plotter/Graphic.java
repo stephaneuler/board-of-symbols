@@ -42,6 +42,8 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
+import javax.swing.MenuElement;
 import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -184,6 +186,7 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 		mi = new JMenuItem(saveText);
 		mi.addActionListener(this);
 		mi.setToolTipText(saveTTText);
+		mi.setAccelerator(KeyStroke.getKeyStroke("control S"));
 		fileMenu.add(mi);
 
 		mi = new JMenuItem(printText);
@@ -219,7 +222,7 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 		return basePane;
 	}
 
-	public void addExternMenu(JMenu menu) {
+	public void addExternMenu(Component menu) {
 		menuBar.add(menu);
 	}
 
@@ -317,6 +320,7 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 			status += "# objects: \n";
 			status += "data: \t" + plotter.getDataObjects().size() + "\n";
 			status += "text: \t" + plotter.getTextObjectsCount() + "\n";
+			status += "circle: \t" + plotter.getCircleCount() + "\n";
 			status += "image: \t" + plotter.getImageObjectsCount() + "\n";
 			status += "#paints: \t" + plotter.getPaintCalls() + "\n";
 			JOptionPane.showMessageDialog(this, status, "Plotter status", JOptionPane.INFORMATION_MESSAGE);
@@ -560,7 +564,17 @@ public class Graphic extends JFrame implements ActionListener, Printable {
 
 	public void removeDataMenu() {
 		menuBar.remove(dataMenu);
+	}
 
+	public void removeMenu( String name) {
+		MenuElement[] mes = menuBar.getSubElements();
+		for( MenuElement me : mes )  {
+			JMenu jm = (JMenu) me;
+			//System.out.println(  jm.getText() );
+			if( name.equals(jm.getText() )) {
+				menuBar.remove( jm );
+			}
+		}
 	}
 
 	public JLabel getStatusLabel() {

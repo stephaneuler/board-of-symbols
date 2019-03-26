@@ -1,6 +1,7 @@
 package jserver;
 
 public class XSendAdapter extends XSendDE {
+	 public static final int BLACK = 0; 
 	 public static final int NAVY = 128; 
 	 public static final int DARKBLUE = 139; 
 	 public static final int MEDIUMBLUE = 205; 
@@ -149,5 +150,9 @@ public class XSendAdapter extends XSendDE {
 
 	public XSendAdapter() {
 		board = new Board();
+	}
+
+	public XSendAdapter(Board board) {
+		this.board = board;
 	}
 }

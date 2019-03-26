@@ -15,12 +15,14 @@ import java.awt.font.GlyphVector;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.RectangularShape;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +61,7 @@ public class Plotter extends JPanel {
 
 	private static final long serialVersionUID = 8220278066243017406L;
 
-	private static final String version = "1.29 April 2018";
+	private static final String version = "1.29a Maerz 2019";
 
 	static int verbose = 0;
 	static Color[] plotColor = { Color.red, Color.green, Color.blue, Color.orange, Color.yellow, Color.magenta };
@@ -68,6 +70,7 @@ public class Plotter extends JPanel {
 	String currV = "0";
 	private Collection<TextObject> textObjects = Collections.synchronizedCollection(new ArrayList<TextObject>());
 	private Collection<ImageObject> imageObjects = Collections.synchronizedCollection(new ArrayList<ImageObject>());
+	private Map<String, Circle> circles = new HashMap<String, Circle>();
 
 	private double xmin = -1;
 	private double xmax = 1;
@@ -117,8 +120,7 @@ public class Plotter extends JPanel {
 	private BufferedImage backgroundImage;
 
 	/**
-	 * @param statusLine
-	 *            the statusLine to set
+	 * @param statusLine the statusLine to set
 	 */
 	public void setStatusLine(String statusLine) {
 		this.statusLine = statusLine;
@@ -135,8 +137,7 @@ public class Plotter extends JPanel {
 	/**
 	 * Constructs a new <code>Plotter</code> with the given name
 	 * 
-	 * @param name
-	 *            the name of the new <code>Plotter</code> object
+	 * @param name the name of the new <code>Plotter</code> object
 	 */
 	public Plotter(String name) {
 		setName(name);
@@ -147,14 +148,14 @@ public class Plotter extends JPanel {
 		return backgroundImage;
 	}
 
-	public void setTicRelSize(double size ) {
-		setXTicRelSize( size );
-		setYTicRelSize( size );
+	public void setTicRelSize(double size) {
+		setXTicRelSize(size);
+		setYTicRelSize(size);
 	}
 
-	public void setTicAbsSize(int size ) {
-		setXTicAbsSize( size );
-		setYTicAbsSize( size );
+	public void setTicAbsSize(int size) {
+		setXTicAbsSize(size);
+		setYTicAbsSize(size);
 	}
 
 	public void setXTicRelSize(double ticRelHeight) {
@@ -184,10 +185,8 @@ public class Plotter extends JPanel {
 	/**
 	 * same as <code>setPreferredSize(new Dimension(width, heigth))</code>
 	 * 
-	 * @param width
-	 *            the specified width
-	 * @param heigth
-	 *            the specified heigth
+	 * @param width  the specified width
+	 * @param heigth the specified heigth
 	 */
 	public void setPreferredSize(int width, int heigth) {
 		setPreferredSize(new Dimension(width, heigth));
@@ -203,8 +202,7 @@ public class Plotter extends JPanel {
 	/**
 	 * Add a point to the current data set, use index as x coordinate
 	 * 
-	 * @param y
-	 *            y coordinate
+	 * @param y y coordinate
 	 */
 	public void add(double y) {
 		add(currV, y);
@@ -213,10 +211,8 @@ public class Plotter extends JPanel {
 	/**
 	 * Add a point to the given data set, use index as x coordinate
 	 * 
-	 * @param key
-	 *            key for the data set
-	 * @param y
-	 *            y coordinate
+	 * @param key key for the data set
+	 * @param y   y coordinate
 	 */
 	public void add(String key, double y) {
 		checkKey(key);
@@ -226,10 +222,8 @@ public class Plotter extends JPanel {
 	/**
 	 * Add a point to the current data set
 	 * 
-	 * @param x
-	 *            x coordinate
-	 * @param y
-	 *            y coordinate
+	 * @param x x coordinate
+	 * @param y y coordinate
 	 */
 	public void add(double x, double y) {
 		add(currV, x, y);
@@ -238,12 +232,9 @@ public class Plotter extends JPanel {
 	/**
 	 * Add a point to the specified data set
 	 * 
-	 * @param key
-	 *            key for the data set
-	 * @param x
-	 *            x coordinate
-	 * @param y
-	 *            y coordinate
+	 * @param key key for the data set
+	 * @param x   x coordinate
+	 * @param y   y coordinate
 	 */
 	public synchronized void add(String key, double x, double y) {
 		checkKey(key);
@@ -284,10 +275,8 @@ public class Plotter extends JPanel {
 	 * Add a point to the current data set using coordinates relative to the last
 	 * point
 	 * 
-	 * @param x
-	 *            dx coordinate
-	 * @param y
-	 *            dy coordinate
+	 * @param x dx coordinate
+	 * @param y dy coordinate
 	 */
 	public synchronized void addD(double x, double y) {
 		addD(currV, x, y);
@@ -297,12 +286,9 @@ public class Plotter extends JPanel {
 	 * Add a point to the specified data set using coordinates relative to the last
 	 * point
 	 * 
-	 * @param key
-	 *            key for the data set
-	 * @param x
-	 *            dx coordinate
-	 * @param y
-	 *            dy coordinate
+	 * @param key key for the data set
+	 * @param x   dx coordinate
+	 * @param y   dy coordinate
 	 */
 	public synchronized void addD(String key, double x, double y) {
 		checkKey(key);
@@ -370,8 +356,7 @@ public class Plotter extends JPanel {
 	 * set the autoIncrementColor mode. If true (default) the color changes with
 	 * each data set.
 	 * 
-	 * @param autoIncrementColor
-	 *            the autoIncrementColor to set
+	 * @param autoIncrementColor the autoIncrementColor to set
 	 */
 	public void setAutoIncrementColor(boolean autoIncrementColor) {
 		this.autoIncrementColor = autoIncrementColor;
@@ -388,8 +373,7 @@ public class Plotter extends JPanel {
 	/**
 	 * Set the color for the current data set.
 	 * 
-	 * @param c
-	 *            color
+	 * @param c color
 	 */
 	public void setDataColor(Color color) {
 		setDataColor(currV, color);
@@ -398,10 +382,8 @@ public class Plotter extends JPanel {
 	/**
 	 * Set the color for the specified data set.
 	 * 
-	 * @param key
-	 *            key for the data set
-	 * @param c
-	 *            color
+	 * @param key key for the data set
+	 * @param c   color
 	 */
 	public void setDataColor(String key, Color c) {
 		checkKey(key);
@@ -441,8 +423,7 @@ public class Plotter extends JPanel {
 	/**
 	 * Draw a horizontal line
 	 * 
-	 * @param y
-	 *            where to draw the line
+	 * @param y where to draw the line
 	 */
 	public void setYLine(double y) {
 		yLine.add(y);
@@ -451,8 +432,7 @@ public class Plotter extends JPanel {
 	/**
 	 * Draw a vertical line
 	 * 
-	 * @param x
-	 *            where to draw the line
+	 * @param x where to draw the line
 	 */
 	public void setXLine(double x) {
 		xLine.add(x);
@@ -461,8 +441,7 @@ public class Plotter extends JPanel {
 	/**
 	 * Draw a horizontal and a vertical line
 	 * 
-	 * @param x
-	 *            where to draw the line
+	 * @param x where to draw the line
 	 */
 	public void setLine(double x) {
 		setXLine(x);
@@ -507,8 +486,8 @@ public class Plotter extends JPanel {
 	 * @param label
 	 */
 	public void setLabel(String[] label) {
-		setXLabel( label );
-		setYLabel( label );
+		setXLabel(label);
+		setYLabel(label);
 	}
 
 	/**
@@ -552,10 +531,8 @@ public class Plotter extends JPanel {
 	/**
 	 * Set the xy-range for plotting
 	 * 
-	 * @param min
-	 *            Minimum value to plot
-	 * @param max
-	 *            Maximuma value to plot
+	 * @param min Minimum value to plot
+	 * @param max Maximuma value to plot
 	 */
 	public void setRange(double min, double max) {
 		setXrange(min, max);
@@ -565,10 +542,8 @@ public class Plotter extends JPanel {
 	/**
 	 * Set the x range for plotting
 	 * 
-	 * @param min
-	 *            Minimum value to plot
-	 * @param max
-	 *            Maximuma value to plot
+	 * @param min Minimum value to plot
+	 * @param max Maximuma value to plot
 	 */
 	public void setXrange(double min, double max) {
 		xmin = min;
@@ -579,10 +554,8 @@ public class Plotter extends JPanel {
 	/**
 	 * Set the y range for plotting
 	 * 
-	 * @param min
-	 *            Minimum value to plot
-	 * @param max
-	 *            Maximuma value to plot
+	 * @param min Minimum value to plot
+	 * @param max Maximuma value to plot
 	 */
 	public void setYrange(double min, double max) {
 		ymin = min;
@@ -792,13 +765,32 @@ public class Plotter extends JPanel {
 					// g2.drawLine(plotLeft, yg, plotRight, yg);
 					g2.drawLine(plotLeft, yg, plotLeft + yTicSize, yg);
 					String lab = "";
-					if (ylabel != null & i < ylabel.length) {
+					if (ylabel != null && i < ylabel.length) {
 						lab = ylabel[i];
 					} else {
 						lab = getLabelString(ygrid[i], yLabelFormat);
 					}
 					g2.drawString(lab, getInsets().left, yg);
 				}
+			}
+		}
+
+		synchronized (circles) {
+			try {
+				for (Circle circle : circles.values()) {
+					// System.out.println(circle);
+					int x = scaleX(circle.getX());
+					int y = scaleY(circle.getY());
+					int rx = scaleX(circle.getX() + 2 * circle.getSize()) - scaleX(circle.getX());
+					int ry = scaleY(circle.getY() - 2 * circle.getSize()) - scaleY(circle.getY());
+
+					rx = Math.min(rx, ry);
+
+					g2.setColor(circle.getColor());
+					g2.fillOval(x - rx / 2, y - rx / 2, rx, rx);
+				}
+			} catch (Exception e) {
+				System.out.println( e.getMessage() );
 			}
 		}
 
@@ -1021,6 +1013,10 @@ public class Plotter extends JPanel {
 		return (int) (yScaleKonst - yWorld * yfactor);
 	}
 
+	public double scaleYD(double yWorld) {
+		return yScaleKonst - yWorld * yfactor;
+	}
+
 	/**
 	 * Calculates the device x-coordinate for a value given in world coordinates. If
 	 * distances are needed: use something like Math.abs( scaleX(1.) - scaleX(0.))
@@ -1032,6 +1028,10 @@ public class Plotter extends JPanel {
 	public int scaleX(double xWorld) {
 		// return (int) (plotLeft + (d - xmin) * xfactor);
 		return (int) (xScaleKonst + xWorld * xfactor);
+	}
+
+	public double scaleXD(double xWorld) {
+		return xScaleKonst + xWorld * xfactor;
 	}
 
 	public double scaleXR(int i) {
@@ -1070,8 +1070,7 @@ public class Plotter extends JPanel {
 	 * If necessary this creates a new empty data set. The new set is default target
 	 * for subsequent calls of the methode <code>add</code>.
 	 * 
-	 * @param name
-	 *            Name of the new data set
+	 * @param name Name of the new data set
 	 */
 	public void nextDataSet(String name) {
 		currV = name;
@@ -1085,8 +1084,7 @@ public class Plotter extends JPanel {
 	/**
 	 * Set the spacing of labels on both axes.
 	 * 
-	 * @param autoGrid
-	 *            the grid spacing to set
+	 * @param autoGrid the grid spacing to set
 	 */
 	public void setAutoGrid(double autoGrid) {
 		setAutoXgrid(autoGrid);
@@ -1096,8 +1094,7 @@ public class Plotter extends JPanel {
 	/**
 	 * Set the spacing of labels on the x axis.
 	 * 
-	 * @param autoXgrid
-	 *            the autoXgrid to set
+	 * @param autoXgrid the autoXgrid to set
 	 */
 	public void setAutoXgrid(double autoXgrid) {
 		this.autoXgrid = autoXgrid;
@@ -1106,8 +1103,7 @@ public class Plotter extends JPanel {
 	/**
 	 * Set the spacing of labels on the y axis.
 	 * 
-	 * @param autoYgrid
-	 *            the autoYgrid to set
+	 * @param autoYgrid the autoYgrid to set
 	 */
 	public void setAutoYgrid(double autoYgrid) {
 		this.autoYgrid = autoYgrid;
@@ -1132,8 +1128,7 @@ public class Plotter extends JPanel {
 	 * <li>HISTOGRAM: verticle box to pointL</li>
 	 * </ul>
 	 * 
-	 * @param lineStyle
-	 *            the plotMode to set
+	 * @param lineStyle the plotMode to set
 	 */
 	public void setDataLineStyle(LineStyle lineStyle) {
 		setDataLineStyle(currV, lineStyle);
@@ -1172,8 +1167,7 @@ public class Plotter extends JPanel {
 	/**
 	 * Set the size of the symbols used in some plotting styles
 	 * 
-	 * @param symbolSize
-	 *            the symbolSize to set
+	 * @param symbolSize the symbolSize to set
 	 */
 	public void setSymbolSize(int symbolSize) {
 		this.symbolSize = symbolSize;
@@ -1200,6 +1194,9 @@ public class Plotter extends JPanel {
 		if (textObjects.size() > 1) {
 			status += textObjects.size() + " text objects, ";
 		}
+		if (circles.size() > 0) {
+			status += circles.size() + " circle objects, ";
+		}
 		status += "x: [" + String.format("%.3g", xmin) + "," + String.format("%.3g", xmax) + "] ";
 		status += "y: [" + String.format("%.3g", ymin) + "," + String.format("%.3g", ymax) + "] ";
 		return status;
@@ -1217,8 +1214,7 @@ public class Plotter extends JPanel {
 	/**
 	 * Set the half the width of the boxes in plot mode HISTOGRAM
 	 * 
-	 * @param halfBarWidth
-	 *            the halfBarWidth to set
+	 * @param halfBarWidth the halfBarWidth to set
 	 */
 	public void setHalfBarWidth(double halfBarWidth) {
 		this.halfBarWidth = halfBarWidth;
@@ -1231,8 +1227,7 @@ public class Plotter extends JPanel {
 	 * decimal place and a %-symbol. Default is <code>null</code>, i. e. the label
 	 * is converted directly into a String.
 	 * 
-	 * @param labelFormat
-	 *            the yLabelFormat to set
+	 * @param labelFormat the yLabelFormat to set
 	 */
 	public void setYLabelFormat(String labelFormat) {
 		yLabelFormat = labelFormat;
@@ -1245,8 +1240,7 @@ public class Plotter extends JPanel {
 	 * decimal place and a %-symbol. Default is <code>null</code>, i. e. the label
 	 * is converted directly into a String.
 	 * 
-	 * @param labelFormat
-	 *            the xLabelFormat to set
+	 * @param labelFormat the xLabelFormat to set
 	 */
 	public void setXLabelFormat(String labelFormat) {
 		xLabelFormat = labelFormat;
@@ -1264,8 +1258,7 @@ public class Plotter extends JPanel {
 	}
 
 	/**
-	 * @param string
-	 *            The name of a data set
+	 * @param string The name of a data set
 	 * @return The data set
 	 * 
 	 */
@@ -1278,8 +1271,7 @@ public class Plotter extends JPanel {
 	}
 
 	/**
-	 * @param key
-	 *            The name of a data set
+	 * @param key The name of a data set
 	 * @return The data set
 	 * 
 	 */
@@ -1298,8 +1290,7 @@ public class Plotter extends JPanel {
 	/**
 	 * Return a Path-Object for the requested data set in World coordinates
 	 * 
-	 * @param name
-	 *            The name of a data set
+	 * @param name The name of a data set
 	 * @return The Path2D object
 	 */
 	public Path2D.Double getPath(String name) {
@@ -1378,8 +1369,7 @@ public class Plotter extends JPanel {
 	 * Remove the first text object that matches the given string. Returns
 	 * <code>true</code> if this plotter contained the specified element.
 	 * 
-	 * @param string
-	 *            element to be removed from this plotter, if present
+	 * @param string element to be removed from this plotter, if present
 	 * @return <code>true</code> if this plotter contained the specified element
 	 */
 	public boolean removeText(String string) {
@@ -1400,10 +1390,8 @@ public class Plotter extends JPanel {
 	 * Remove the first text object at the given position. Returns <code>true</code>
 	 * if this plotter contained the specified element.
 	 * 
-	 * @param x
-	 *            x postion
-	 * @param y
-	 *            y position
+	 * @param x x postion
+	 * @param y y position
 	 * @return <code>true</code> if this plotter contained the specified element
 	 */
 	public boolean removeText(double x, double y) {
@@ -1464,12 +1452,9 @@ public class Plotter extends JPanel {
 	/**
 	 * Write text at the specified position
 	 * 
-	 * @param s
-	 *            text to write
-	 * @param x
-	 *            x coordinate
-	 * @param y
-	 *            y coordinate
+	 * @param s text to write
+	 * @param x x coordinate
+	 * @param y y coordinate
 	 */
 	public TextObject setText(String s, double x, double y) {
 		TextObject t = new TextObject(s, x, y);
@@ -1482,12 +1467,9 @@ public class Plotter extends JPanel {
 	/**
 	 * Write a charcter at the specified position
 	 * 
-	 * @param c
-	 *            character to write
-	 * @param x
-	 *            x coordinate
-	 * @param y
-	 *            y coordinate
+	 * @param c character to write
+	 * @param x x coordinate
+	 * @param y y coordinate
 	 */
 	public TextObject setText(char c, double x, double y) {
 		return setText("" + c, x, y);
@@ -1531,6 +1513,23 @@ public class Plotter extends JPanel {
 
 	public int getImageObjectsCount() {
 		return imageObjects.size();
+	}
+
+	public void addCircle(String key, double x, double y, double size) {
+		circles.put(key, new Circle(x, y, size, getDataSet(key).getColor()));
+	}
+
+	public void removeCirlce(String key) {
+		circles.remove(key);
+
+	}
+
+	public void removeAllCirlces() {
+		circles.clear();
+	}
+
+	public int getCircleCount() {
+		return circles.size();
 	}
 
 }

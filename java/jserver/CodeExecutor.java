@@ -38,6 +38,11 @@ public abstract class CodeExecutor {
 	protected String exeName = "commandgenerator.c";
 	protected String exeCommand = null;
 	protected JTextArea messageField;
+	protected boolean verbose = true;
+
+	public void setVerbose(boolean verbose) {
+		this.verbose = verbose;
+	}
 
 	public CodeExecutor() {
 		super();
@@ -152,6 +157,10 @@ public abstract class CodeExecutor {
 
 	public String getCompleteTemplate() {
 		return "";
+	}
+
+	public String getInteractiveTemplate() {
+		return "Not implemented in the current programming language";
 	}
 
 }

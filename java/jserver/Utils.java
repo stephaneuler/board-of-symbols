@@ -5,6 +5,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.ResourceBundle;
 
 import javax.swing.JMenu;
@@ -94,6 +95,14 @@ public class Utils {
 		return result.trim();
 	}
 
+	public static String clipText(String text, int maxLength) {
+		if (text.length() <= maxLength) {
+			return text;
+		} else {
+			return text.substring(0, maxLength) + "...";
+		}
+	}
+
 	public static String concat(ResourceBundleWrapper messages, String... strings) {
 		String result = "";
 
@@ -125,5 +134,35 @@ public class Utils {
 		}
 
 	}
+
+	static  String getJavaHelp() {
+		Properties p = System.getProperties();
+		String text = "";
+
+		text += "Java Runtime Environment version: " + p.getProperty("java.version") + System.lineSeparator();
+		text += "Java installation directory: " + p.getProperty("java.home") + System.lineSeparator();
+		text += "Java class path: " + p.getProperty("java.class.path") + System.lineSeparator();
+		text += "Java class format version number: " + p.getProperty("java.class.version") + System.lineSeparator();
+		// text += "compiled with javac version : " + majorToJavaVersion(
+		// p.getProperty("java.class.version") ) + System.lineSeparator();
+		text += "Operating system name: " + p.getProperty("os.name") + System.lineSeparator();
+		text += "Operating system version: " + p.getProperty("os.version") + System.lineSeparator();
+
+		return text;
+	}
+
+	static String majorToJavaVersion(String major) {
+		switch (major) {
+		case "52.0":
+			return "8";
+		case "53.0":
+			return "9";
+		case "54.0":
+			return "10";
+		}
+		// TODO Auto-generated method stub
+		return "???";
+	}
+
 
 }

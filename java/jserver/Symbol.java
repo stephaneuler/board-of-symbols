@@ -9,8 +9,6 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
-import org.w3c.dom.Node;
-
 import plotter.DataObject;
 import plotter.ImageObject;
 import plotter.LineStyle;
@@ -27,13 +25,14 @@ public class Symbol {
 	private static Board board;
 	private static boolean linearNumbering = false;
 	private static Color BoSColor = Color.LIGHT_GRAY;
+	private static Color numberTextColor = Color.BLUE;
 
 	Position pos;
 	private double size;
 	private double fullSize;
 	int index = -1;
 	// boolean aktiv;
-	String key = null;
+	private String key = null;
 	SymbolType type = SymbolType.CIRCLE;
 	protected Color farbe = BoSColor;
 	protected Color textFarbe = Color.BLACK;
@@ -118,6 +117,13 @@ public class Symbol {
 		Symbol.numbering = numbering;
 	}
 
+	public static void setNumberTextColor(Color color) {
+		numberTextColor = color;
+	}
+	public static Color getNumberTextColor() {
+		return numberTextColor;
+	}
+	
 	public String getText() {
 		return text;
 	}
@@ -125,6 +131,7 @@ public class Symbol {
 	public boolean hasText() {
 		return text != null;
 	}
+
 
 	public void setText(String text) {
 		this.text = text;
@@ -174,8 +181,7 @@ public class Symbol {
 	}
 
 	/**
-	 * @param farbe
-	 *            the farbe to set
+	 * @param farbe the farbe to set
 	 */
 	public void setFarbe(Color farbe) {
 		this.farbe = farbe;
@@ -242,16 +248,16 @@ public class Symbol {
 	}
 
 	public void zeichnen(Plotter plotter) {
-		if (key == null) {
-			key = plotter.nextVector();
-			plotter.setDataLineStyle(key, LineStyle.FILL);
+		if (getKey() == null) {
+			setKey(plotter.nextDataSet());
+			plotter.setDataLineStyle(getKey(), LineStyle.FILL);
 		}
 		// if (aktiv)
 		// plotter.setDataColor(key, farbe.brighter());
 		// else {
 		// plotter.setDataColor(key, farbe.darker());
 		// }
-		plotter.setDataColor(key, farbe);
+		plotter.setDataColor(getKey(), farbe);
 		for (String k : secondaryKeys) {
 			plotter.removeDataObject(k);
 		}
@@ -269,9 +275,10 @@ public class Symbol {
 
 	protected void draw(Plotter plotter) {
 		plotter.setDataLineStyle(key, LineStyle.FILL);
+		plotter.removeCirlce( key );
 
 		if (hintergrund != null) {
-			DataObject d = plotter.getDataSet(key);
+			DataObject d = plotter.getDataSet(getKey());
 			d.setCorners(new plotter.Point(pos.x - fullSize, pos.y + fullSize),
 					new plotter.Point(pos.x + fullSize, pos.y - fullSize));
 			d.setBackGroundColor(hintergrund);
@@ -279,21 +286,22 @@ public class Symbol {
 		}
 
 		if (numbering) {
-			plotter.setDataColor(key, new Color(farbe.getRed(), farbe.getGreen(), farbe.getBlue(), alpha));
+			plotter.setDataColor(getKey(), new Color(farbe.getRed(), farbe.getGreen(), farbe.getBlue(), alpha));
 			String numText = "";
 			if (linearNumbering) {
 				numText += index;
 			} else {
 				numText += index % board.getColumns() + "," + index / board.getColumns();
 			}
-			plotter.setText(numText, pos.x, pos.y);
+			TextObject to = plotter.setText(numText, pos.x, pos.y);
+			to.setColor( numberTextColor );
 		} else {
-			plotter.setDataColor(key, farbe);
+			plotter.setDataColor(getKey(), farbe);
 		}
 
 		if (text != null) {
 			if (useAlphaWithText && text.length() != 0) {
-				plotter.setDataColor(key, new Color(farbe.getRed(), farbe.getGreen(), farbe.getBlue(), alpha));
+				plotter.setDataColor(getKey(), new Color(farbe.getRed(), farbe.getGreen(), farbe.getBlue(), alpha));
 			}
 			// System.out.println("Text:" + text );
 			// if (textObject == null) {
@@ -306,80 +314,82 @@ public class Symbol {
 			// textObject.setText(text);
 			// }
 		}
-		
+
 		if (type == SymbolType.CIRCLE) {
-			for (double t = 0; t < 2 * Math.PI; t += 0.03) {
-				double x = pos.x + size * Math.cos(t);
-				double y = pos.y + size * Math.sin(t);
-				plotter.add(key, x, y);
-			}
+//			for (double t = 0; t < 2 * Math.PI; t += 0.03) {
+//				double x = pos.x + size * Math.cos(t);
+//				double y = pos.y + size * Math.sin(t);
+//				plotter.add(getKey(), x, y);
+//			}
+			plotter.addCircle( key, pos.x, pos.y, size );
+
 		} else if (Dice.isDiceType(type)) {
-			Dice.draw(key, secondaryKeys, Dice.getValue(type), plotter, pos, size);
+			Dice.draw(getKey(), secondaryKeys, Dice.getValue(type), plotter, pos, size);
 
 		} else if (type == SymbolType.SQUARE) {
-			plotter.add(key, pos.x - size, pos.y - size);
-			plotter.addD(key, 2 * size, 0);
-			plotter.addD(key, 0, 2 * size);
-			plotter.addD(key, -2 * size, 0);
-			plotter.addD(key, 0, -2 * size);
+			plotter.add(getKey(), pos.x - size, pos.y - size);
+			plotter.addD(getKey(), 2 * size, 0);
+			plotter.addD(getKey(), 0, 2 * size);
+			plotter.addD(getKey(), -2 * size, 0);
+			plotter.addD(getKey(), 0, -2 * size);
 
 		} else if (type == SymbolType.DIAMOND) {
-			plotter.add(key, pos.x - size, pos.y);
-			plotter.addD(key, size, -size);
-			plotter.addD(key, size, +size);
-			plotter.addD(key, -size, size);
-			plotter.addD(key, -size, -size);
+			plotter.add(getKey(), pos.x - size, pos.y);
+			plotter.addD(getKey(), size, -size);
+			plotter.addD(getKey(), size, +size);
+			plotter.addD(getKey(), -size, size);
+			plotter.addD(getKey(), -size, -size);
 
 		} else if (type == SymbolType.VLINE) {
-			plotter.add(key, pos.x, pos.y - size);
-			plotter.addD(key, 0, 2 * size);
-			plotter.setDataLineStyle(key, LineStyle.LINE);
-			plotter.setDataStroke(key, stroke);
+			plotter.add(getKey(), pos.x, pos.y - size);
+			plotter.addD(getKey(), 0, 2 * size);
+			plotter.setDataLineStyle(getKey(), LineStyle.LINE);
+			plotter.setDataStroke(getKey(), stroke);
 
 		} else if (type == SymbolType.HLINE) {
-			plotter.add(key, pos.x - size, pos.y);
-			plotter.addD(key, 2 * size, 0);
-			plotter.setDataLineStyle(key, LineStyle.LINE);
-			plotter.setDataStroke(key, stroke);
+			plotter.add(getKey(), pos.x - size, pos.y);
+			plotter.addD(getKey(), 2 * size, 0);
+			plotter.setDataLineStyle(getKey(), LineStyle.LINE);
+			plotter.setDataStroke(getKey(), stroke);
 
 		} else if (type == SymbolType.BAR) {
-			plotter.add(key, pos.x - barWidth, pos.y - 0.5);
-			plotter.addD(key, 0, 2 * size);
-			plotter.addD(key, 2 * barWidth, 0);
-			plotter.addD(key, 0, -2 * size);
-			plotter.addD(key, -2 * barWidth, 0);
+			plotter.add(getKey(), pos.x - barWidth, pos.y - 0.5);
+			plotter.addD(getKey(), 0, 2 * size);
+			plotter.addD(getKey(), 2 * barWidth, 0);
+			plotter.addD(getKey(), 0, -2 * size);
+			plotter.addD(getKey(), -2 * barWidth, 0);
 			// plotter.addD(key, 0, 2 * size);
 			// plotter.setDataLineStyle(key, LineStyle.LINE);
 			// plotter.setDataStroke(key, stroke);
 
 		} else if (type == SymbolType.BLOCK) {
-			plotter.add(key, pos.x - size, pos.y - blockHeigth);
-			plotter.addD(key, 2 * size, 0);
-			plotter.addD(key, 0, 2 * blockHeigth );
-			plotter.addD(key, -2 * size, 0 );
-			plotter.addD(key, 0, -2 * blockHeigth );
+			plotter.add(getKey(), pos.x - size, pos.y - blockHeigth);
+			plotter.addD(getKey(), 2 * size, 0);
+			plotter.addD(getKey(), 0, 2 * blockHeigth);
+			plotter.addD(getKey(), -2 * size, 0);
+			plotter.addD(getKey(), 0, -2 * blockHeigth);
 
 		} else if (type == SymbolType.PLUS) {
-			plotter.add(key, pos.x, pos.y);
-			plotter.addD(key, size, 0);
-			plotter.addD(key, -2 * size, 0);
-			plotter.addD(key, size, 0);
-			plotter.addD(key, 0, size);
-			plotter.addD(key, 0, -2 * size);
-			plotter.setDataLineStyle(key, LineStyle.LINE);
-			plotter.setDataStroke(key, stroke);
+			plotter.add(getKey(), pos.x, pos.y);
+			plotter.addD(getKey(), size, 0);
+			plotter.addD(getKey(), -2 * size, 0);
+			plotter.addD(getKey(), size, 0);
+			plotter.addD(getKey(), 0, size);
+			plotter.addD(getKey(), 0, -2 * size);
+			plotter.setDataLineStyle(getKey(), LineStyle.LINE);
+			plotter.setDataStroke(getKey(), stroke);
 
 		} else if (type == SymbolType.UP) {
-			plotter.add(key, pos.x - size, pos.y - size);
-			plotter.addD(key, 2 * size, 2 * size);
-			plotter.setDataLineStyle(key, LineStyle.LINE);
-			plotter.setDataStroke(key, stroke);
+			plotter.add(getKey(), pos.x - size, pos.y - size);
+			plotter.addD(getKey(), 2 * size, 2 * size);
+			plotter.setDataLineStyle(getKey(), LineStyle.LINE);
+			plotter.setDataStroke(getKey(), stroke);
 
 		} else if (type == SymbolType.DOWN) {
-			plotter.add(key, pos.x + size, pos.y - size);
-			plotter.addD(key, -2 * size, 2 * size);
-			plotter.setDataLineStyle(key, LineStyle.LINE);
-			plotter.setDataStroke(key, stroke);
+			plotter.add(getKey(), pos.x + size, pos.y - size);
+			plotter.addD(getKey(), -2 * size, 2 * size);
+			plotter.setDataLineStyle(getKey(), LineStyle.LINE);
+			plotter.setDataStroke(getKey(), stroke);
 
 		} else if (type == SymbolType.STAR) {
 			int spitzen = 8;
@@ -388,45 +398,49 @@ public class Symbol {
 			for (double t = -phi / 4; t < 2 * Math.PI; t += phi) {
 				double x = pos.x + radius1 * Math.cos(t);
 				double y = pos.y + radius1 * Math.sin(t);
-				plotter.add(key, x, y);
+				plotter.add(getKey(), x, y);
 				x = pos.x + size * Math.cos(t + phi / 2.);
 				y = pos.y + size * Math.sin(t + phi / 2.);
-				plotter.add(key, x, y);
+				plotter.add(getKey(), x, y);
 			}
 			double x = radius1 + pos.x;
 			double y = pos.y;
-			plotter.add(key, x, y);
+			plotter.add(getKey(), x, y);
 
 		} else if (type == SymbolType.TRIANGLE_LD) {
-			plotter.add(key, pos.x - size, pos.y - size);
-			plotter.addD(key, 2 * size, 0);
-			plotter.addD(key, -2 * size, 2 * size);
-			plotter.addD(key, 0, -2 * size);
+			plotter.add(getKey(), pos.x - size, pos.y - size);
+			plotter.addD(getKey(), 2 * size, 0);
+			plotter.addD(getKey(), -2 * size, 2 * size);
+			plotter.addD(getKey(), 0, -2 * size);
 
 		} else if (type == SymbolType.TRIANGLE_RD) {
-			plotter.add(key, pos.x + size, pos.y - size);
-			plotter.addD(key, 0, 2 * size);
-			plotter.addD(key, -2 * size, -2 * size);
-			plotter.addD(key, 2 * size, 0);
+			plotter.add(getKey(), pos.x + size, pos.y - size);
+			plotter.addD(getKey(), 0, 2 * size);
+			plotter.addD(getKey(), -2 * size, -2 * size);
+			plotter.addD(getKey(), 2 * size, 0);
 
 		} else if (type == SymbolType.TRIANGLE_LU) {
-			plotter.add(key, pos.x - size, pos.y + size);
-			plotter.addD(key, 2 * size, 0);
-			plotter.addD(key, -2 * size, -2 * size);
-			plotter.addD(key, 0, 2 * size);
+			plotter.add(getKey(), pos.x - size, pos.y + size);
+			plotter.addD(getKey(), 2 * size, 0);
+			plotter.addD(getKey(), -2 * size, -2 * size);
+			plotter.addD(getKey(), 0, 2 * size);
 
 		} else if (type == SymbolType.TRIANGLE_RU) {
-			plotter.add(key, pos.x + size, pos.y + size);
-			plotter.addD(key, -2 * size, 0);
-			plotter.addD(key, 2 * size, -2 * size);
-			plotter.addD(key, 0, 2 * size);
+			plotter.add(getKey(), pos.x + size, pos.y + size);
+			plotter.addD(getKey(), -2 * size, 0);
+			plotter.addD(getKey(), 2 * size, -2 * size);
+			plotter.addD(getKey(), 0, 2 * size);
+
+		} else if (type == SymbolType.DOT) {
+			plotter.add(getKey(), pos.x - size, pos.y - size);
+			plotter.setDataLineStyle(getKey(), LineStyle.DOT);
 
 		}
 	}
 
 	public void clearForm(Plotter plotter) {
-		if (key != null) {
-			plotter.removeAll(key);
+		if (getKey() != null) {
+			plotter.removeAll(getKey());
 		}
 		for (String k : secondaryKeys) {
 			plotter.removeDataObject(k);
@@ -434,5 +448,14 @@ public class Symbol {
 		secondaryKeys.clear();
 
 	}
+
+	public String getKey() {
+		return key;
+	}
+
+	public void setKey(String key) {
+		this.key = key;
+	}
+
 
 }

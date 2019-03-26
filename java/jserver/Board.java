@@ -1,5 +1,6 @@
 package jserver;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -22,26 +23,32 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
+import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
+//import jdk.nashorn.internal.runtime.regexp.joni.constants.CCVALTYPE;
 import plotter.Graphic;
 import plotter.InfoBox;
 import plotter.Plotter;
@@ -59,6 +66,7 @@ import plotter.Sleep;
 //         se 17-01    keyboard listener
 // 1.15    se 17-08    font selector
 // 1.15a   se 17-09-19 html unicode
+// 1.18    se 18-06-04 image import
 
 /**
  * This class implements a NxM board as used for board games like chess or
@@ -72,12 +80,19 @@ import plotter.Sleep;
  * @author Stephan Euler
  * 
  */
-public class Board implements ActionListener, MouseListener, KeyListener {
+public class Board extends Adapters implements ActionListener, MouseListener, KeyListener {
 
+	public static final double DEFAULT_SYMBOL_SIZE = 0.5;
+	public static final int BIG_BOARD_SIZE = 30;
 	public static final String FILTER_PREFIX = ">>";
+	public static final String LS = System.lineSeparator();
 
+	private static final String formPrefix = "FORM_";
+
+	private static String importImageText = "Import image";
 	private static String trainingText = "Training";
-	private static String historyText = "CommandHistory";
+	private static String historyText;
+	private static String clearHistoryText;
 	private static String hashCodeText;
 	private static String clearColorsText;
 	private static String clearTextText;
@@ -91,27 +106,23 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 	private static String quadText;
 	private static String interactiveText;
 	private static String codingWindowText;
+	private static String analyseBoardText = "Analyse";
+	private static String serialiseBoardText = "Serialise";
 	private static String numberingText;
 	private static String linNumberingText = "linNum";
 	private static String alphaText;
 	private static String sendText;
 	private static String colorText;
+	private static String numberColorText;
 	private static String helpFormText;
+	private static String helpFunctionText;
 	private static String helpEnvText = "Java info";
 	private static String showText = "show events";
-	private static final String runText = "ausführen";
-	private static final String codingText = "C-Code Eingabe";
-	private static final String formPrefix = "FORM_";
-	private static final int RAW = 0;
-	private static final int C = 1;
 
 	private Graphic graphic;
 	private Plotter plotter;
 	private boolean examMode = false;
-	private int messageCount = 0;
-	private int rows = 10;
-	private int columns = 10;
-	private double radius = 0.5;
+	private double radius = DEFAULT_SYMBOL_SIZE;
 	private int symbolFontSize = Symbol.getFontSize();
 	private int nSymbols = 0;
 	private List<Symbol> symbols = new ArrayList<Symbol>();
@@ -123,16 +134,11 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 	private List<BoardClickListener> boardClickListener = new ArrayList<BoardClickListener>();
 	private JButton sendButton;
 	private JButton showButton;
-	private boolean interactive = false;
-	private boolean coding = false;
-	private JTextArea codeInput = new JTextArea();
-	private JTextArea messageField = new JTextArea();
-	private JButton runButton = new JButton(runText);
 	private JMenuItem linNumberingItem;
 	private String lastError;
 	private int errorCount;
+	private boolean interactive = false;
 	private boolean filterMode = false;
-	private CodeExecutorC codeExecutor = new CodeExecutorC(this);
 	private CodeWindow codeWindow;
 	private Color defaultBackground;
 	private boolean userDefinedStatusLine = false;
@@ -145,11 +151,43 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 	private String propertieFile = "board.properties";
 	private String language = "de";
 	private String country = "DE";
+	private String fileOpenDirectory;
 
 	private boolean verbose = false;
 	private int hashCode;
+	private int maxOutOfRange;
+	private int outOfRangeCount;
 
-	private List<String> messageHistory = new ArrayList<>();
+	private List<String> messageHistory = new LinkedList<>();
+	private List<ActionListener> commandListener = new ArrayList<>();
+	private BoardModel boardModel = new BoardModel();
+	private BoardAnalyser boardAnalyser;
+	private InfoBox analyserInfo = null;
+
+	public BoardModel getBoardModel() {
+		return boardModel;
+	}
+
+	public List<String> getMessageHistory() {
+		return messageHistory;
+	}
+
+	public void resetMessageHistory() {
+		messageHistory.clear();
+	}
+
+	public int getMaxOutOfRange() {
+		return maxOutOfRange;
+	}
+
+	public void resetMaxOutOfRange() {
+		this.maxOutOfRange = 0;
+		this.outOfRangeCount = 0;
+	}
+
+	public int getOutOfRangeCount() {
+		return outOfRangeCount;
+	}
 
 	public Board() {
 
@@ -158,6 +196,7 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 			stream = new BufferedInputStream(new FileInputStream(propertieFile));
 			properties.load(stream);
 			stream.close();
+			fileOpenDirectory = properties.getProperty("imageOpenDir");
 		} catch (FileNotFoundException e) {
 			System.out.println("property file " + propertieFile + " not found");
 		} catch (IOException e) {
@@ -168,6 +207,7 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 		setStrings();
 		SymbolType.setSymbolTexts(messages.getBundle());
 		Symbol.setBoard(this);
+		boardAnalyser = new BoardAnalyser(this);
 
 		URL imageURL = Board.class.getResource("images/bos.jpg");
 		graphic = new Graphic(messages.getBundle(), (new ImageIcon(imageURL)).getImage());
@@ -185,8 +225,11 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 						}
 					}
 				}
+				addRecentFilesToProperties();
+				saveProperties();
 				System.exit(0);
 			}
+
 		});
 
 		String title = "Board, " + messages.getString("boardVersion");
@@ -199,15 +242,23 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 		} else {
 			String p = properties.getProperty("columns");
 			if (p != null) {
-				columns = Integer.parseInt(p);
+				boardModel.setColumns(Integer.parseInt(p));
 			}
 			p = properties.getProperty("rows");
 			if (p != null) {
-				rows = Integer.parseInt(p);
+				boardModel.setRows(Integer.parseInt(p));
 			}
 
 			Symbol.setNumbering(Boolean.parseBoolean(properties.getProperty("numbering")));
 			Symbol.setLinearNumbering(Boolean.parseBoolean(properties.getProperty("linNumbering")));
+			String colorText = properties.getProperty("numberColor");
+			if (colorText != null) {
+				Symbol.setNumberTextColor(new Color(parseColor(colorText)));
+			}
+			 colorText = properties.getProperty("symbolColor");
+			if (colorText != null) {
+				Symbol.setBoSColor( new Color(parseColor(colorText)));
+			}
 		}
 
 		graphic.setTitle(title);
@@ -216,8 +267,10 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 		graphic.pack();
 		drawSymbols();
 
+		System.out.println("CE: " + boardAnalyser.getKC());
+
 		commandInfo = new InfoBox(graphic, "", 400, 400);
-		commandInfo.setTitle("Commands");
+		commandInfo.setTitle(messages.getString("Inputs"));
 		commandInfo.setVisible(false);
 
 		symbolFontSize = Integer.parseInt(properties.getProperty("fontSize", "" + symbolFontSize));
@@ -231,9 +284,6 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 		// showButton.setToolTipText(messages.getString("tooltip.showButton"));
 		showButton.addActionListener(this);
 
-		runButton.addActionListener(this);
-		messageField.setEditable(false);
-
 		if (interactive) {
 			graphic.addBottomComponent(input);
 			graphic.addBottomComponent(sendButton);
@@ -241,23 +291,25 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 			graphic.addBottomComponent(waitingCommands);
 		}
 
-		if (coding) {
-			graphic.addEastComponent(codeInput);
-			graphic.addEastComponent(runButton);
-			graphic.addEastComponent(messageField);
-		}
-
 		graphic.removeDataMenu();
 		graphic.addExternMenu(myBoardMenu());
 		graphic.addExternMenu(myFormMenu());
 		graphic.addExternMenu(myOptionsMenu());
+		graphic.addExternMenu(Box.createHorizontalGlue());
 		graphic.addExternMenu(myHelpMenu());
 
 		JMenu fileMenu = graphic.getFileMenu();
 		// Utils.addMenuItem(this, fileMenu, hashCodeText,
 		// messages.getString("tooltip.hashCode"));
+
+		fileMenu.addSeparator();
+		Utils.addMenuItem(this, fileMenu, trainingText, "Start Trainer", "control T");
+		Utils.addMenuItem(this, fileMenu, importImageText);
+		fileMenu.addSeparator();
 		Utils.addMenuItem(this, fileMenu, historyText);
-		Utils.addMenuItem(this, fileMenu, trainingText);
+		Utils.addMenuItem(this, fileMenu, clearHistoryText);
+		Utils.addMenuItem(this, fileMenu, analyseBoardText);
+		Utils.addMenuItem(this, fileMenu, serialiseBoardText);
 
 		setStatusLineInfo();
 		plotter.addMouseListener(this);
@@ -267,6 +319,14 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 
 	public Properties getProperties() {
 		return properties;
+	}
+
+	public void addCommandListener(ActionListener listener) {
+		commandListener.add(listener);
+	}
+
+	public boolean removeCommandListener(ActionListener listener) {
+		return commandListener.remove(listener);
 	}
 
 	public void setSize(int width, int heigth) {
@@ -290,13 +350,19 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 		colText = messages.getString("columns");
 		quadText = messages.getString("square");
 		interactiveText = messages.getString("interactive");
+		showText = messages.getString("showInputs");
 		codingWindowText = messages.getString("codingWindow");
+		importImageText = messages.getString("importImage");
+		historyText = messages.getString("showCommandHistory");
+		clearHistoryText = messages.getString("clearCommandHistory");
 
 		numberingText = Utils.concat(messages, "numbering", "onOff");
 		alphaText = "Alpha " + messages.getString("value");
 		sendText = messages.getString("send");
 		helpFormText = messages.getString("forms");
+		helpFunctionText = messages.getString("functions");
 		colorText = messages.getString("symbolColor");
+		numberColorText = messages.getString("numberColor");
 
 	}
 
@@ -305,15 +371,20 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 	 */
 	private void loadMessages() {
 
-		language = properties.getProperty("language", language);
-		country = properties.getProperty("country", country);
-
+		if (properties.containsKey("language")) {
+			language = properties.getProperty("language", language);
+			country = properties.getProperty("country", country);
+		} else {
+			askLanguage();
+			properties.setProperty("language", language);
+			properties.setProperty("country", country);
+			saveProperties();
+		}
 		Locale locale = new Locale(language, country);
 
 		JComponent.setDefaultLocale(locale);
 
 		ResourceBundle bundle = ResourceBundle.getBundle("config/MessagesBundle", locale);
-		System.out.println(messages);
 		if (verbose) {
 			System.out.println(locale);
 			System.out.println(bundle.getLocale());
@@ -326,6 +397,13 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 			JOptionPane.showMessageDialog(graphic, text, "Language", JOptionPane.INFORMATION_MESSAGE);
 		}
 		messages = new ResourceBundleWrapper(bundle);
+	}
+
+	private void askLanguage() {
+		String localeInfo = Dialogs.askLanguage();
+		String[] parts = localeInfo.split("_");
+		language = parts[0];
+		country = parts[1];
 	}
 
 	public Graphic getGraphic() {
@@ -353,12 +431,13 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 	}
 
 	public Symbol getSymbol(int x, int y) {
-		return symbols.get(x + y * columns);
+		return symbols.get(x + y * boardModel.getColumns());
 	}
 
 	private void setStatusLineInfo() {
 		if (!userDefinedStatusLine) {
-			String info = columns + "x" + rows + " " + messages.getString("board");
+			String info = boardModel.getColumns() + "x" + boardModel.getRows() + " " + messages.getString("board");
+			// info += " KC: " + boardAnalyser.getKC();
 			plotter.setStatusLine(info);
 		}
 	}
@@ -382,6 +461,20 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 	private JMenu myOptionsMenu() {
 		JMenu menu = new JMenu(messages.getString("options"));
 
+		Properties languages = getAvailableLanguages();
+		for (String key : languages.stringPropertyNames()) {
+			JMenuItem mi = Utils.addMenuItem(this, menu, key);
+			mi.setActionCommand("LANG_" + languages.getProperty(key));
+		}
+		linNumberingItem = new JCheckBoxMenuItem(linNumberingText, Symbol.isLinearNumbering());
+		linNumberingItem.addActionListener(this);
+		menu.add(linNumberingItem);
+		Utils.addMenuItem(this, menu, colorText);
+		Utils.addMenuItem(this, menu, numberColorText);
+		return menu;
+	}
+
+	static Properties getAvailableLanguages() {
 		Properties languages = new Properties();
 		String languagesFile = "config/languages.properties";
 		try {
@@ -398,16 +491,7 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-		for (String key : languages.stringPropertyNames()) {
-			JMenuItem mi = Utils.addMenuItem(this, menu, key);
-			mi.setActionCommand("LANG_" + languages.getProperty(key));
-		}
-		linNumberingItem = new JCheckBoxMenuItem(linNumberingText, Symbol.isLinearNumbering());
-		linNumberingItem.addActionListener(this);
-		menu.add(linNumberingItem);
-		Utils.addMenuItem(this, menu, colorText);
-		return menu;
+		return languages;
 	}
 
 	private JMenu myBoardMenu() {
@@ -417,6 +501,7 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 		Utils.addMenuItem(this, menu, clearTextText, messages.getString("tooltip.clearTexts"));
 		Utils.addMenuItem(this, menu, fontSizeText, messages.getString("tooltip.fontSize"));
 		Utils.addMenuItem(this, menu, fontTypeText, messages.getString("tooltip.fontType"));
+		menu.addSeparator();
 		if (!examMode) {
 			Utils.addMenuItem(this, menu, growText, messages.getString("tooltip.grow"), "alt PLUS");
 			Utils.addMenuItem(this, menu, shrinkText, messages.getString("tooltip.shrink"), "alt MINUS");
@@ -424,6 +509,7 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 			Utils.addMenuItem(this, menu, rowText, messages.getString("tooltip.columns"));
 			Utils.addMenuItem(this, menu, colText, messages.getString("tooltip.rows"));
 			Utils.addMenuItem(this, menu, quadText, messages.getString("tooltip.setSquare"), "alt Q");
+			menu.addSeparator();
 			Utils.addMenuItem(this, menu, interactiveText, messages.getString("tooltip.interactive"), "alt I");
 		}
 		// Utils.addMenuItem(this, menu, codingText,
@@ -437,6 +523,7 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 		JMenu menu = new JMenu(messages.getString("help"));
 
 		Utils.addMenuItem(this, menu, helpFormText);
+		Utils.addMenuItem(this, menu, helpFunctionText);
 		Utils.addMenuItem(this, menu, helpEnvText);
 
 		return menu;
@@ -468,16 +555,15 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 	 * are ignored. This is helpful when the commands are mixed with other output.
 	 * 
 	 * 
-	 * @param line
-	 *            a line with (currently) one command
+	 * @param line a line with (currently) one command
 	 * @return okay or an error message
 	 */
 	public String receiveMessage(String line) {
 		// System.out.println( "receiveMessage: " + line);
 		line = line.trim();
-		++messageCount;
-		String info = columns + "x" + rows + " " + messages.getString("board") + " , " + messages.getString("message")
-				+ "#" + messageCount + ": " + line;
+		// ++messageCount;
+		String info = boardModel.getColumns() + "x" + boardModel.getRows() + " " + messages.getString("board") + " , "
+				+ messages.getString("message") + "#" + messageHistory.size() + ": " + line;
 
 		if (line.startsWith(FILTER_PREFIX)) {
 			line = line.substring(FILTER_PREFIX.length()).trim();
@@ -486,7 +572,7 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 				return null;
 			}
 		}
-		messageHistory.add( messageCount +" " + line );
+		messageHistory.add(line);
 
 		if (!userDefinedStatusLine) {
 			plotter.setStatusLine(info);
@@ -514,6 +600,12 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 			return "Okay";
 		}
 
+		if (line.startsWith("numberTextColor")) {
+			Symbol.setNumberTextColor(new Color(parseColor(p[1])));
+			redrawSymbols();
+			return "Okay";
+		}
+
 		if (line.startsWith("statusfontsize")) {
 			float fs = Float.parseFloat(p[1]);
 			JLabel lab = graphic.getStatusLabel();
@@ -523,9 +615,9 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 		}
 
 		if (line.startsWith("image")) {
-			int index = Integer.parseInt(p[1]) + Integer.parseInt(p[2]) * columns;
+			int index = indexFromColRow(p[1], p[2]);
 			if (index < 0 | index >= nSymbols) {
-				return "ERROR - " + index + " out of Range ";
+				return rangeError(p);
 			}
 			symbols.get(index).setImage(p[3], plotter);
 			redrawSymbol(symbols.get(index));
@@ -535,12 +627,13 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 		if (line.startsWith("bgImage")) {
 			File file = new File(p[1]);
 			try {
-				BufferedImage img = ImageIO.read( file );
+				BufferedImage img = ImageIO.read(file);
 				plotter.setBackgroundImage(img);
 				graphic.repaint();
 			} catch (IOException e) {
 				try {
-					JOptionPane.showMessageDialog(graphic, e.getMessage() + " " + file.getCanonicalPath(), "bgImage", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(graphic, e.getMessage() + " " + file.getCanonicalPath(), "bgImage",
+							JOptionPane.ERROR_MESSAGE);
 				} catch (HeadlessException | IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -552,8 +645,8 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 
 		if (line.startsWith("button")) {
 			JButton b = new BoSButton(p[1], this);
-			if( p.length < 3 ) {
-			graphic.addEastComponent(b);
+			if (p.length < 3) {
+				graphic.addEastComponent(b);
 			} else {
 				graphic.addComponent(b, p[2]);
 			}
@@ -561,7 +654,7 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 			graphic.repaint();
 			return "Okay";
 		}
-		
+
 		if (line.startsWith("removeAllButtons")) {
 			graphic.removeBorderComponents();
 			interactive = false;
@@ -569,9 +662,9 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 			graphic.repaint();
 			return "Okay";
 		}
-		
+
 		if (line.equals("s")) {
-			return "" + columns + " " + rows;
+			return "" + boardModel.getColumns() + " " + boardModel.getRows();
 		}
 
 		// poll last command
@@ -622,7 +715,8 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 			}
 			int index = Integer.parseInt(p[1]);
 			if (index < 0 | index >= nSymbols) {
-				return "ERROR - " + index + " out of Range ";
+				updateOutOfRange(index);
+				return "ERROR - " + index + " out of range\n ";
 			}
 			symbols.get(index).setType(s);
 			redrawSymbol(symbols.get(index));
@@ -639,9 +733,9 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 			if (s == null) {
 				return "Error: unknown form";
 			}
-			int index = Integer.parseInt(p[1]) + Integer.parseInt(p[2]) * columns;
+			int index = indexFromColRow(p[1], p[2]);
 			if (index < 0 | index >= nSymbols) {
-				return "ERROR - " + index + " out of Range ";
+				return rangeError(p);
 			}
 			symbols.get(index).setType(s);
 			redrawSymbol(symbols.get(index));
@@ -664,7 +758,8 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 			// System.out.println("Size: " + line);
 			int index = Integer.parseInt(p[1]);
 			if (index < 0 | index >= nSymbols) {
-				return "ERROR - " + index + " out of Range ";
+				updateOutOfRange(index);
+				return "ERROR - " + index + " out of range\n ";
 			}
 			if (p.length != 3) {
 				return "ERROR - " + p.length + " args, should be  3";
@@ -678,11 +773,9 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 
 		// resize form
 		if (line.startsWith("#s")) {
-			int col = Integer.parseInt(p[1]);
-			int row = Integer.parseInt(p[2]);
-			int index = col + row * columns;
+			int index = indexFromColRow(p[1], p[2]);
 			if (index < 0 | index >= nSymbols) {
-				return "ERROR - " + index + " out of Range ";
+				return rangeError(p);
 			}
 			if (p.length != 4) {
 				return "ERROR - " + p.length + " args, should be  3";
@@ -702,9 +795,9 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 			int newColumns = Integer.parseInt(p[1]);
 			int newRows = Integer.parseInt(p[2]);
 			// draw new symbols if size as changed
-			if (newColumns != columns | newRows != rows) {
-				columns = newColumns;
-				rows = newRows;
+			if (newColumns != boardModel.getColumns() | newRows != boardModel.getRows()) {
+				boardModel.setColumns(newColumns);
+				boardModel.setRows(newRows);
 				drawSymbols();
 				graphic.repaint();
 			}
@@ -739,7 +832,8 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 		if (line.startsWith("b ")) {
 			int index = Integer.parseInt(p[1]);
 			if (index < 0 | index >= nSymbols) {
-				return "ERROR - " + index + " out of Range ";
+				updateOutOfRange(index);
+				return "ERROR - " + index + " out of range\n ";
 			}
 			int icolor = parseColor(p[2]);
 			if (icolor >= 0) {
@@ -753,11 +847,9 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 		}
 
 		if (line.startsWith("#b ")) {
-			int col = Integer.parseInt(p[1]);
-			int row = Integer.parseInt(p[2]);
-			int index = col + row * columns;
+			int index = indexFromColRow(p[1], p[2]);
 			if (index < 0 | index >= nSymbols) {
-				return "ERROR - " + index + " out of Range ";
+				return rangeError(p);
 			}
 			int icolor = parseColor(p[3]);
 			if (icolor >= 0) {
@@ -773,7 +865,8 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 		if (line.startsWith("T ")) {
 			int index = Integer.parseInt(p[1]);
 			if (index < 0 | index >= nSymbols) {
-				return "ERROR - " + index + " out of Range ";
+				updateOutOfRange(index);
+				return "ERROR - " + index + " out of range\n ";
 			}
 			String[] p2 = line.split("\\s+", 3);
 			if (p2.length >= 3) {
@@ -787,11 +880,9 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 		}
 
 		if (line.startsWith("#T ")) {
-			int col = Integer.parseInt(p[1]);
-			int row = Integer.parseInt(p[2]);
-			int index = col + row * columns;
+			int index = indexFromColRow(p[1], p[2]);
 			if (index < 0 | index >= nSymbols) {
-				return "ERROR - " + index + " out of Range ";
+				return rangeError(p);
 			}
 			String[] p2 = line.split("\\s+", 4);
 			if (p2.length >= 4) {
@@ -807,7 +898,8 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 		if (line.startsWith("TC ")) {
 			int index = Integer.parseInt(p[1]);
 			if (index < 0 | index >= nSymbols) {
-				return "ERROR - " + index + " out of Range ";
+				updateOutOfRange(index);
+				return "ERROR - " + index + " out of range\n ";
 			}
 			int icolor = parseColor(p[2]);
 			symbols.get(index).setTextFarbe(new Color(icolor));
@@ -827,19 +919,17 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 		}
 
 		if (line.startsWith("showInput")) {
-			System.out.println( "ShowInput: " + interactive );
-			if( ! interactive ) {
+			System.out.println("ShowInput: " + interactive);
+			if (!interactive) {
 				actionPerformed(new ActionEvent(this, 0, interactiveText));
 			}
 			return "okay";
 		}
 
 		if (line.startsWith("#TC ")) {
-			int col = Integer.parseInt(p[1]);
-			int row = Integer.parseInt(p[2]);
-			int index = col + row * columns;
+			int index = indexFromColRow(p[1], p[2]);
 			if (index < 0 | index >= nSymbols) {
-				return "ERROR - " + index + " out of Range ";
+				return rangeError(p);
 			}
 			int icolor = parseColor(p[3]);
 			symbols.get(index).setTextFarbe(new Color(icolor));
@@ -857,11 +947,9 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 		}
 
 		if (line.startsWith("# ")) {
-			int col = Integer.parseInt(p[1]);
-			int row = Integer.parseInt(p[2]);
-			int index = col + row * columns;
+			int index = indexFromColRow(p[1], p[2]);
 			if (index < 0 | index >= nSymbols) {
-				return "ERROR - " + index + " out of Range ";
+				return rangeError(p);
 			}
 			if (updateSymbol(index, p[3]))
 				graphic.repaint();
@@ -879,7 +967,8 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 			for (int n = 0; n < p.length; n += 2) {
 				int index = Integer.parseInt(p[n]);
 				if (index < 0 | index >= nSymbols) {
-					return "ERROR - " + index + " out of Range ";
+					updateOutOfRange(index);
+					return "ERROR - " + index + " out of range\n ";
 				}
 				change = updateSymbol(index, p[n + 1]) | change;
 			}
@@ -895,6 +984,26 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 			return "ERROR - can not parse line :" + line;
 		}
 
+	}
+
+	private String rangeError(String[] p) {
+		return "ERROR -  (" + Integer.parseInt(p[1]) + "," + Integer.parseInt(p[2]) + ") out of range\n";
+	}
+
+	private void updateOutOfRange(int index) {
+		++outOfRangeCount;
+		maxOutOfRange = Integer.max(maxOutOfRange, index);
+	}
+
+	private int indexFromColRow(String s1, String s2) {
+		int col = Integer.parseInt(s1);
+		int row = Integer.parseInt(s2);
+		if (col >= boardModel.getColumns() | row >= boardModel.getColumns()) {
+			updateOutOfRange(col + row * boardModel.getColumns());
+			return -1;
+		} else {
+			return col + row * boardModel.getColumns();
+		}
 	}
 
 	private String decodeUni(String text) {
@@ -972,7 +1081,6 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 			fontSelector.setVisible(true);
 
 		} else if (cmd.equals(clearTextText)) {
-			System.out.println("Board:" + clearTextText);
 			plotter.removeAllText();
 			for (Symbol s : symbols) {
 				s.setText(null);
@@ -1003,48 +1111,50 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 			redrawSymbols();
 			alphaMenuItem.setEnabled(Symbol.isNumbering());
 		} else if (cmd.equals(growText)) {
-			++columns;
-			++rows;
+			boardModel.incColumns(1);
+			boardModel.incRows(1);
 			drawSymbols();
 			setStatusLineInfo();
 			graphic.repaint();
 		} else if (cmd.equals(shrinkText)) {
-			--columns;
-			--rows;
+			boardModel.incColumns(-1);
+			boardModel.incRows(-1);
 			drawSymbols();
 			setStatusLineInfo();
 			graphic.repaint();
 		} else if (cmd.equals(bigText)) {
-			if (columns == 30 & rows == 30)
+			if (boardModel.getColumns() == BIG_BOARD_SIZE & boardModel.getRows() == BIG_BOARD_SIZE)
 				return;
-			columns = 30;
-			rows = 30;
+			boardModel.setColumns(BIG_BOARD_SIZE);
+			boardModel.setRows(BIG_BOARD_SIZE);
 			drawSymbols();
 			setStatusLineInfo();
 			graphic.repaint();
 		} else if (cmd.equals(rowText)) {
-			String a = JOptionPane.showInputDialog(graphic, messages.getString("tooltip.rows"), new Integer(rows));
+			String a = JOptionPane.showInputDialog(graphic, messages.getString("tooltip.rows"),
+					new Integer(boardModel.getRows()));
 			if (a != null) {
-				rows = Integer.parseInt(a);
+				boardModel.setRows(Integer.parseInt(a));
 				drawSymbols();
 				setStatusLineInfo();
 				graphic.repaint();
 			}
 		} else if (cmd.equals(colText)) {
 			String a = JOptionPane.showInputDialog(graphic, messages.getString("tooltip.columns"),
-					new Integer(columns));
+					new Integer(boardModel.getColumns()));
 			if (a != null) {
-				columns = Integer.parseInt(a);
+				boardModel.setColumns(Integer.parseInt(a));
 				drawSymbols();
 				setStatusLineInfo();
 				graphic.repaint();
 			}
 		} else if (cmd.equals(quadText)) {
 			String a = JOptionPane.showInputDialog(graphic, messages.getString("tooltip.setSquare"),
-					new Integer(columns));
+					new Integer(boardModel.getColumns()));
 			if (a != null) {
-				columns = Integer.parseInt(a);
-				rows = columns;
+				int size = Integer.parseInt(a);
+				boardModel.setColumns(size);
+				boardModel.setRows(size);
 				drawSymbols();
 				setStatusLineInfo();
 				graphic.repaint();
@@ -1086,32 +1196,14 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 			graphic.requestFocusInWindow();
 
 		} else if (cmd.equals(sendText)) {
+			for (ActionListener listener : commandListener) {
+				listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, input.getText()));
+			}
 			if ("".equals(input.getText()))
 				return;
 			addCommand(input.getText());
 			input.setText("");
 			graphic.requestFocusInWindow();
-
-		} else if (cmd.equals(runText)) {
-			String result = "";
-			int scriptMode = C;
-			if (scriptMode == RAW) {
-				String[] lines = codeInput.getText().split("\\n");
-				for (String line : lines) {
-					if (!line.equals("")) {
-						result += receiveMessage(line) + "\n";
-					}
-				}
-			} else {
-				result += "compile ...\n";
-				String fileName = codeExecutor.createTmpSourceFile(codeInput.getText());
-				if (fileName == null) {
-					result += "ERROR : " + getLastError();
-				} else {
-					result += codeExecutor.compileAndExecute(fileName);
-				}
-			}
-			messageField.setText(result);
 
 		} else if (cmd.equals(interactiveText)) {
 			if (interactive) {
@@ -1129,19 +1221,9 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 			graphic.pack();
 			graphic.repaint();
 
-		} else if (cmd.equals(codingText)) {
-			if (coding)
-				return;
-			graphic.addEastComponent(codeInput);
-			graphic.addEastComponent(runButton);
-			graphic.addEastComponent(messageField);
-
-			graphic.pack();
-			graphic.repaint();
-			coding = true;
-
 		} else if (cmd.equals(codingWindowText)) {
 			codeWindow = new CodeWindow(this);
+
 		} else if (cmd.startsWith("LANG_")) {
 			String[] parts = cmd.split("_");
 			language = parts[1];
@@ -1166,8 +1248,23 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 						}
 					}
 					graphic.repaint();
-					properties.setProperty("color", a);
+					properties.setProperty("symbolColor", a);
 					saveProperties();
+				} catch (NumberFormatException ex) {
+					JOptionPane.showMessageDialog(graphic, ex.toString(), "Number coversion",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+
+		} else if (cmd.equals(numberColorText)) {
+			Color c = Symbol.getNumberTextColor();
+			int v = c.getRed() * 256 * 256 + c.getGreen() * 256 + c.getBlue();
+			String cs = "0x" + Integer.toHexString(v);
+			String a = JOptionPane.showInputDialog(graphic, numberColorText, cs);
+			if (a != null && a.trim().length() > 0) {
+				try {
+					Symbol.setNumberTextColor(Color.decode(a));
+					redrawSymbols();
 				} catch (NumberFormatException ex) {
 					JOptionPane.showMessageDialog(graphic, ex.toString(), "Number coversion",
 							JOptionPane.ERROR_MESSAGE);
@@ -1177,74 +1274,181 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 		} else if (cmd.equals(helpFormText)) {
 			InfoBox info = new InfoBox(graphic, "", 400, 500);
 			info.setTitle(messages.getString("forms"));
+			info.setIconImage(Dialogs.infoImage);
 			info.getTextArea().setText(getFormsHelp());
 			info.setVisible(true);
+
+		} else if (cmd.equals(helpFunctionText)) {
+			InfoBox info = new InfoBox(graphic, "", 600, 500);
+			info.setTitle(messages.getString("functions"));
+			info.setIconImage(Dialogs.infoImage);
+			info.getTextArea().setContentType("text/html");
+			info.getTextArea().setFont(new Font("Consolas", Font.PLAIN, 12));
+			info.getTextArea().setText(getFunctionsHelp());
+			info.setVisible(true);
+			System.out.println(info.getTextArea().getFont());
 
 		} else if (cmd.equals(helpEnvText)) {
 			InfoBox info = new InfoBox(graphic, "", 400, 300);
 			info.setTitle(messages.getString("Java info"));
-			info.getTextArea().setText(getJavaHelp());
+			info.setIconImage(Dialogs.infoImage);
+			info.getTextArea().setText(Utils.getJavaHelp());
 			info.setVisible(true);
+
+		} else if (cmd.equals(clearHistoryText)) {
+			messageHistory.clear();
 
 		} else if (cmd.equals(historyText)) {
 			InfoBox info = new InfoBox(graphic, "", 400, 500);
 			info.setTitle("BoSL Commands");
-			String text = "Received BoSL commands"+ System.lineSeparator();
-			for( String m : messageHistory ) {
-				text += m + System.lineSeparator();
+			info.setIconImage(Dialogs.infoImage);
+			String text = "Received " + messageHistory.size() + " BoSL commands" + LS;
+			int l = 1;
+			if (messageHistory.size() > 200) {
+				text += "... " + LS;
 			}
-			info.getTextArea().setText( text );
+			for (String m : messageHistory) {
+				if (l >= messageHistory.size() - 200) {
+					text += l + ": " + m + LS;
+				}
+				++l;
+			}
+			Map<String, Integer> doubles = boardAnalyser.getDuplicateMessages();
+			if (doubles.size() > 0) {
+				text += "duplicate messages: " + doubles.size() + LS;
+				for (String message : doubles.keySet()) {
+					text += "cmd : " + message + " Count : " + doubles.get(message) + LS;
+				}
+			}
+			info.getTextArea().setText(text);
 			info.setVisible(true);
-			
+
+		} else if (cmd.equals(analyseBoardText)) {
+			if (analyserInfo == null) {
+				analyserInfo = new InfoBox(graphic, "", 400, 500);
+				JButton b = new JButton(analyseBoardText);
+				b.addActionListener(this);
+				analyserInfo.add(b, BorderLayout.NORTH);
+				analyserInfo.setTitle("Board analyser");
+				analyserInfo.setIconImage(Dialogs.infoImage);
+			}
+
+			boardAnalyser.getKC();
+			int size = boardAnalyser.getSerialSize();
+			int comp = boardAnalyser.getCompressedSize();
+			String text = analyserInfo.getTextArea().getText();
+			text += "*** " + Calendar.getInstance().getTime().toString() + LS;
+			text += boardModel.getNumberSymbols() + " Symbols" + LS;
+			text += "Serialised form, size: " + size + " Byte" + LS;
+			text += "Serialised form, zip-size: " + comp + " Byte" + LS;
+			// text += "Ratio: " + String.format("%.4f", 1000. * comp / size) + " mBit" +
+			// LS;
+			text += "required BoSL commands: " + boardAnalyser.calcNumBoSLCommands() + LS;
+			if (codeWindow != null) {
+				CodeAnalyser codeAnalyser = new CodeAnalyser(codeWindow.getCode());
+				text += codeAnalyser.getResult();
+			}
+			analyserInfo.getTextArea().setText(text);
+			analyserInfo.setVisible(true);
+
+		} else if (cmd.equals(serialiseBoardText)) {
+			InfoBox serialiseInfo = new InfoBox(graphic, "", 400, 500);
+			BoardSerializer bs = new BoardSerializer();
+			bs.buildDocument(this);
+			String text = bs.write();
+			serialiseInfo.setTitle("Serialised board");
+			serialiseInfo.setIconImage(Dialogs.infoImage);
+			serialiseInfo.getTextArea().setText(text);
+			serialiseInfo.setVisible(true);
+
+		} else if (cmd.equals(importImageText)) {
+			JFileChooser chooser = new JFileChooser();
+			if (fileOpenDirectory != null) {
+				chooser.setCurrentDirectory(new File(fileOpenDirectory));
+			}
+			chooser.setDialogTitle("Image import");
+			chooser.setDialogType(JFileChooser.OPEN_DIALOG);
+			String[] fileSuffixes = ImageIO.getWriterFileSuffixes();
+			FileNameExtensionFilter filter = new FileNameExtensionFilter(" Images", fileSuffixes);
+			chooser.setFileFilter(filter);
+
+			int retval = chooser.showDialog(plotter, null);
+			if (retval == JFileChooser.APPROVE_OPTION) {
+				fileOpenDirectory = chooser.getCurrentDirectory().getAbsolutePath();
+				properties.setProperty("imageOpenDir", fileOpenDirectory);
+				try {
+					properties.store(new FileWriter(propertieFile), "");
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				String filename = chooser.getSelectedFile().getAbsolutePath();
+				importImage(filename);
+			} else {
+				return;
+			}
 
 		}
 
 		properties.setProperty("language", language);
 		properties.setProperty("country", country);
-		properties.setProperty("columns", "" + columns);
-		properties.setProperty("rows", "" + rows);
-		properties.setProperty("coding", "" + coding);
+		properties.setProperty("columns", "" + boardModel.getColumns());
+		properties.setProperty("rows", "" + boardModel.getRows());
 		properties.setProperty("numbering", "" + Symbol.isNumbering());
+		properties.setProperty("numberColor", "" + Symbol.getNumberTextColor().getRGB());
 		properties.setProperty("linNumbering", "" + Symbol.isLinearNumbering());
 		properties.setProperty("fontSize", "" + symbolFontSize);
 		saveProperties();
 	}
 
+	private void importImage(String filename) {
+		File file = new File(filename);
+		BufferedImage img;
+		try {
+			img = ImageIO.read(file);
+			System.out.println("Image loaded: " + file.getName());
+		} catch (IOException e) {
+			System.out.println("Image failed: " + file.getName());
+			return;
+		}
+		// System.out.println(img.getWidth() + " x " + img.getHeight());
+
+		BufferedImage resized = ImageUtils.scaleImage(img, boardModel.getColumns(), boardModel.getRows());
+		ImageUtils.drawImageWithSymbols(resized, this);
+
+		// show code to generate this image
+		InfoBox info = new InfoBox(graphic, "", 400, 300);
+		info.setTitle(messages.getString("Image code"));
+		info.setIconImage(Dialogs.infoImage);
+		info.getTextArea().setText(ImageUtils.getImageCode(resized));
+		info.setVisible(true);
+
+	}
+
 	private String getFormsHelp() {
 		String text = "";
 		for (SymbolType type : SymbolType.values()) {
-			text += SymbolType.getShort(type) + "\t" + SymbolType.texts.get(type) + System.lineSeparator();
+			text += SymbolType.getShort(type) + "\t" + SymbolType.texts.get(type) + LS;
 		}
 
 		return text;
 	}
 
-	private String getJavaHelp() {
-		Properties p = System.getProperties();
-		String text = "";
-		
-		text += "Java Runtime Environment version: " + p.getProperty("java.version") + System.lineSeparator();
-		text += "Java installation directory: " + p.getProperty("java.home") + System.lineSeparator();
-		text += "Java class path: " + p.getProperty("java.class.path") + System.lineSeparator();
-		text += "Java class format version number: " + p.getProperty("java.class.version") + System.lineSeparator();
-//		text += "compiled with javac version : " + majorToJavaVersion( p.getProperty("java.class.version") ) + System.lineSeparator();
-		text += "Operating system name: " + p.getProperty("os.name") + System.lineSeparator();
-		text += "Operating system version: " + p.getProperty("os.version") + System.lineSeparator();
+	private String getFunctionsHelp() {
+		String text = "<html><table>";
+		String className = "jserver.XSend" + messages.getLocale().getLanguage().toUpperCase();
+		String[] methods = MethodExtractor.getMethods(className);
+		for (String method : methods) {
+			text += "<tr><td><pre><small>" + method + "</small></pre></td><td>" + getFunctionHelp(method)
+					+ "</td></tr>";
+		}
+		text += "</table></html>";
 
 		return text;
 	}
 
-	private String majorToJavaVersion(String major) {
-		switch( major ) {
-		case "52.0":
-			return "8";
-		case "53.0":
-			return "9";
-		case "54.0":
-			return "10";
-		}
-		// TODO Auto-generated method stub
-		return "???";
+	private String getFunctionHelp(String method) {
+		String[] parts = method.split("\\(");
+		return messages.getString("fct_" + parts[0]);
 	}
 
 	public void addCommand(String text) {
@@ -1262,17 +1466,27 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 
 	}
 
+	private void addRecentFilesToProperties() {
+		if (codeWindow != null) {
+			List<String> fileNames = codeWindow.getRecentFiles();
+			for (int i = 0; i < fileNames.size(); i++) {
+				properties.setProperty("RF_" + i, fileNames.get(i));
+			}
+		}
+	}
+
 	private void drawSymbols() {
 		plotter.removeAllDataObjects();
 		plotter.removeAllText();
-		plotter.setXrange(-1, columns);
-		plotter.setYrange(-1, rows);
+		plotter.removeAllCirlces();
+		plotter.setXrange(-1, boardModel.getColumns());
+		plotter.setYrange(-1, boardModel.getRows());
 
 		nSymbols = 0;
 		// symbols = new Symbol[rows * columns];
 		symbols.clear();
-		for (int m = 0; m < rows; m++) {
-			for (int n = 0; n < columns; n++) {
+		for (int m = 0; m < boardModel.getRows(); m++) {
+			for (int n = 0; n < boardModel.getColumns(); n++) {
 				Symbol s = new Symbol(new Position(n, m), radius);
 				s.setType(symbolType);
 				s.setFarbe(Symbol.getBoSColor());
@@ -1330,11 +1544,11 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 	}
 
 	public int getRows() {
-		return rows;
+		return boardModel.getRows();
 	}
 
 	public int getColumns() {
-		return columns;
+		return boardModel.getColumns();
 	}
 
 	public List<Symbol> getSymbols() {
@@ -1356,7 +1570,7 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 		int ix = (int) (wx + 0.5);
 		int iy = (int) (wy + 0.5);
 		// System.out.println("col, row: " + ix + ", " + iy);
-		int pos = ix + iy * columns;
+		int pos = ix + iy * boardModel.getColumns();
 
 		for (int i = 0; i < e.getClickCount(); i++) {
 			message += "#";
@@ -1369,22 +1583,6 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 			bcl.boardClick(new BoardClickEvent(ix, iy, e.getClickCount(), e.getButton()));
 		}
 
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent arg0) {
-	}
-
-	@Override
-	public void mouseExited(MouseEvent arg0) {
-	}
-
-	@Override
-	public void mousePressed(MouseEvent arg0) {
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent arg0) {
 	}
 
 	public void setSymbol(int i, Symbol s) {
@@ -1414,9 +1612,14 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 		return symbols.size();
 	}
 
+	public int getMessageCount() {
+		return messageHistory.size();
+	}
+
 	public void reset() {
 		actionPerformed(new ActionEvent(this, 0, clearColorsText));
 		actionPerformed(new ActionEvent(this, 0, clearTextText));
+		plotter.removeAllCirlces();
 		setNewSymbolType(SymbolType.CIRCLE);
 		plotter.setBackground(null);
 		plotter.setBorderColor(Color.BLUE);
@@ -1425,16 +1628,6 @@ public class Board implements ActionListener, MouseListener, KeyListener {
 
 	public void addClickListener(BoardClickListener listener) {
 		boardClickListener.add(listener);
-	}
-
-	@Override
-	public void keyTyped(KeyEvent e) {
-		// System.out.println( e );
-	}
-
-	@Override
-	public void keyPressed(KeyEvent e) {
-		// System.out.println( e );
 	}
 
 	@Override

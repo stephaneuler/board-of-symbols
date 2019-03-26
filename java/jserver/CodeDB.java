@@ -101,7 +101,7 @@ public class CodeDB {
 		try {
 			tf = TransformerFactory.newInstance().newTransformer();
 			tf.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-			tf.setOutputProperty(OutputKeys.INDENT, "yes");
+			tf.setOutputProperty(OutputKeys.INDENT, "no");
 			tf.transform(new DOMSource(document), new StreamResult(xmlFile));
 		} catch (TransformerFactoryConfigurationError | TransformerException e) {
 			// TODO Auto-generated catch block
@@ -170,8 +170,10 @@ public class CodeDB {
 		for (int j = 0; j < children.getLength(); j++) {
 			Node child = children.item(j);
 			if ("codeA".equals(child.getNodeName())) {
-				CDATASection section = (CDATASection) child.getLastChild();
-				section.replaceWholeText(code);
+				Node cdataSection = child.getLastChild();
+				//System.out.println( child + " " + child.getNodeName() + " "  + child.getNodeType() );			
+				//System.out.println( section + " " + section.getNodeName() + " "  + section.getNodeType() );			
+				cdataSection.setTextContent(code);
 			}
 			if ("code".equals(child.getNodeName())) {
 				child.setTextContent(code);
@@ -190,6 +192,35 @@ public class CodeDB {
 		writeXML();
 		return;
 
+	}
+	
+	public void updateTagSnippet(String snippetName, String tag, String text) {
+		Element s = getSnippetByName(snippetName);
+		Node tagNode = null;
+
+		NodeList children = s.getChildNodes();
+		for (int j = 0; j < children.getLength(); j++) {
+			Node child = children.item(j);
+			if (tag.equals(child.getNodeName())) {
+				tagNode = child;
+			}
+		}
+
+		if (tagNode == null) {
+			tagNode = document.createElement(tag);
+			s.appendChild(tagNode);
+		}
+		tagNode.setTextContent(text);
+
+		writeXML();
+		return;
+	}
+
+	public void updateAttSnippet(String snippetName, String att, String text) {
+		Element s = getSnippetByName(snippetName);
+		s.setAttribute(att, text);
+		writeXML();
+		return;
 	}
 
 	Element getSnippetByName(String snippetName) {
@@ -260,6 +291,14 @@ public class CodeDB {
 			}
 		}
 		return null;
+	}
+
+	public String getSnippetLocale(String snippetName) {
+		Element s = getSnippetByName(snippetName);
+		if (s == null) {
+			return null;
+		}
+		return s.getAttribute("locale");
 	}
 
 	public void saveAsLast(String code) {
@@ -342,5 +381,6 @@ public class CodeDB {
 	public void setLastEditElement(Element lastEditElement) {
 		this.lastEditElement = lastEditElement;
 	}
+
 
 }

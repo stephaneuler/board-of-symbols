@@ -1,5 +1,7 @@
 package jserver;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.PrintStream;
 
 import javax.swing.JTextArea;
@@ -159,21 +161,37 @@ public abstract class XSend {
 	public static final int LIGHTYELLOW = 16777184;
 	public static final int IVORY = 16777200;
 	public static final int WHITE = 16777215;
+	
+	static PrintStream stdout = System.out;
 
 	public Board board = null;
 	public String result = "";
-	static PrintStream stdout = System.out;
+	private ActionListener listener;
 
+	/**
+	 * @throws InterruptedException
+	 */
 	abstract public void send() throws InterruptedException;
 
 	public void setUp(JTextArea messageField) {
 		TOutputStream tos = new TOutputStream(System.out, messageField);
 		PrintStream outStream = new PrintStream(tos, true);
 		System.setOut(outStream);
+
+		 listener =  new ActionListener() {		
+			@Override
+			public void actionPerformed(ActionEvent ev) {
+				receiveCommand(ev.getActionCommand());			
+			}
+
+		};
+		board.addCommandListener( listener );
+
 	}
 
 	public void setDown() {
 		System.setOut(stdout);
+		System.out.println( "Remove CommandListener: " + board.removeCommandListener(listener) );
 	}
 
 	public String getResult() {
@@ -186,6 +204,15 @@ public abstract class XSend {
 
 	public void setBoard(Board board) {
 		this.board = board;
+	}
+
+	public void receiveCommand(String actionCommand) {
+		System.out.println( "Action command: " + actionCommand );
+		
+	}
+
+	public void newBoard() {
+		this.board = new Board();
 	}
 
 	public Board getBoard() {

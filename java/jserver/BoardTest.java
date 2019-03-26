@@ -24,19 +24,25 @@ public class BoardTest {
 		assertEquals("#symbols increased by 1", n + 1, board.getSymbolCount());
 	}
 
-	@Test
-	public void testContent() {
-		BoardSerializer bs = new BoardSerializer();
-
-		bs.buildDocument(board);
-		String s = bs.write();
-		assertEquals("#hash code content", s.hashCode(), 699796684);
-	}
+//	@Test
+//	public void testContent() {
+//		BoardSerializer bs = new BoardSerializer();
+//
+//		bs.buildDocument(board);
+//		String s = bs.write();
+//		assertEquals("#hash code content", s.hashCode(), 699796684);
+//	}
 
 	@Test
 	public void testClearSymbol() {
 		board.clearSymbols();
 		assertEquals("#symbols after clear", 0, board.getSymbolCount());
+	}
+
+	@Test
+	public void testColorName() {
+		assertEquals("color name", "BLACK", ColorNames.getName( 0 ));
+		assertEquals("color name", "WHITE", ColorNames.getName( 0xffffff ));
 	}
 
 }

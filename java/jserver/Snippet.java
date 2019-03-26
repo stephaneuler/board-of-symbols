@@ -22,6 +22,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.sun.org.apache.xml.internal.serializer.utils.Messages;
+
 public class Snippet {
 	Element element;
 	private String[] tagNames = { "author", "comment", "language", "tag", "created", "updated" };
@@ -38,8 +40,7 @@ public class Snippet {
 		builder = factory.newDocumentBuilder();
 		InputSource is = new InputSource(new StringReader(xml));
 		Document document = builder.parse(is);
-		element = (Element) document.getElementsByTagName("snippet")
-				.item(0);
+		element = (Element) document.getElementsByTagName("snippet").item(0);
 	}
 
 	public Element getElement() {
@@ -48,6 +49,11 @@ public class Snippet {
 
 	public String getInfo() {
 		String infoText = "";
+		if( element == null ) {
+			return "no info available";
+		}
+		String locale = element.getAttribute("locale");
+		infoText += "locale:\t " + locale + "\n";
 		NodeList children = element.getChildNodes();
 		for (int j = 0; j < children.getLength(); j++) {
 			Node c = children.item(j);
@@ -60,6 +66,19 @@ public class Snippet {
 
 		}
 		return infoText;
+	}
+
+	public String getLanguage() {
+		NodeList children = element.getChildNodes();
+		for (int j = 0; j < children.getLength(); j++) {
+			Node c = children.item(j);
+			if ("language".equals(c.getNodeName())) {
+				Node n = c.getLastChild();
+				return n.getNodeValue();
+			}
+
+		}
+		return null;
 	}
 
 	public String getName() {
@@ -77,9 +96,9 @@ public class Snippet {
 			return null;
 		}
 		document = builder.newDocument();
-		
+
 		document.appendChild(document.importNode(element, true));
-		 
+
 		Transformer tf;
 		StringWriter writer = new StringWriter();
 		StreamResult result = new StreamResult(writer);
