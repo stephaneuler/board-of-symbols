@@ -3,6 +3,7 @@ This directory contains some documentation for BoS.
 * bos_en_2: slides from a talk about BoS
 * BoSL commands: list of advanced commands in the boS Language
 * BoSBlueJ: using BoS from BlueJ
+* java-bos-skript: learning Java with BoS (in German)
 * c-skript: learning C with BoS (in German)
 
 Some additional links:
