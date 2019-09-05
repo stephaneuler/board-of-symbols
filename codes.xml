@@ -1,76 +1,12 @@
-<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?><codes>
-<autosave>
-int i;
-int farben[] = { RED, BLUE, GREEN, OLIVE, YELLOW, 0xCDD718};
-for( i=0; i&lt;130; i++ ) {
-    farbe(i, farben[i % (sizeof( farben) / sizeof( int )) ] );
-}
-</autosave>
-<snippet name="modulo">
-<code>
-int i;
-int farben[] = { RED, BLUE, GREEN, OLIVE, YELLOW, 0xCDD718};
-for( i=0; i&lt;130; i++ ) {
-    farbe(i, farben[i % (sizeof( farben) / sizeof( int )) ] );
-}
-</code>
-</snippet>
-<snippet name="noName">
-<code>
-int i, j;
-int farben[] = { RED, BLUE, GREEN, BLACK, YELLOW, 0x1310FA};
-for( i=0; i&lt;14; i++) {
-for( j=0; j&lt;20; j++) {
-    farbe2(i, j, farben[(i + j )% (sizeof( farben) / sizeof( int )) ] );
- }
-}
-</code>
-</snippet>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><codes><snippet locale="en_US" name="T2"><author>Euler</author><created>Thu Sep 05 15:44:25 CEST 2019</created><codeA><![CDATA[
 
-<snippet name="grauen">
-<tag>Graustufen</tag>
-<code>
-int i;
+forms( "s" );
+colors( WHITE );
+color2( 4, 2, DARKGREEN );
+color2( 4, 3, DARKGREEN );
+color2( 4, 4, DARKGREEN );
+color2( 3, 5, DARKGREEN );
+color2( 4, 5, DARKGREEN );
+color2( 5, 5, DARKGREEN );
 
-// alles loeschen und Grundfarben setzen
-loeschen();
-groesse( 16,1);
-for( i=0; i&lt;16; i++ ) {
-    grau( i, i*16 );
-}
-</code>
-</snippet>
-
-<snippet name="wachsen">
-<code>
-int i;
-
-// alles loeschen und Grundfarben setzen
-loeschen();
-formen( "tld" );
-groesse( 12,12);
-for( i=0; i&lt;12*12; i++ ) {
-    farbe( i, BLACK );
-    symbolGroesse( i, 0.5 * i / 12 / 12 );
-}
-</code>
-</snippet>
-
-<snippet name="wachsenGrau">
-<tag>Graustufen</tag>
-<code>
-int max = 12;
-int i;
-
-// alles loeschen und Grundfarben setzen
-loeschen();
-groesse( max, max);
-formen("tld");
-for( i=0; i&lt;max*max; i++ ) {
-    symbolGroesse( i, 0.5 * i / max /max );
-    grau(i, 255 * i  /max /max );
-    hintergrund( i, WHITE );
-}
-</code>
-</snippet>
-</codes>
+]]></codeA><language>Java</language></snippet></codes>
