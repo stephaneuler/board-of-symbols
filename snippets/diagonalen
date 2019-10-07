@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<snippet locale="de_DE" name="diagonalen">
+    <author>Stephan Euler</author>
+    <created>Mon Oct 07 18:14:51 CEST 2019</created>
+    <codeA>
+        <![CDATA[
+int N = 32;
+int d = 8;
+
+groesse( N, N );
+formen("s");
+farben( BLUE );
+
+for( int x=0; x<N; x++ ) {
+   for( int y=0; y<N; y++ ) {
+      if( (x + y) % d == 0 || (x-y) % d == 0 ) {
+	   farbe2( x, y, YELLOW );
+      }
+   }
+}
+]]>
+    </codeA>
+    <language>Java</language>
+</snippet>
