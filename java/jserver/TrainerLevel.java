@@ -1,7 +1,7 @@
 package jserver;
 
 public class TrainerLevel {
-	Mode mode;
+	TrainerMode mode;
 	boolean randomForm;
 	boolean useBackGroundForm;
 	String topic = "default";
@@ -10,12 +10,12 @@ public class TrainerLevel {
 		return topic;
 	}
 
-	public TrainerLevel(Mode mode, boolean randomForm, boolean useBackGroundForm, String topic) {
+	public TrainerLevel(TrainerMode mode, boolean randomForm, boolean useBackGroundForm, String topic) {
 		this(mode, randomForm, useBackGroundForm);
 		this.topic = topic;
 	}
 
-	public TrainerLevel(Mode mode, boolean randomForm, boolean useBackGroundForm) {
+	public TrainerLevel(TrainerMode mode, boolean randomForm, boolean useBackGroundForm) {
 		super();
 		this.mode = mode;
 		this.randomForm = randomForm;

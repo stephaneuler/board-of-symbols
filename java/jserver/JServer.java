@@ -12,11 +12,14 @@ import java.util.logging.Logger;
 public class JServer implements Runnable {
 	int backlog = 10;
 	int port = 1958;
-	Board board = new Board();
+	Board board;
 	Handler handler;
 	Logger logger;
 
-	JServer() {
+	public JServer(Board board) {
+		super();
+		this.board = board;
+		
 		try {
 			handler = new FileHandler("logs.xml");
 			logger = Logger.getGlobal();
@@ -28,6 +31,10 @@ public class JServer implements Runnable {
 
 		Thread t = new Thread(this, "Server");
 		t.start();
+	}
+
+	JServer() {
+		this( new Board() );
 	}
 
 	/**

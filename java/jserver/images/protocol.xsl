@@ -81,7 +81,7 @@
 	<xsl:value-of select="code" />
   </pre>
    <div><img><xsl:attribute name="src"> 
-           <xsl:value-of select="file" /> </xsl:attribute> 
+           <xsl:value-of select="imageFile" /> </xsl:attribute> 
            <xsl:attribute name="width">200</xsl:attribute> 
       </img></div>
   <div>Anzahl der Symbole: <xsl:value-of select="symbols" /></div>
@@ -112,6 +112,9 @@
   M = <xsl:value-of select="comments + inline-comments + 2 * blocks + 3 * max-indent + 3 * uses-methods" />, 
   R = <xsl:value-of select="BoSL-commands - required-bosl-commands" />, 
   S = <xsl:value-of select="count(style-warning)"/>
+
+  <h3>CSV</h3>
+  CSV <xsl:value-of select="snippet-name" />, <xsl:value-of select="symbols" />, <xsl:value-of select="zip-size" />, <xsl:value-of select="required-bosl-commands" />, <xsl:value-of select="comments + inline-comments + 2 * blocks + 3 * max-indent + 3 * uses-methods" />,  <xsl:value-of select="BoSL-commands - required-bosl-commands" />,  <xsl:value-of select="count(style-warning)"/>
   </xsl:template>
 
   <xsl:template match="test">

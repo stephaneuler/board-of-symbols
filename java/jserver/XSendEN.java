@@ -15,97 +15,100 @@ package jserver;
  *
  */
 public abstract class XSendEN  extends XSend {
-
 	public void size(int x, int y) {
-		result +=  board.receiveMessage(">>r " + x + " " + y );
+		log( board.receiveMessage(">>r " + x + " " + y ) );
 	}
 
 	public void background(int i, int f) {
-		result +=  board.receiveMessage( ">>b " + i + " " + f );
+		log( board.receiveMessage( ">>background " + i + " " + f ) );
 	}
 
 	public void background2(int i, int j, int f) {
-		result +=  board.receiveMessage(">>#b " + i + " " + j + " " + f );
+		log( board.receiveMessage(">>background2 " + i + " " + j + " " + f ) );
 	}
 
 	public void area(int f) {
-		result +=  board.receiveMessage(">>ba " + f );
+		log( board.receiveMessage(">>ba " + f ) );
 	}
 
 	public void border(int f) {
-		result +=  board.receiveMessage(">>bo " + f );
+		log( board.receiveMessage(">>border " + f ) ) ;
 	}
 
 	public void clear() {
-		result +=  board.receiveMessage(">>c");
+		log( board.receiveMessage(">>clear") );
 	}
 
 	public void colors(int f) {
-		result +=  board.receiveMessage(">>a " + f );
+		log( board.receiveMessage(">>colors " + f ) ) ;
 	}
 
 	public  void color(int i, int f) {
-		result += board.receiveMessage(  ">>" + i + " " + f );
+		log( board.receiveMessage(  ">>color " + i + " " + f ) ) ;
 	}
 
 	public void color2(int i, int j, int f) {
-		result +=  board.receiveMessage(">># " + i + " " + j + " " + f );
+		log( board.receiveMessage(">>color2 " + i + " " + j + " " + f ) ) ;
 	}
 
-	public void grey(int i, int g) {
-		color(i, g << 16 | g << 8 | g);
-	}
-
-	public void grey2(int i, int j, int g) {
-		color2(i, j, g << 16 | g << 8 | g);
-	}
-
+//	public void grey(int i, int g) {
+//		color(i, g << 16 | g << 8 | g);
+//	}
+//
+//	public void grey2(int i, int j, int g) {
+//		color2(i, j, g << 16 | g << 8 | g);
+//	}
+//
 	public void forms(String f) {
-		result +=  board.receiveMessage(">>f " + f );
+		log( board.receiveMessage(">>forms " + f ) ) ;
 	}
 
 	public void form(int i, String f) {
-		result +=  board.receiveMessage(">>fi " + i + " " + f );
+		log( board.receiveMessage(">>form " + i + " " + f ) ) ;
 	}
 
 	public void form2(int i, int j, String f) {
-		result +=  board.receiveMessage(">>#fi " + i + " " + j + " " + f );
+		log( board.receiveMessage(">>form2 " + i + " " + j + " " + f ) ) ;
 	}
 
 	public void symbolSize(int i, double s) {
-		result +=  board.receiveMessage(">>s " + i + " " + s );
+		log( board.receiveMessage(">>symbolSize " + i + " " + s ) ) ;
 	}
 
 	public void symbolSize2(int i, int j, double s) {
-		result +=  board.receiveMessage(">>#s " + i + " " + j + " " + s );
+		log( board.receiveMessage(">>symbolSize2 " + i + " " + j + " " + s ) ) ;
+	}
+
+	public void symbolSizes( double s) {
+		log( board.receiveMessage(">>symbolSizes "  + s ) ) ;
 	}
 
 	public void text(int i, String f) {
-		result +=  board.receiveMessage(">>T " + i + " " + f );
-	}
-
-	public void textColor(int i, int c) {
-		result +=  board.receiveMessage(">>TC " + i + " " + c );
-	}
-
-	public void textColor2(int i, int j, int c) {
-		result +=  board.receiveMessage(">>#TC " + i + " " + j + " " + c );
+		log( board.receiveMessage(">>text " + i + " " + f ) ) ;
 	}
 
 	public void text2(int i, int j, String f) {
-		result +=  board.receiveMessage(">>#T " + i + " " + j + " " + f );
+		log( board.receiveMessage(">>text2 " + i + " " + j + " " + f ) ) ;
+	}
+
+	public void textColor(int i, int c) {
+		log( board.receiveMessage(">>textColor " + i + " " + c ) ) ;
+	}
+
+	public void textColor2(int i, int j, int c) {
+		log( board.receiveMessage(">>textColor2 " + i + " " + j + " " + c ) ) ;
 	}
 
 	public void character(int i, char c) {
-		result +=  board.receiveMessage(">>T " + i + " " + c );
+		log( board.receiveMessage(">>T " + i + " " + c ) ) ;
 	}
 
 	public void character2(int i, int j, char c) {
-		result +=  board.receiveMessage(">>#T " + i + " " + j + " " + c );
+		log( board.receiveMessage(">>#T " + i + " " + j + " " + c ) ) ;
 	}
 
 	public void statusText(String s) {
-		result +=  board.receiveMessage(">>t " + s );
+		log( board.receiveMessage(">>statusText " + s ) ) ;
 	}
 	
 	public String ask() {

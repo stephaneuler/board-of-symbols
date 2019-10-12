@@ -61,7 +61,7 @@ public class Plotter extends JPanel {
 
 	private static final long serialVersionUID = 8220278066243017406L;
 
-	private static final String version = "1.29a Maerz 2019";
+	private static final String version = "1.30 Juni 2019";
 
 	static int verbose = 0;
 	static Color[] plotColor = { Color.red, Color.green, Color.blue, Color.orange, Color.yellow, Color.magenta };
@@ -597,10 +597,6 @@ public class Plotter extends JPanel {
 
 		Graphics2D g2 = (Graphics2D) g;
 
-		// if (backGroundColor != null) {
-		// setBackground(backGroundColor);
-		// }
-
 		if (verbose > 1) {
 			System.out.println("PAINT");
 			System.out.println(getBackground());
@@ -650,9 +646,6 @@ public class Plotter extends JPanel {
 			xmax = Double.MIN_VALUE;
 			xmin = Double.MAX_VALUE;
 			for (DataObject d : dataObjects.values()) {
-				// double[] vek = d.getData();
-				// xmax = Vis.vmax(xmax, vek, 0, 2);
-				// xmin = Vis.vmin(xmin, vek, 0, 2);
 				xmax = Math.max(xmax, d.xmax());
 				xmin = Math.min(xmin, d.xmin());
 			}
@@ -676,32 +669,7 @@ public class Plotter extends JPanel {
 
 		// now rectancle
 		g2.drawRect(plotLeft, plotUp, plotWidth, plotHeight);
-
-		synchronized (imageObjects) {
-			for (ImageObject imageOject : imageObjects) {
-				Image image = imageOject.image;
-				System.out.println("Image: " + image.getHeight(null) + " x " + image.getWidth(null));
-				if (imageOject.worldWidth > 0 | imageOject.worldHeight > 0) {
-					int newWidth = -1;
-					int newHeight = -1;
-					if (imageOject.worldWidth > 0) {
-						newWidth = Math.abs(scaleX(imageOject.worldWidth) - scaleX(0.));
-						System.out.println("W: " + imageOject.worldWidth + " -> " + newWidth);
-					}
-					if (imageOject.worldHeight > 0) {
-						newHeight = Math.abs(scaleY(imageOject.worldHeight) - scaleY(0.));
-						System.out.println("H: " + imageOject.worldHeight + " -> " + newHeight);
-					}
-					image = imageOject.image.getScaledInstance(newWidth, newHeight, Image.SCALE_DEFAULT);
-					System.out.println("rescaled Image: " + newHeight + " x " + newWidth);
-					System.out.println("rescaled Image: " + image.getHeight(null) + " x " + image.getWidth(null));
-				}
-				int x = scaleX(imageOject.getX()) - image.getWidth(null) / 2;
-				int y = scaleY(imageOject.getY()) - image.getHeight(null) / 2;
-				System.out.println("Pos: " + imageOject.getX() + ", " + imageOject.getY() + "-> " + x + "," + y);
-				g2.drawImage(image, x, y, null);
-			}
-		}
+		drawImages( g2 );
 
 		FontMetrics fm = g2.getFontMetrics();
 
@@ -775,63 +743,28 @@ public class Plotter extends JPanel {
 			}
 		}
 
-		synchronized (circles) {
-			try {
-				for (Circle circle : circles.values()) {
-					// System.out.println(circle);
-					int x = scaleX(circle.getX());
-					int y = scaleY(circle.getY());
-					int rx = scaleX(circle.getX() + 2 * circle.getSize()) - scaleX(circle.getX());
-					int ry = scaleY(circle.getY() - 2 * circle.getSize()) - scaleY(circle.getY());
-
-					rx = Math.min(rx, ry);
-
-					g2.setColor(circle.getColor());
-					g2.fillOval(x - rx / 2, y - rx / 2, rx, rx);
-				}
-			} catch (Exception e) {
-				System.out.println( e.getMessage() );
-			}
-		}
-
 		g2.setColor(Color.BLUE);
-		// if (dataObjects.size() > 0) {
 		int xcol = 0;
-		for (DataObject d : dataObjects.values()) {
+		for (DataObject dataObject : dataObjects.values()) {
 			int starX = 0;
 			int starY = 0;
 
-			double[] tmpXVector = d.getData();
+			double[] tmpXVector = dataObject.getData();
 			if (verbose > 1)
 				System.out.println("plotting  points");
 
-			if (d.hasBackground()) {
-				Point[] corners = d.getCorners();
-				// for (int i = 0; i < tmpXVector.length; i += 2) {
-				// System.out.println(tmpXVector[i] + " " + tmpXVector[i+1]
-				// + " " + scaleX(tmpXVector[i]) + " " + scaleY(tmpXVector[i+1]
-				// ));
-				// }
-				int iw = scaleX(corners[1].x) - scaleX(corners[0].x);
-				int ih = scaleY(corners[1].y) - scaleY(corners[0].y);
-				// System.out.println(" iw: " + iw);
-				// System.out.println(corners[0].x + " " + corners[0].y + " " +
-				// width + " x " + height);
-				Shape s = new Rectangle2D.Double(scaleX(corners[0].x), scaleY(corners[0].y), iw, ih);
-				// System.out.println( s );
-				g2.setColor(d.getBackGroundColor());
-				g2.draw(s);
-				g2.fill(s);
+			if (dataObject.hasBackground()) {
+				drawBackground( dataObject, g2 );
 			}
 
 			LineStyle currStyle = plotMode;
-			if (d.getLineStyle() != LineStyle.UNDEFINED)
-				currStyle = d.getLineStyle();
-			if (d.getStroke() != null)
-				g2.setStroke(d.getStroke());
+			if (dataObject.getLineStyle() != LineStyle.UNDEFINED)
+				currStyle = dataObject.getLineStyle();
+			if (dataObject.getStroke() != null)
+				g2.setStroke(dataObject.getStroke());
 
 			Path2D.Double pd = new Path2D.Double();
-			g2.setColor(d.getColor());
+			g2.setColor(dataObject.getColor());
 
 			for (int i = 0; i < tmpXVector.length; i += 2) {
 				double x = scaleX(tmpXVector[i]);
@@ -853,7 +786,7 @@ public class Plotter extends JPanel {
 				if (xmin > 0)
 					xref = xmin;
 
-				if (currStyle == LineStyle.IMPULS) {
+				if ( currStyle == LineStyle.IMPULS  || dataObject.hasLineStyle(  LineStyle.IMPULS )) {
 					g2.drawLine((int) x, scaleY(yref), (int) x, (int) y);
 				}
 
@@ -882,29 +815,29 @@ public class Plotter extends JPanel {
 					g2.fill(s);
 				}
 
-				if (currStyle == LineStyle.SYMBOL || currStyle == LineStyle.BOTH || d.hasLineStyle(LineStyle.SYMBOL)) {
+				if (currStyle == LineStyle.SYMBOL || currStyle == LineStyle.BOTH || dataObject.hasLineStyle(LineStyle.SYMBOL)) {
 					g2.drawOval((int) (x - symbolSize / 2), (int) (y - symbolSize / 2), symbolSize, symbolSize);
 				}
 
-				if (currStyle == LineStyle.FILLED_SYMBOL || d.hasLineStyle(LineStyle.FILLED_SYMBOL)) {
+				if (currStyle == LineStyle.FILLED_SYMBOL || dataObject.hasLineStyle(LineStyle.FILLED_SYMBOL)) {
 					Shape s = new Ellipse2D.Double((int) (x - symbolSize / 2), (int) (y - symbolSize / 2), symbolSize,
 							symbolSize);
 					g2.fill(s);
 					g2.setColor(Color.BLACK);
 					g2.draw(s);
-					g2.setColor(d.getColor());
+					g2.setColor(dataObject.getColor());
 				}
 				if (currStyle == LineStyle.DOT) {
 					g2.drawOval((int) x, (int) y, 1, 1);
 				}
 
-				if (currStyle == LineStyle.VALUE || d.hasLineStyle(LineStyle.VALUE)) {
+				if (currStyle == LineStyle.VALUE || dataObject.hasLineStyle(LineStyle.VALUE)) {
 					String t = String.format(valueFormatString, tmpXVector[i + 1]);
 					t = t.replaceAll("[,.]0+", "");
 					g2.drawString(t, (int) x - fm.stringWidth(t) / 2, (int) y);
 				}
 
-				if (currStyle == LineStyle.COORD || d.hasLineStyle(LineStyle.COORD)) {
+				if (currStyle == LineStyle.COORD || dataObject.hasLineStyle(LineStyle.COORD)) {
 					String t = String.format("(%.1f;%.1f)", tmpXVector[i], tmpXVector[i + 1]);
 					t = t.replaceAll(",0", "");
 					g2.drawString(t, (int) x - fm.stringWidth(t) / 2, (int) y);
@@ -931,8 +864,74 @@ public class Plotter extends JPanel {
 				g2.fill(pd);
 			}
 		}
+		
+		drawCircles(g2);
 		drawTextObjects(g2);
 
+	}
+
+	private void drawBackground(DataObject dataObject, Graphics2D g2) {
+		Point[] corners = dataObject.getCorners();
+		int iw = scaleX(corners[1].x) - scaleX(corners[0].x);
+		int ih = scaleY(corners[1].y) - scaleY(corners[0].y);
+		Shape s = new Rectangle2D.Double(scaleX(corners[0].x), scaleY(corners[0].y), iw, ih);
+		g2.setColor(dataObject.getBackGroundColor());
+		g2.draw(s);
+		g2.fill(s);
+	}
+
+	private void drawImages(Graphics2D g2) {
+		synchronized (imageObjects) {
+			for (ImageObject imageOject : imageObjects) {
+				Image image = imageOject.image;
+				if( verbose > 0 ) {
+					System.out.println("Image: " + image.getHeight(null) + " x " + image.getWidth(null));
+				}
+				if (imageOject.worldWidth > 0 | imageOject.worldHeight > 0) {
+					int newWidth = -1;
+					int newHeight = -1;
+					if (imageOject.worldWidth > 0) {
+						newWidth = Math.abs(scaleX(imageOject.worldWidth) - scaleX(0.));
+						//System.out.println("W: " + imageOject.worldWidth + " -> " + newWidth);
+					}
+					if (imageOject.worldHeight > 0) {
+						newHeight = Math.abs(scaleY(imageOject.worldHeight) - scaleY(0.));
+						//System.out.println("H: " + imageOject.worldHeight + " -> " + newHeight);
+					}
+					image = imageOject.image.getScaledInstance(newWidth, newHeight, Image.SCALE_DEFAULT);
+					if( verbose > 0 ) {
+						System.out.println("rescaled Image: " + newHeight + " x " + newWidth);
+						System.out.println("rescaled Image: " + image.getHeight(null) + " x " + image.getWidth(null));
+					}
+				}
+				int x = scaleX(imageOject.getX()) - image.getWidth(null) / 2;
+				int y = scaleY(imageOject.getY()) - image.getHeight(null) / 2;
+				if( verbose > 0 ) {
+					System.out.println("Pos: " + imageOject.getX() + ", " + imageOject.getY() + "-> " + x + "," + y);
+				}
+				g2.drawImage(image, x, y, null);
+			}
+		}
+	}
+
+	private void drawCircles(Graphics g2) {
+		synchronized (circles) {
+			try {
+				for (Circle circle : circles.values()) {
+					// System.out.println(circle);
+					int x = scaleX(circle.getX());
+					int y = scaleY(circle.getY());
+					int rx = scaleX(circle.getX() + 2 * circle.getSize()) - scaleX(circle.getX());
+					int ry = scaleY(circle.getY() - 2 * circle.getSize()) - scaleY(circle.getY());
+					rx = Math.min(rx, ry);
+
+					g2.setColor(circle.getColor());
+					g2.fillOval(x - rx / 2, y - rx / 2, rx, rx);
+				}
+			} catch (Exception e) {
+				System.out.println( e.getMessage() );
+			}
+		}
 	}
 
 	private void drawTextObjects(Graphics2D g2) {

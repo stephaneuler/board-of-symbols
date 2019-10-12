@@ -67,32 +67,32 @@ public class Trainer extends JFrame implements ActionListener {
 
 	// private String startTime = time();
 	private TrainerLevel[] levels = { 
-			new TrainerLevel(Mode.SINGLE, false, false, "basic"),
-			new TrainerLevel(Mode.SINGLE, true, false, "basic"), 
-			new TrainerLevel(Mode.SINGLE, true, true, "basic"),
-			new TrainerLevel(Mode.MULTI, false, false, "basic"), 
-			new TrainerLevel(Mode.MULTI, true, false, "basic"),
-			new TrainerLevel(Mode.ALL_SYMBOLS, false, false, "basic"), 
-			new TrainerLevel(Mode.BACKGROUND, false, false, "basic"),
-			new TrainerLevel(Mode.STRIPES, false, false, "pattern"),
-			new TrainerLevel(Mode.STAIRWAY, false, false, "pattern"), 
-			new TrainerLevel(Mode.TRIANGLE, false, false, "pattern"),
-			new TrainerLevel(Mode.FRAME, false, false, "pattern"), 
-			new TrainerLevel(Mode.X, true, false, "pattern"),
-			new TrainerLevel(Mode.Y, true, false, "pattern"), 
-			new TrainerLevel(Mode.Z, true, false, "pattern"), 
-			new TrainerLevel(Mode.ARROW, false, false, "pattern"),
-			new TrainerLevel(Mode.ARROW, false, true, "pattern"), 
-			new TrainerLevel(Mode.TREE, false, false, "pattern"),
-			new TrainerLevel(Mode.DICE, false, true, "pattern"), 
-			new TrainerLevel(Mode.SIZES, true, false, "pattern"), 
-			new TrainerLevel(Mode.THM, false, false, "text"), 
-			new TrainerLevel(Mode.ABC, false, false, "text"),
-			new TrainerLevel(Mode.MODULO, false, false, "text"),
-			new TrainerLevel(Mode.COORD, false, false, "text"),
-			new TrainerLevel(Mode.ABCOORD, false, false, "text"),
-			new TrainerLevel(Mode.LETTERTREE, false, false, "text"),
-			new TrainerLevel(Mode.LETTERTREE, false, true, "text"),
+			new TrainerLevel(TrainerMode.SINGLE, false, false, "basic"),
+			new TrainerLevel(TrainerMode.SINGLE, true, false, "basic"), 
+			new TrainerLevel(TrainerMode.SINGLE, true, true, "basic"),
+			new TrainerLevel(TrainerMode.MULTI, false, false, "basic"), 
+			new TrainerLevel(TrainerMode.MULTI, true, false, "basic"),
+			new TrainerLevel(TrainerMode.ALL_SYMBOLS, false, false, "basic"), 
+			new TrainerLevel(TrainerMode.BACKGROUND, false, false, "basic"),
+			new TrainerLevel(TrainerMode.STRIPES, false, false, "pattern"),
+			new TrainerLevel(TrainerMode.STAIRWAY, false, false, "pattern"), 
+			new TrainerLevel(TrainerMode.TRIANGLE, false, false, "pattern"),
+			new TrainerLevel(TrainerMode.FRAME, false, false, "pattern"), 
+			new TrainerLevel(TrainerMode.X, true, false, "pattern"),
+			new TrainerLevel(TrainerMode.Y, true, false, "pattern"), 
+			new TrainerLevel(TrainerMode.Z, true, false, "pattern"), 
+			new TrainerLevel(TrainerMode.ARROW, false, false, "pattern"),
+			new TrainerLevel(TrainerMode.ARROW, false, true, "pattern"), 
+			new TrainerLevel(TrainerMode.TREE, false, false, "pattern"),
+			new TrainerLevel(TrainerMode.DICE, false, true, "pattern"), 
+			new TrainerLevel(TrainerMode.SIZES, true, false, "pattern"), 
+			new TrainerLevel(TrainerMode.THM, false, false, "text"), 
+			new TrainerLevel(TrainerMode.ABC, false, false, "text"),
+			new TrainerLevel(TrainerMode.MODULO, false, false, "text"),
+			new TrainerLevel(TrainerMode.COORD, false, false, "text"),
+			new TrainerLevel(TrainerMode.ABCOORD, false, false, "text"),
+			new TrainerLevel(TrainerMode.LETTERTREE, false, false, "text"),
+			new TrainerLevel(TrainerMode.LETTERTREE, false, true, "text"),
 			};
 	private int[] hitCount = new int[levels.length + 1];
 
@@ -267,7 +267,7 @@ public class Trainer extends JFrame implements ActionListener {
 				message += " generator: " + numMessagesGenerator + " BoS commands" + System.lineSeparator();
 				int userMessages = board.getMessageCount() - numMessagesUser;
 				message += " user: " + userMessages + " BoS commands" + System.lineSeparator();
-				URL imageURL = CodeWindow.class.getResource("images/pattern_okay.jpg");
+				URL imageURL = this.getClass().getResource("images/pattern_okay.jpg");
 				Icon icon = new ImageIcon(imageURL);
 				JOptionPane.showMessageDialog(null, message, checkText, JOptionPane.OK_OPTION, icon);
 			} else {

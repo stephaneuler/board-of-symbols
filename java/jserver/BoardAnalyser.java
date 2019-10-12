@@ -71,9 +71,13 @@ public class BoardAnalyser {
 	public Map<String, Integer> getDuplicateMessages() {
 		Map<String, Integer> map = new HashMap<>();
 
-		for (String temp : board.getMessageHistory() ) {
-			Integer count = map.get(temp);
-			map.put(temp, (count == null) ? 1 : count + 1);
+		try {
+			for (String temp : board.getMessageHistory() ) {
+				Integer count = map.get(temp);
+				map.put(temp, (count == null) ? 1 : count + 1);
+			}
+		} catch (java.util.ConcurrentModificationException e) {
+			//e.printStackTrace();
 		}
 		Integer one = Integer.valueOf(1);
 		map.entrySet().removeIf(

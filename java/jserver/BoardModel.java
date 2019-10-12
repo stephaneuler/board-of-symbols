@@ -27,5 +27,9 @@ public class BoardModel {
 	public int getNumberSymbols() {
 		return rows * columns;
 	}
+	public void decRows(int i) {
+		rows -= i;
+		
+	}
 
 }

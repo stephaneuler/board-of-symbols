@@ -140,7 +140,7 @@ public class CodeDB {
 		Element element = getSnippetByName(name);
 		element.getParentNode().removeChild(element);
 		writeXML();
-		
+
 	}
 
 	public void addSnippet(Element snip) {
@@ -171,8 +171,10 @@ public class CodeDB {
 			Node child = children.item(j);
 			if ("codeA".equals(child.getNodeName())) {
 				Node cdataSection = child.getLastChild();
-				//System.out.println( child + " " + child.getNodeName() + " "  + child.getNodeType() );			
-				//System.out.println( section + " " + section.getNodeName() + " "  + section.getNodeType() );			
+				// System.out.println( child + " " + child.getNodeName() + " " +
+				// child.getNodeType() );
+				// System.out.println( section + " " + section.getNodeName() + " " +
+				// section.getNodeType() );
 				cdataSection.setTextContent(code);
 			}
 			if ("code".equals(child.getNodeName())) {
@@ -193,7 +195,7 @@ public class CodeDB {
 		return;
 
 	}
-	
+
 	public void updateTagSnippet(String snippetName, String tag, String text) {
 		Element s = getSnippetByName(snippetName);
 		Node tagNode = null;
@@ -269,10 +271,11 @@ public class CodeDB {
 			Node c = children.item(j);
 			if ("codeA".equals(c.getNodeName())) {
 				NodeList cc = c.getChildNodes();
-				for( int jj = 0; jj < cc.getLength(); jj++ ) {
+				for (int jj = 0; jj < cc.getLength(); jj++) {
 					Node n = cc.item(jj);
-					//System.out.println("in codeA, Node type: " + n.getNodeType() + " " + n.getNodeName());
-					if( n.getNodeType() == Node.CDATA_SECTION_NODE ) {
+					// System.out.println("in codeA, Node type: " + n.getNodeType() + " " +
+					// n.getNodeName());
+					if (n.getNodeType() == Node.CDATA_SECTION_NODE) {
 						return n.getNodeValue();
 					}
 				}
@@ -302,8 +305,10 @@ public class CodeDB {
 	}
 
 	public void saveAsLast(String code) {
-		getLastEditElement().setTextContent(code);
-		writeXML();
+		if (getLastEditElement() != null) {
+			getLastEditElement().setTextContent(code);
+			writeXML();
+		}
 	}
 
 	public List<String> getSnippetNames() {
@@ -321,8 +326,8 @@ public class CodeDB {
 	/**
 	 * Read the color names from file colors.h
 	 * 
-	 * @return a list of color names. The list is empty if the file does not
-	 *         exists or does not contain required format
+	 * @return a list of color names. The list is empty if the file does not exists
+	 *         or does not contain required format
 	 */
 	public List<String> getColorNames() {
 		List<String> colorNames = new ArrayList<String>();
@@ -381,6 +386,5 @@ public class CodeDB {
 	public void setLastEditElement(Element lastEditElement) {
 		this.lastEditElement = lastEditElement;
 	}
-
 
 }

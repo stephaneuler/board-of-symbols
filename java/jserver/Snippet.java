@@ -22,7 +22,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.sun.org.apache.xml.internal.serializer.utils.Messages;
 
 public class Snippet {
 	Element element;
@@ -63,7 +62,6 @@ public class Snippet {
 					infoText += s + ":\t " + n.getNodeValue() + "\n";
 				}
 			}
-
 		}
 		return infoText;
 	}

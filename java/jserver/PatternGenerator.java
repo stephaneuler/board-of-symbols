@@ -5,11 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-enum Mode {
-	SINGLE, MULTI, ALL_SYMBOLS, TRIANGLE, FRAME, ARROW, TREE, STAIRWAY, THM, ABC, 
-	MODULO, DICE, STRIPES, X, Y, Z, SIZES, BACKGROUND, LETTERTREE, COORD, ABCOORD,
-}
-
 /**
  * Generator for BoS-patterns. The method generate() draws a pattern on a board
  * using the given mode. Parameters such as position, size and color vary
@@ -56,7 +51,7 @@ public class PatternGenerator {
 		PatternGenerator pg = new PatternGenerator(10);
 		// pg.generateAll();
 
-		pg.generate(Mode.ABCOORD, true, true);
+		pg.generate(TrainerMode.ABCOORD, true, true);
 	}
 
 	public void generateAll() {
@@ -77,14 +72,14 @@ public class PatternGenerator {
 	}
 
 	public void generate() {
-		generate(Mode.MULTI);
+		generate(TrainerMode.MULTI);
 	}
 
-	public void generate(Mode mode) {
+	public void generate(TrainerMode mode) {
 		generate(mode, false);
 	}
 
-	void generate(Mode mode, boolean randomForm) {
+	void generate(TrainerMode mode, boolean randomForm) {
 		generate(mode, randomForm, false);
 	}
 
@@ -96,7 +91,7 @@ public class PatternGenerator {
 	 * @param useBG
 	 *            if true fill the board with one of the background forms
 	 */
-	public void generate(Mode mode, boolean randomForm, boolean useBG) {
+	public void generate(TrainerMode mode, boolean randomForm, boolean useBG) {
 		BoardSerializer bs = new BoardSerializer();
 		board.receiveMessage(Board.FILTER_PREFIX + "statusfontsize 18");
 		board.receiveMessage(Board.FILTER_PREFIX + "fontsize 32");
@@ -132,13 +127,13 @@ public class PatternGenerator {
 			xsa.formen(bgform);
 		}
 
-		if (mode == Mode.SINGLE) {
+		if (mode == TrainerMode.SINGLE) {
 			xsa.farbe2(sstart, zstart, color);
 			if (randomForm) {
 				xsa.form2(sstart, zstart, form);
 			}
 
-		} else if (mode == Mode.MULTI) {
+		} else if (mode == TrainerMode.MULTI) {
 			for (int z = zstart; z < N; z += zinc) {
 				for (int s = sstart; s < N; s += sinc) {
 					xsa.farbe2(s, z, color);
@@ -148,7 +143,7 @@ public class PatternGenerator {
 				}
 			}
 
-		} else if (mode == Mode.ALL_SYMBOLS) {
+		} else if (mode == TrainerMode.ALL_SYMBOLS) {
 			SymbolType[] types =  SymbolType.values();
 			List<Integer> ind = new ArrayList<>();
 			for( int i=0; i<N*N; i++ ) {
@@ -161,7 +156,7 @@ public class PatternGenerator {
 			}
 
 
-		} else if (mode == Mode.TRIANGLE) {
+		} else if (mode == TrainerMode.TRIANGLE) {
 			sinc = 1 + random.nextInt(2);
 			for (int s = sstart; s < N - sstart; s += sinc) {
 				for (int z = sstart; z <= s; ++z) {
@@ -174,7 +169,7 @@ public class PatternGenerator {
 				}
 			}
 
-		} else if (mode == Mode.FRAME) {
+		} else if (mode == TrainerMode.FRAME) {
 			int size = 4 + random.nextInt(3);
 			Painter.waagrecht(xsa, sstart, zstart, size, color, "s");
 			Painter.waagrecht(xsa, sstart, zstart + size - 1, size, color, "s");
@@ -185,7 +180,7 @@ public class PatternGenerator {
 			xsa.form2(sstart + size - 1, zstart, "tlu");
 			xsa.form2(sstart + size - 1, zstart + size - 1, "tld");
 
-		} else if (mode == Mode.X) {
+		} else if (mode == TrainerMode.X) {
 			int x = N / 2 + random.nextInt(3) - 1;
 			int y = N / 2 + random.nextInt(3) - 1;
 			int size = 2;
@@ -194,7 +189,7 @@ public class PatternGenerator {
 			Painter.linie(xsa, x - size, y - size, 1, 1, 2 * size + 1, color, form);
 			Painter.linie(xsa, x - size, y + size, 1, -1, 2 * size + 1, color, form);
 
-		} else if (mode == Mode.Y) {
+		} else if (mode == TrainerMode.Y) {
 			int x = N / 2 + random.nextInt(3) - 1;
 			int y = N / 2 + random.nextInt(3) - 1;
 			int size = 3;
@@ -204,7 +199,7 @@ public class PatternGenerator {
 			Painter.linie(xsa, x, y, -1, 1, size, color, "\\");
 			Painter.linie(xsa, x, y, 0, -1, y, color, "|");
 
-		} else if (mode == Mode.Z) {
+		} else if (mode == TrainerMode.Z) {
 			int x = N / 2 + random.nextInt(3) - 1;
 			int y = N / 2 + random.nextInt(3) - 1;
 			int size = 2;
@@ -214,7 +209,7 @@ public class PatternGenerator {
 			Painter.linie(xsa, x - size, y + size, 1, 0, 2 * size + 1, color, form);
 			Painter.linie(xsa, x - size, y - size, 1, 0, 2 * size + 1, color, form);
 
-		} else if (mode == Mode.ARROW) {
+		} else if (mode == TrainerMode.ARROW) {
 			zstart = 1 + random.nextInt(2);
 			sstart = 1 + random.nextInt(2);
 			int max = (zstart > sstart) ? zstart : sstart;
@@ -243,13 +238,13 @@ public class PatternGenerator {
 				break;
 			}
 
-		} else if (mode == Mode.STAIRWAY) {
+		} else if (mode == TrainerMode.STAIRWAY) {
 			int width = 3 + random.nextInt(2);
 			for (int s = sstart; s < N - width; s++) {
 				Painter.waagrecht(xsa, s, zstart + (s - sstart), width, color, "s");
 			}
 
-		} else if (mode == Mode.SIZES) {
+		} else if (mode == TrainerMode.SIZES) {
 			xsa.formen( "none");
 			for( int x=0; x<N; x++ ) {
 				xsa.symbolGroesse2(x, x, 0.5*x/(N-1));
@@ -257,7 +252,7 @@ public class PatternGenerator {
 				xsa.form2(x, x, form);
 			}
 			
-		} else if (mode == Mode.BACKGROUND) {
+		} else if (mode == TrainerMode.BACKGROUND) {
 			List<Integer> bgColors = new ArrayList<>();
 			for( int c : colors ) {
 				if( c != color ) {
@@ -276,12 +271,12 @@ public class PatternGenerator {
 				xsa.hintergrund2(sstart + x, zstart, bgColors.get(x));
 			}
 			
-		} else if (mode == Mode.THM) {
+		} else if (mode == TrainerMode.THM) {
 			xsa.text2(sstart, zstart, "T");
 			xsa.text2(sstart + 1, zstart, "H");
 			xsa.text2(sstart + 2, zstart, "M");
 
-		} else if (mode == Mode.ABC) {
+		} else if (mode == TrainerMode.ABC) {
 			for (int i = zstart; i < 26; i += zinc) {
 				char c = (char) ('A' + i);
 				xsa.farbe(sstart, color);
@@ -289,13 +284,13 @@ public class PatternGenerator {
 				++sstart;
 			}
 
-		} else if (mode == Mode.MODULO) {
+		} else if (mode == TrainerMode.MODULO) {
 			int m = 5 + random.nextInt(4);
 			for (int i = 0; i < N * N; i++) {
 				xsa.text(i, "" + i % m);
 			}
 
-		} else if (mode == Mode.DICE) {
+		} else if (mode == TrainerMode.DICE) {
 			int bgColor = colors[random.nextInt(colors.length)];
 			xsa.farben(bgColor);
 			for (int i = 1; i <= 6; i++) {
@@ -305,7 +300,7 @@ public class PatternGenerator {
 				}
 			}
 
-		} else if (mode == Mode.STRIPES) {
+		} else if (mode == TrainerMode.STRIPES) {
 			xsa.formen("s");
 			int M = N / 2 + +random.nextInt(5) - 2;
 			for (int y = 0; y < N; y += 2) {
@@ -317,7 +312,7 @@ public class PatternGenerator {
 				}
 			}
 
-		} else if (mode == Mode.TREE) {
+		} else if (mode == TrainerMode.TREE) {
 			xsa.formen("none");
 			int r = 10;
 			for (int y = 1; y < 6; y++) {
@@ -333,7 +328,7 @@ public class PatternGenerator {
 				--r;
 			}
 
-		} else if (mode == Mode.LETTERTREE) {
+		} else if (mode == TrainerMode.LETTERTREE) {
 			board.receiveMessage(Board.FILTER_PREFIX + "fonttype Courier New");
 			xsa.formen("none");
 			String innen = randomElement( "*+#xo");
@@ -351,7 +346,7 @@ public class PatternGenerator {
 			}
 			xsa.statusText("LETTERTREE, Textbreite: " + pg.length() + " Zeichen");
 
-		} else if (mode == Mode.COORD) {
+		} else if (mode == TrainerMode.COORD) {
 			xsa.formen( "c");
 			xsa.farben( color );
 			board.receiveMessage(Board.FILTER_PREFIX + "fontsize 18");
@@ -360,7 +355,7 @@ public class PatternGenerator {
 					xsa.text2( x, y, x + "," + y);
 				}
 			}
-		} else if (mode == Mode.ABCOORD ) {
+		} else if (mode == TrainerMode.ABCOORD ) {
 			xsa.formen( "c");
 			xsa.farben( color );
 			board.receiveMessage(Board.FILTER_PREFIX + "fontsize 18");

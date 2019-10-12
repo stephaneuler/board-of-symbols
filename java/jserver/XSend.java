@@ -161,12 +161,22 @@ public abstract class XSend {
 	public static final int LIGHTYELLOW = 16777184;
 	public static final int IVORY = 16777200;
 	public static final int WHITE = 16777215;
+	public static final int BLACK = 0; 
 	
 	static PrintStream stdout = System.out;
 
 	public Board board = null;
 	public String result = "";
 	private ActionListener listener;
+	private boolean logging;
+
+	public boolean isLogging() {
+		return logging;
+	}
+
+	public void setLogging(boolean logging) {
+		this.logging = logging;
+	}
 
 	/**
 	 * @throws InterruptedException
@@ -197,6 +207,13 @@ public abstract class XSend {
 	public String getResult() {
 		return result;
 	}
+
+	public void log(String message) {
+		if( logging ) {
+			result +=  message;	
+		}
+	}
+
 
 	public void setResult(String result) {
 		this.result = result;

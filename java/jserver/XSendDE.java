@@ -18,95 +18,99 @@ package jserver;
 public abstract class XSendDE extends XSend {
 	
 	public void groesse(int x, int y) {
-		result +=  board.receiveMessage(">>r " + x + " " + y );
+		log( board.receiveMessage(">>resize " + x + " " + y ) );
 	}
 
 	public void hintergrund(int i, int f) {
-		result +=  board.receiveMessage( ">>b " + i + " " + f );
+		log( board.receiveMessage( ">>background " + i + " " + f ) ) ;
 	}
 
 	public void hintergrund2(int i, int j, int f) {
-		result +=  board.receiveMessage(">>#b " + i + " " + j + " " + f );
+		log( board.receiveMessage(">>background2 " + i + " " + j + " " + f ) ) ;
 	}
 
 	public void flaeche(int f) {
-		result +=  board.receiveMessage(">>ba " + f );
+		log( board.receiveMessage(">>ba " + f ) ) ;
 	}
 
 	public void rahmen(int f) {
-		result +=  board.receiveMessage(">>bo " + f );
+		log( board.receiveMessage(">>border " + f ) ) ;
 	}
 
 	public void loeschen() {
-		result +=  board.receiveMessage(">>c");
+		log( board.receiveMessage(">>clear") );
 	}
 
 	public void farben(int f) {
-		result +=  board.receiveMessage(">>a " + f );
+		log( board.receiveMessage(">>colors " + f ) ) ;
 	}
 
 	public  void farbe(int i, int f) {
-		result += board.receiveMessage(  ">>" + i + " " + f );
-	}
-
-	public void grau(int i, int g) {
-		farbe(i, g << 16 | g << 8 | g);
+		log( board.receiveMessage(  ">>color " + i + " " + f ) ) ;
 	}
 
 	public void farbe2(int i, int j, int f) {
-		result +=  board.receiveMessage(">># " + i + " " + j + " " + f );
+		log( board.receiveMessage(">>color2 " + i + " " + j + " " + f ) ) ;
 	}
 
-	public void grau2(int i, int j, int g) {
-		farbe2(i, j, g << 16 | g << 8 | g);
-	}
-
+///	public void grau(int i, int g) {
+//		farbe(i, g << 16 | g << 8 | g);
+//	}
+//
+//	public void grau2(int i, int j, int g) {
+//		farbe2(i, j, g << 16 | g << 8 | g);
+//	}
+//
 	public void formen(String f) {
-		result +=  board.receiveMessage(">>f " + f );
+		log( board.receiveMessage(">>forms " + f ) ) ;
 	}
 
 	public void form(int i, String f) {
-		result +=  board.receiveMessage(">>fi " + i + " " + f );
+		log( board.receiveMessage(">>form " + i + " " + f ) ) ;
 	}
 
 	public void form2(int i, int j, String f) {
-		result +=  board.receiveMessage(">>#fi " + i + " " + j + " " + f );
+		log( board.receiveMessage(">>form2 " + i + " " + j + " " + f ) ) ;
 	}
 
 	public void symbolGroesse(int i, double s) {
-		result +=  board.receiveMessage(">>s " + i + " " + s );
+		log( board.receiveMessage(">>symbolSize " + i + " " + s ) ) ;
 	}
 
 	public void symbolGroesse2(int i, int j, double s) {
-		result +=  board.receiveMessage(">>#s " + i + " " + j + " " + s );
+		log( board.receiveMessage(">>symbolSize2 " + i + " " + j + " " + s ) ) ;
+	}
+
+	public void symbolGroessen( double s) {
+		log( board.receiveMessage(">>symbolSizes "  + s ) ) ;
 	}
 
 	public void text(int i, String f) {
-		result +=  board.receiveMessage(">>T " + i + " " + f );
-	}
-
-	public void textFarbe(int i, int c) {
-		result +=  board.receiveMessage(">>TC " + i + " " + c );
-	}
-
-	public void textFarbe2(int i, int j, int c) {
-		result +=  board.receiveMessage(">>#TC " + i + " " + j + " " + c );
+		log( board.receiveMessage(">>text " + i + " " + f ) ) ;
 	}
 
 	public void text2(int i, int j, String f) {
-		result +=  board.receiveMessage(">>#T " + i + " " + j + " " + f );
+		log( board.receiveMessage(">>text2 " + i + " " + j + " " + f ) ) ;
+	}
+
+	public void textFarbe(int i, int c) {
+		log( board.receiveMessage(">>textColor " + i + " " + c ) ) ;
+	}
+
+	public void textFarbe2(int i, int j, int c) {
+		log( board.receiveMessage(">>textColor2 " + i + " " + j + " " + c ) ) ;
 	}
 
 	public void zeichen(int i, char c) {
-		result +=  board.receiveMessage(">>T " + i + " " + c );
+		log( board.receiveMessage(">>T " + i + " " + c ) ) ;
 	}
 
 	public void zeichen2(int i, int j, char c) {
-		result +=  board.receiveMessage(">>#T " + i + " " + j + " " + c );
+		log( board.receiveMessage(">>#T " + i + " " + j + " " + c ) ) ;
 	}
 
 	public void statusText(String s) {
-		result +=  board.receiveMessage(">>t " + s );
+		log( board.receiveMessage(">>statusText " + s ) ) ;
 	}
 	
 	public String abfragen() {

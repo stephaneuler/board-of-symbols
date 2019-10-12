@@ -16,6 +16,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import plotter.Sleep;
+
 /**
  * This implementation executes Java code.
  * 
@@ -54,9 +56,11 @@ public class CodeExecutorJava extends CodeExecutor {
 
 	@Override
 	public void stopExecution() {
-		// System.out.println("CodeExcecutorJava::stopExecution");
+		// 
+		System.out.println("CodeExcecutorJava::stopExecution");
 		if (sendThread != null) {
-			// System.out.println("CodeExcecutorJava::send interrupt");
+			// 
+			System.out.println("CodeExcecutorJava::send interrupt");
 			sendThread.interrupt();
 		}
 	}
@@ -66,7 +70,7 @@ public class CodeExecutorJava extends CodeExecutor {
 		hasErrors = false;
 		result = new StringBuffer();
 		String line;
-
+		
 		if (verbose) {
 			System.out.println("compileAndExecute fileName: " + fileName);
 		}
@@ -162,7 +166,6 @@ public class CodeExecutorJava extends CodeExecutor {
 			result.append(sb);
 		} catch (MalformedURLException | ClassNotFoundException | IllegalAccessException | IllegalArgumentException
 				| InstantiationException | InvocationTargetException | NoSuchMethodException | SecurityException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 			messageField.append(e1.getMessage() + "\n");
 		}
@@ -235,7 +238,7 @@ public class CodeExecutorJava extends CodeExecutor {
 				// fw.write("import plotter.Sleep;\n");
 
 				fw.write("public class ATest extends XSend" + language + " {" + Board.LS);
-				insertColors(fw);
+//				insertColors(fw);
 				fw.write(Board.LS);
 				fw.write("/**" + Board.LS);
 				fw.write(" * Die methode zum senden der BoS befehle." + Board.LS);

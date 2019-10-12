@@ -40,9 +40,9 @@ public class Dialogs {
 		return reply;
 	}
 
-	public static boolean useCodesXMLStandard(ResourceBundle messages) {
-		int reply = JOptionPane.showConfirmDialog(null, messages.getString("useXMLStandard"),
-				messages.getString("changes"), JOptionPane.YES_NO_OPTION);
+	public static boolean useCodesXMLStandard(ResourceBundle messages, String defaultXMLFileName) {
+		String text = messages.getString("useXMLStandard") + " <" + defaultXMLFileName + ">";
+		int reply = JOptionPane.showConfirmDialog(null, text, messages.getString("changes"), JOptionPane.YES_NO_OPTION);
 
 		return reply == JOptionPane.YES_OPTION;
 	}
@@ -65,6 +65,48 @@ public class Dialogs {
 		}
 	}
 
+	public static String askString(String title) {
+		String message = "Bitte Text eingeben";
+		return JOptionPane.showInputDialog(null, message, title, JOptionPane.QUESTION_MESSAGE);
+	}
+
+	public static int askInteger(String title) {
+		return askInteger(title, 0, 0);
+	}
+
+	public static int askInteger(String title, int lower, int upper) {
+		String message = "Ganze Zahl";
+		String answer = null;
+
+		if (upper > lower) {
+			message += " zwischen " + lower + " und " + upper;
+		}
+		String lastError = "";
+
+		for (int attempt = 0;; ++attempt) {
+			String fullMessage = message;
+			if (attempt > 0) {
+				fullMessage += "\nFehler: " + lastError;
+			}
+			answer = (String) JOptionPane.showInputDialog(null, fullMessage, title, JOptionPane.QUESTION_MESSAGE, null, null,
+					answer);
+			if (answer == null) {
+				lastError = "keine Eingabe";
+				continue;
+			}
+			try {
+				int n = Integer.parseInt(answer);
+				if (upper <= lower | (n >= lower & n < upper)) {
+					return n;
+				} else {
+					lastError = n + ": Außerhalb des Bereichs";
+				}
+			} catch (Exception e) {
+				lastError = "<<" + answer + ">> ist keine Zahl";
+			}
+		}
+	}
+
 	public static String askLanguage() {
 		Properties languages = Board.getAvailableLanguages();
 		JPanel panel = new JPanel();
@@ -73,15 +115,15 @@ public class Dialogs {
 		Set<Entry<Object, Object>> entries = languages.entrySet();
 		for (Entry<Object, Object> entry : entries) {
 			JCheckBox b = new JCheckBox((String) entry.getKey());
-			if( entry.getValue().equals("en_US")) {
+			if (entry.getValue().equals("en_US")) {
 				b.setSelected(true);
 			}
-			b.setActionCommand( (String) entry.getValue() ); 
+			b.setActionCommand((String) entry.getValue());
 			panel.add(b);
 			buttonGroup.add(b);
 		}
 		JOptionPane.showConfirmDialog(null, panel, "Language", JOptionPane.DEFAULT_OPTION);
-		if( buttonGroup.getSelection() != null ) {
+		if (buttonGroup.getSelection() != null) {
 			return buttonGroup.getSelection().getActionCommand();
 		} else {
 			return "en_US";

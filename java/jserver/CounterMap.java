@@ -37,8 +37,8 @@ public class CounterMap<T> {
 	public int size() {
 		return counter.size();
 	}
-	
+
 	public Set<Entry<T, Integer>> getSet() {
-	 return counter.entrySet();
+		return counter.entrySet();
 	}
 }

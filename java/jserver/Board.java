@@ -24,6 +24,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -46,6 +48,10 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 //import jdk.nashorn.internal.runtime.regexp.joni.constants.CCVALTYPE;
@@ -86,6 +92,7 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 	public static final int BIG_BOARD_SIZE = 30;
 	public static final String FILTER_PREFIX = ">>";
 	public static final String LS = System.lineSeparator();
+	public static final String FS = System.getProperty("file.separator");
 
 	private static final String formPrefix = "FORM_";
 
@@ -109,6 +116,7 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 	private static String analyseBoardText = "Analyse";
 	private static String serialiseBoardText = "Serialise";
 	private static String numberingText;
+	private static String symbolSizeText;
 	private static String linNumberingText = "linNum";
 	private static String alphaText;
 	private static String sendText;
@@ -117,10 +125,13 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 	private static String helpFormText;
 	private static String helpFunctionText;
 	private static String helpEnvText = "Java info";
+	private static String helpPropertiesText;
 	private static String showText = "show events";
+	private static String startServeText = "Start server";
 
 	private Graphic graphic;
 	private Plotter plotter;
+	private JServer jserver;
 	private boolean examMode = false;
 	private double radius = DEFAULT_SYMBOL_SIZE;
 	private int symbolFontSize = Symbol.getFontSize();
@@ -147,6 +158,8 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 	private Trainer trainer;
 	private InfoBox commandInfo;
 	private FontSelector fontSelector;
+	private Map<String, String> lookAndFeels = new HashMap<>();
+	private BoardCloser boardCloser;
 
 	private String propertieFile = "board.properties";
 	private String language = "de";
@@ -158,11 +171,20 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 	private int maxOutOfRange;
 	private int outOfRangeCount;
 
-	private List<String> messageHistory = new LinkedList<>();
+	private List<String> messageHistory = Collections.synchronizedList( new LinkedList<>() );
 	private List<ActionListener> commandListener = new ArrayList<>();
 	private BoardModel boardModel = new BoardModel();
 	private BoardAnalyser boardAnalyser;
 	private InfoBox analyserInfo = null;
+	private boolean saveMessages = true;
+
+	public boolean isSaveMessages() {
+		return saveMessages;
+	}
+
+	public void setSaveMessages(boolean saveMessages) {
+		this.saveMessages = saveMessages;
+	}
 
 	public BoardModel getBoardModel() {
 		return boardModel;
@@ -203,6 +225,15 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 			e.printStackTrace();
 		}
 
+		if (properties.containsKey("lookAndFeel")) {
+			try {
+				UIManager.setLookAndFeel(properties.getProperty("lookAndFeel"));
+			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+					| UnsupportedLookAndFeelException e1) {
+				JOptionPane.showMessageDialog(graphic, e1.toString(), "Look & Feel", JOptionPane.ERROR_MESSAGE);
+			}
+
+		}
 		loadMessages();
 		setStrings();
 		SymbolType.setSymbolTexts(messages.getBundle());
@@ -214,23 +245,8 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 		plotter = graphic.getPlotter();
 
 		graphic.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		graphic.addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent e) {
-				if (codeWindow != null) {
-					codeWindow.savePosition();
-					if (codeWindow.isCodeHasChanged()) {
-						int reply = Dialogs.codeHasChangedDialog(messages.getBundle());
-						if (reply == JOptionPane.NO_OPTION) {
-							return;
-						}
-					}
-				}
-				addRecentFilesToProperties();
-				saveProperties();
-				System.exit(0);
-			}
-
-		});
+		boardCloser = new BoardCloser(this);
+		graphic.addWindowListener(boardCloser);
 
 		String title = "Board, " + messages.getString("boardVersion");
 
@@ -255,9 +271,9 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 			if (colorText != null) {
 				Symbol.setNumberTextColor(new Color(parseColor(colorText)));
 			}
-			 colorText = properties.getProperty("symbolColor");
+			colorText = properties.getProperty("symbolColor");
 			if (colorText != null) {
-				Symbol.setBoSColor( new Color(parseColor(colorText)));
+				Symbol.setBoSColor(new Color(parseColor(colorText)));
 			}
 		}
 
@@ -291,25 +307,7 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 			graphic.addBottomComponent(waitingCommands);
 		}
 
-		graphic.removeDataMenu();
-		graphic.addExternMenu(myBoardMenu());
-		graphic.addExternMenu(myFormMenu());
-		graphic.addExternMenu(myOptionsMenu());
-		graphic.addExternMenu(Box.createHorizontalGlue());
-		graphic.addExternMenu(myHelpMenu());
-
-		JMenu fileMenu = graphic.getFileMenu();
-		// Utils.addMenuItem(this, fileMenu, hashCodeText,
-		// messages.getString("tooltip.hashCode"));
-
-		fileMenu.addSeparator();
-		Utils.addMenuItem(this, fileMenu, trainingText, "Start Trainer", "control T");
-		Utils.addMenuItem(this, fileMenu, importImageText);
-		fileMenu.addSeparator();
-		Utils.addMenuItem(this, fileMenu, historyText);
-		Utils.addMenuItem(this, fileMenu, clearHistoryText);
-		Utils.addMenuItem(this, fileMenu, analyseBoardText);
-		Utils.addMenuItem(this, fileMenu, serialiseBoardText);
+		setMenus();
 
 		setStatusLineInfo();
 		plotter.addMouseListener(this);
@@ -357,6 +355,7 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 		clearHistoryText = messages.getString("clearCommandHistory");
 
 		numberingText = Utils.concat(messages, "numbering", "onOff");
+		symbolSizeText = messages.getString("symbolSize");
 		alphaText = "Alpha " + messages.getString("value");
 		sendText = messages.getString("send");
 		helpFormText = messages.getString("forms");
@@ -364,6 +363,7 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 		colorText = messages.getString("symbolColor");
 		numberColorText = messages.getString("numberColor");
 
+		helpPropertiesText = messages.getString("properties");
 	}
 
 	/**
@@ -442,6 +442,30 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 		}
 	}
 
+	private void setMenus() {
+		graphic.removeDataMenu();
+		graphic.addExternMenu(myBoardMenu());
+		graphic.addExternMenu(myFormMenu());
+		graphic.addExternMenu(myOptionsMenu());
+		graphic.addExternMenu(Box.createHorizontalGlue());
+		graphic.addExternMenu(myHelpMenu());
+
+		extendFileMenu(graphic.getFileMenu());
+	}
+
+	private void extendFileMenu(JMenu fileMenu) {
+		fileMenu.addSeparator();
+		Utils.addMenuItem(this, fileMenu, trainingText, "Start Trainer", "control T");
+		Utils.addMenuItem(this, fileMenu, importImageText);
+		fileMenu.addSeparator();
+		Utils.addMenuItem(this, fileMenu, historyText);
+		Utils.addMenuItem(this, fileMenu, clearHistoryText);
+		Utils.addMenuItem(this, fileMenu, analyseBoardText);
+		Utils.addMenuItem(this, fileMenu, serialiseBoardText);
+		Utils.addMenuItem(this, fileMenu, startServeText);
+
+	}
+
 	private JMenu myFormMenu() {
 		JMenu menu = new JMenu(messages.getString("forms"));
 		for (SymbolType type : SymbolType.values()) {
@@ -450,48 +474,13 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 		}
 
 		menu.addSeparator();
-		Utils.addMenuItem(this, menu, numberingText, "Nummerierung der Elemente anzeigen", "alt N");
+		Utils.addMenuItem(this, menu, numberingText, messages.getString("tooltip.numbering"), "alt N");
+		Utils.addMenuItem(this, menu, symbolSizeText,  messages.getString("tooltip.symbolSize") );
 
 		alphaMenuItem = Utils.addMenuItem(this, menu, alphaText, "Alpha Wert für  Transparenz (Durchsichtigkeit)");
 		alphaMenuItem.setEnabled(Symbol.isNumbering());
 
 		return menu;
-	}
-
-	private JMenu myOptionsMenu() {
-		JMenu menu = new JMenu(messages.getString("options"));
-
-		Properties languages = getAvailableLanguages();
-		for (String key : languages.stringPropertyNames()) {
-			JMenuItem mi = Utils.addMenuItem(this, menu, key);
-			mi.setActionCommand("LANG_" + languages.getProperty(key));
-		}
-		linNumberingItem = new JCheckBoxMenuItem(linNumberingText, Symbol.isLinearNumbering());
-		linNumberingItem.addActionListener(this);
-		menu.add(linNumberingItem);
-		Utils.addMenuItem(this, menu, colorText);
-		Utils.addMenuItem(this, menu, numberColorText);
-		return menu;
-	}
-
-	static Properties getAvailableLanguages() {
-		Properties languages = new Properties();
-		String languagesFile = "config/languages.properties";
-		try {
-			InputStream stream;
-			stream = ClassLoader.getSystemClassLoader().getResourceAsStream(languagesFile);
-			if (stream == null) {
-				System.out.println("property file " + languagesFile + " not found");
-				languages.setProperty("Deutsch", "de_DE");
-				languages.setProperty("English (US)", "en_US");
-			} else {
-				languages.load(stream);
-				stream.close();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return languages;
 	}
 
 	private JMenu myBoardMenu() {
@@ -519,14 +508,61 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 		return menu;
 	}
 
+	private JMenu myOptionsMenu() {
+		JMenu menu = new JMenu(messages.getString("options"));
+
+		Properties languages = getAvailableLanguages();
+		for (String key : languages.stringPropertyNames()) {
+			JMenuItem mi = Utils.addMenuItem(this, menu, key);
+			mi.setActionCommand("LANG_" + languages.getProperty(key));
+		}
+		linNumberingItem = new JCheckBoxMenuItem(linNumberingText, Symbol.isLinearNumbering());
+		linNumberingItem.addActionListener(this);
+		menu.add(linNumberingItem);
+		Utils.addMenuItem(this, menu, colorText);
+		Utils.addMenuItem(this, menu, numberColorText);
+
+		JMenu lookAndFeelsMenu = new JMenu("Look & Feel");
+		LookAndFeelInfo[] plafs = UIManager.getInstalledLookAndFeels();
+		for (LookAndFeelInfo info : plafs) {
+			// System.out.println(info.getName());
+			lookAndFeels.put(info.getName(), info.getClassName());
+			Utils.addMenuItem(this, lookAndFeelsMenu, info.getName());
+		}
+		menu.add(lookAndFeelsMenu);
+
+		return menu;
+	}
+
 	private JMenu myHelpMenu() {
 		JMenu menu = new JMenu(messages.getString("help"));
 
 		Utils.addMenuItem(this, menu, helpFormText);
 		Utils.addMenuItem(this, menu, helpFunctionText);
 		Utils.addMenuItem(this, menu, helpEnvText);
+		Utils.addMenuItem(this, menu, helpPropertiesText);
 
 		return menu;
+	}
+
+	static Properties getAvailableLanguages() {
+		Properties languages = new Properties();
+		String languagesFile = "config/languages.properties";
+		try {
+			InputStream stream;
+			stream = ClassLoader.getSystemClassLoader().getResourceAsStream(languagesFile);
+			if (stream == null) {
+				System.out.println("property file " + languagesFile + " not found");
+				languages.setProperty("Deutsch", "de_DE");
+				languages.setProperty("English (US)", "en_US");
+			} else {
+				languages.load(stream);
+				stream.close();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return languages;
 	}
 
 	/**
@@ -535,12 +571,7 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
-				try {
-					Board b = new Board();
-					// b.receiveMessage("T 4 test &#x00C2; &#x00Cf; ");
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				new Board();
 			}
 		});
 	}
@@ -572,7 +603,9 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 				return null;
 			}
 		}
-		messageHistory.add(line);
+		if (saveMessages) {
+			messageHistory.add(line);
+		}
 
 		if (!userDefinedStatusLine) {
 			plotter.setStatusLine(info);
@@ -686,32 +719,31 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 			return "okay";
 		}
 
-		if (line.equals("c")) {
+		if (line.equals("c") | line.equals("clear")) {
 			actionPerformed(new ActionEvent(this, 0, clearColorsText));
 			graphic.repaint();
 			return "okay";
 		}
 
-		// set forms
-		if (line.startsWith("f ")) {
-			SymbolType s = SymbolType.getTypeFromShortName(line.substring(2));
+		// set forms, first test with alternative BoSL command
+		if (line.startsWith("f ") | line.startsWith("forms ") ) {
+			SymbolType s = SymbolType.getTypeFromShortName(p[1]);
 			if (s == null) {
-				return "Error: unknown form";
+				return "Error: unknown form " + line.substring(2);
 			}
 			setNewSymbolType(s);
 			graphic.repaint();
 			return "okay";
 		}
 
-		// set forms
-		if (line.startsWith("fi")) {
+		// set forms i
+		if (line.startsWith("fi")  | line.startsWith("form ")) {
 			if (p.length != 3) {
 				return "ERROR - " + p.length + " args, should be  2";
 			}
 			SymbolType s = SymbolType.getTypeFromShortName(p[2]);
 			if (s == null) {
-				System.out.println("Error: unknown form: " + p[2]);
-				return "Error: unknown form";
+				return "Error: unknown form: " + p[2];
 			}
 			int index = Integer.parseInt(p[1]);
 			if (index < 0 | index >= nSymbols) {
@@ -720,12 +752,11 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 			}
 			symbols.get(index).setType(s);
 			redrawSymbol(symbols.get(index));
-			// redrawSymbols();
 			return "okay";
 		}
 
-		// set forms
-		if (line.startsWith("#fi")) {
+		// set forms xy
+		if (line.startsWith("#fi")  | line.startsWith("form2 ") ) {
 			if (p.length != 4) {
 				return "ERROR - " + p.length + " args, should be  4";
 			}
@@ -739,7 +770,6 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 			}
 			symbols.get(index).setType(s);
 			redrawSymbol(symbols.get(index));
-			// redrawSymbols();
 			return "okay";
 		}
 
@@ -754,41 +784,36 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 		}
 
 		// resize form
-		if (line.startsWith("s ")) {
-			// System.out.println("Size: " + line);
+		if (line.startsWith("s " )  | line.startsWith("symbolSize ")  ) {
+			if (p.length != 3) {
+				return "ERROR - " + p.length + " args, should be  3";
+			}
 			int index = Integer.parseInt(p[1]);
 			if (index < 0 | index >= nSymbols) {
 				updateOutOfRange(index);
 				return "ERROR - " + index + " out of range\n ";
 			}
-			if (p.length != 3) {
-				return "ERROR - " + p.length + " args, should be  3";
-			}
-			double size = Double.parseDouble(p[2]);
-			symbols.get(index).setSize(size);
-			redrawSymbol(symbols.get(index));
+			updateSymbolSize(index, p[2]);
 			return "okay";
 
 		}
 
 		// resize form
-		if (line.startsWith("#s")) {
+		if (line.startsWith("#s")  | line.startsWith("symbolSize2 ") ) {
+			if (p.length != 4) {
+				return "ERROR - " + p.length + " args, should be  3";
+			}
 			int index = indexFromColRow(p[1], p[2]);
 			if (index < 0 | index >= nSymbols) {
 				return rangeError(p);
 			}
-			if (p.length != 4) {
-				return "ERROR - " + p.length + " args, should be  3";
-			}
-			double size = Double.parseDouble(p[3]);
-			symbols.get(index).setSize(size);
-			redrawSymbol(symbols.get(index));
+			updateSymbolSize(index, p[3]);
 			return "okay";
 
 		}
 
 		// resize board
-		if (line.startsWith("r ")) {
+		if (line.startsWith("r ") | line.startsWith("resize ") ) {
 			if (p.length != 3) {
 				return "ERROR - " + p.length + " args, should be  2";
 			}
@@ -810,8 +835,8 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 			return "okay";
 		}
 
-		if (line.startsWith("t ")) {
-			plotter.setStatusLine(line.substring(2));
+		if (line.startsWith("t ")  | line.startsWith("statusText ")  ) {
+			plotter.setStatusLine(line.substring( line.indexOf(" ") ));
 			userDefinedStatusLine = true;
 			graphic.repaint();
 			return "okay";
@@ -823,88 +848,68 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 			return "okay";
 		}
 
-		if (line.startsWith("bo ")) {
+		if (line.startsWith("bo ") | line.startsWith("border ")) {
 			plotter.setBorderColor(new Color(parseColor(p[1])));
 			graphic.repaint();
 			return "okay";
 		}
 
-		if (line.startsWith("b ")) {
+		if (line.startsWith("b ")  | line.startsWith("background ") ) {
 			int index = Integer.parseInt(p[1]);
 			if (index < 0 | index >= nSymbols) {
 				updateOutOfRange(index);
 				return "ERROR - " + index + " out of range\n ";
 			}
-			int icolor = parseColor(p[2]);
-			if (icolor >= 0) {
-				symbols.get(index).setHintergrund(new Color(icolor));
-			} else {
-				symbols.get(index).clearHintergrund();
-			}
-			symbols.get(index).zeichnen(plotter);
-			graphic.repaint();
+			updateSymbolBackgroundColor( index, p[2]);
 			return "okay";
 		}
 
-		if (line.startsWith("#b ")) {
+		if (line.startsWith("#b ")  | line.startsWith("background2 ") ) {
 			int index = indexFromColRow(p[1], p[2]);
 			if (index < 0 | index >= nSymbols) {
 				return rangeError(p);
 			}
-			int icolor = parseColor(p[3]);
-			if (icolor >= 0) {
-				symbols.get(index).setHintergrund(new Color(icolor));
-			} else {
-				symbols.get(index).clearHintergrund();
-			}
-			symbols.get(index).zeichnen(plotter);
-			graphic.repaint();
+			updateSymbolBackgroundColor( index, p[3]);
 			return "okay";
 		}
 
-		if (line.startsWith("T ")) {
+		if (line.startsWith("T ")  | line.startsWith("text ") ) {
 			int index = Integer.parseInt(p[1]);
 			if (index < 0 | index >= nSymbols) {
 				updateOutOfRange(index);
 				return "ERROR - " + index + " out of range\n ";
 			}
 			String[] p2 = line.split("\\s+", 3);
-			if (p2.length >= 3) {
-				symbols.get(index).setText(decodeUni(p2[2]));
-			} else {
-				symbols.get(index).setText("");
-			}
-			symbols.get(index).zeichnen(plotter);
-			graphic.repaint();
+			updateSymbolText( index, p2, 3 );
 			return "okay";
 		}
 
-		if (line.startsWith("#T ")) {
+		if (line.startsWith("#T ")  | line.startsWith("text2 ") ) {
 			int index = indexFromColRow(p[1], p[2]);
 			if (index < 0 | index >= nSymbols) {
 				return rangeError(p);
 			}
 			String[] p2 = line.split("\\s+", 4);
-			if (p2.length >= 4) {
-				symbols.get(index).setText(decodeUni(p2[3]));
-			} else {
-				symbols.get(index).setText("");
-			}
-			symbols.get(index).zeichnen(plotter);
-			graphic.repaint();
+			updateSymbolText( index, p2, 4 );
 			return "okay";
 		}
 
-		if (line.startsWith("TC ")) {
+		if (line.startsWith("textColor ")) {
 			int index = Integer.parseInt(p[1]);
 			if (index < 0 | index >= nSymbols) {
 				updateOutOfRange(index);
 				return "ERROR - " + index + " out of range\n ";
 			}
-			int icolor = parseColor(p[2]);
-			symbols.get(index).setTextFarbe(new Color(icolor));
-			symbols.get(index).zeichnen(plotter);
-			graphic.repaint();
+			updateSymbolTextColor( index, p[2] );
+			return "okay";
+		}
+
+		if (line.startsWith("textColor2 ")) {
+			int index = indexFromColRow(p[1], p[2]);
+			if (index < 0 | index >= nSymbols) {
+				return rangeError(p);
+			}
+			updateSymbolTextColor( index, p[3] );
 			return "okay";
 		}
 
@@ -926,33 +931,34 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 			return "okay";
 		}
 
-		if (line.startsWith("#TC ")) {
-			int index = indexFromColRow(p[1], p[2]);
-			if (index < 0 | index >= nSymbols) {
-				return rangeError(p);
-			}
-			int icolor = parseColor(p[3]);
-			symbols.get(index).setTextFarbe(new Color(icolor));
-			symbols.get(index).zeichnen(plotter);
-			graphic.repaint();
-			return "okay";
-		}
-
-		if (line.startsWith("a ")) {
+		if (line.startsWith("a ") | line.startsWith("colors ") ) {
 			for (int i = 0; i < symbols.size(); i++) {
-				updateSymbol(i, p[1]);
+				updateSymbolColor(i, p[1]);
 			}
 			graphic.repaint();
 			return "okay";
 		}
 
-		if (line.startsWith("# ")) {
+		if ( line.startsWith("color ")  ) {
+			int index = Integer.parseInt(p[1]);
+			if (index < 0 | index >= nSymbols) {
+				updateOutOfRange(index);
+				return "ERROR - " + index + " out of range\n ";
+			}
+			if( updateSymbolColor(index, p[2])) {
+				graphic.repaint();
+			}
+			return "okay";
+		}
+
+		if (line.startsWith("# ")  | line.startsWith("color2 ")  ) {
 			int index = indexFromColRow(p[1], p[2]);
 			if (index < 0 | index >= nSymbols) {
 				return rangeError(p);
 			}
-			if (updateSymbol(index, p[3]))
+			if (updateSymbolColor(index, p[3])) {
 				graphic.repaint();
+			}
 
 			return "okay";
 		}
@@ -970,7 +976,7 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 					updateOutOfRange(index);
 					return "ERROR - " + index + " out of range\n ";
 				}
-				change = updateSymbol(index, p[n + 1]) | change;
+				change = updateSymbolColor(index, p[n + 1]) | change;
 			}
 			if (change) {
 				// System.out.print("+");
@@ -986,6 +992,40 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 
 	}
 
+	private void updateSymbolText(int index, String[] p2, int textIndex) {
+		if (p2.length >= textIndex) {
+			symbols.get(index).setText(decodeUni(p2[textIndex-1]));
+		} else {
+			symbols.get(index).setText("");
+		}
+		symbols.get(index).zeichnen(plotter);
+		graphic.repaint();
+	}
+
+	private void updateSymbolTextColor(int index, String string) {
+		int icolor = parseColor( string );
+		symbols.get(index).setTextFarbe(new Color(icolor));
+		symbols.get(index).zeichnen(plotter);
+		graphic.repaint();
+	}
+
+	private void updateSymbolSize(int index, String string) {
+		double size = Double.parseDouble( string );
+		symbols.get(index).setSize(size);
+		redrawSymbol(symbols.get(index));
+	}
+
+	private void updateSymbolBackgroundColor(int index, String string) {
+		int icolor = parseColor( string);
+		if (icolor >= 0) {
+			symbols.get(index).setHintergrund(new Color(icolor));
+		} else {
+			symbols.get(index).clearHintergrund();
+		}
+		symbols.get(index).zeichnen(plotter);
+		graphic.repaint();
+	}
+
 	private String rangeError(String[] p) {
 		return "ERROR -  (" + Integer.parseInt(p[1]) + "," + Integer.parseInt(p[2]) + ") out of range\n";
 	}
@@ -998,7 +1038,7 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 	private int indexFromColRow(String s1, String s2) {
 		int col = Integer.parseInt(s1);
 		int row = Integer.parseInt(s2);
-		if (col >= boardModel.getColumns() | row >= boardModel.getColumns()) {
+		if (col >= boardModel.getColumns() | row >= boardModel.getRows()) {
 			updateOutOfRange(col + row * boardModel.getColumns());
 			return -1;
 		} else {
@@ -1023,12 +1063,12 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 		graphic.repaint();
 	}
 
-	private boolean updateSymbol(int index, String colorString) {
+	private boolean updateSymbolColor(int index, String colorString) {
 		int colorInt = parseColor(colorString);
-		return updateSymbol(index, colorInt);
+		return updateSymbolColor(index, colorInt);
 	}
 
-	private boolean updateSymbol(int index, int colorInt) {
+	private boolean updateSymbolColor(int index, int colorInt) {
 		Color color = new Color(colorInt);
 		if (color.equals(symbols.get(index).getFarbe())) {
 			return false;
@@ -1040,13 +1080,11 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 	}
 
 	public static int parseColor(String colorString) {
-		int color = 0;
 		if (colorString.startsWith("0x")) {
-			color = Integer.parseInt(colorString.substring(2), 16);
+			return Integer.parseInt(colorString.substring(2), 16);
 		} else {
-			color = Integer.parseInt(colorString);
+			return Integer.parseInt(colorString);
 		}
-		return color;
 	}
 
 	@Override
@@ -1103,6 +1141,17 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 				redrawSymbols();
 			}
 
+		} else if (cmd.equals(symbolSizeText)) {
+			String a = JOptionPane.showInputDialog(graphic, messages.getString("tooltip.symbolSize"),
+					"" + 0.5);
+			if (a != null) {
+				double size = Double.parseDouble(a);
+				for (Symbol s : symbols) {
+					s.setSize(size);
+				}
+				redrawSymbols();
+			}
+			
 		} else if (cmd.equals(numberingText)) {
 			Symbol.toggleNumbering();
 			if (!Symbol.isNumbering()) {
@@ -1110,6 +1159,7 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 			}
 			redrawSymbols();
 			alphaMenuItem.setEnabled(Symbol.isNumbering());
+			
 		} else if (cmd.equals(growText)) {
 			boardModel.incColumns(1);
 			boardModel.incRows(1);
@@ -1132,7 +1182,7 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 			graphic.repaint();
 		} else if (cmd.equals(rowText)) {
 			String a = JOptionPane.showInputDialog(graphic, messages.getString("tooltip.rows"),
-					new Integer(boardModel.getRows()));
+					"" +boardModel.getRows());
 			if (a != null) {
 				boardModel.setRows(Integer.parseInt(a));
 				drawSymbols();
@@ -1141,7 +1191,7 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 			}
 		} else if (cmd.equals(colText)) {
 			String a = JOptionPane.showInputDialog(graphic, messages.getString("tooltip.columns"),
-					new Integer(boardModel.getColumns()));
+					""+ boardModel.getColumns() );
 			if (a != null) {
 				boardModel.setColumns(Integer.parseInt(a));
 				drawSymbols();
@@ -1256,6 +1306,21 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 				}
 			}
 
+		} else if (lookAndFeels.containsKey(cmd)) {
+			try {
+				UIManager.setLookAndFeel(lookAndFeels.get(cmd));
+				properties.setProperty("lookAndFeel", lookAndFeels.get(cmd));
+				SwingUtilities.updateComponentTreeUI(graphic);
+				graphic.pack();
+				if (codeWindow != null) {
+					SwingUtilities.updateComponentTreeUI(codeWindow);
+					codeWindow.pack();
+				}
+			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+					| UnsupportedLookAndFeelException e) {
+				e.printStackTrace();
+			}
+
 		} else if (cmd.equals(numberColorText)) {
 			Color c = Symbol.getNumberTextColor();
 			int v = c.getRed() * 256 * 256 + c.getGreen() * 256 + c.getBlue();
@@ -1293,6 +1358,13 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 			info.setTitle(messages.getString("Java info"));
 			info.setIconImage(Dialogs.infoImage);
 			info.getTextArea().setText(Utils.getJavaHelp());
+			info.setVisible(true);
+
+		} else if (cmd.equals(helpPropertiesText)) {
+			InfoBox info = new InfoBox(graphic, "", 400, 300);
+			info.setTitle(messages.getString("properties"));
+			info.setIconImage(Dialogs.infoImage);
+			info.getTextArea().setText( Utils.toText( properties ) );
 			info.setVisible(true);
 
 		} else if (cmd.equals(clearHistoryText)) {
@@ -1350,6 +1422,15 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 			}
 			analyserInfo.getTextArea().setText(text);
 			analyserInfo.setVisible(true);
+
+		} else if (cmd.equals(startServeText)) {
+			if (jserver == null) {
+				jserver = new JServer(this);
+				JOptionPane.showMessageDialog(null, "Server started", "JServer", JOptionPane.INFORMATION_MESSAGE);
+			} else {
+				JOptionPane.showMessageDialog(null, "Server ist already running", "JServer",
+						JOptionPane.INFORMATION_MESSAGE);
+			}
 
 		} else if (cmd.equals(serialiseBoardText)) {
 			InfoBox serialiseInfo = new InfoBox(graphic, "", 400, 500);
@@ -1466,7 +1547,7 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 
 	}
 
-	private void addRecentFilesToProperties() {
+	void addRecentFilesToProperties() {
 		if (codeWindow != null) {
 			List<String> fileNames = codeWindow.getRecentFiles();
 			for (int i = 0; i < fileNames.size(); i++) {
@@ -1636,6 +1717,15 @@ public class Board extends Adapters implements ActionListener, MouseListener, Ke
 		String message = "$ " + e.getKeyCode() + " " + KeyEvent.getKeyText(e.getKeyCode());
 		// System.out.println(message);
 		addCommand(message);
+	}
+
+	public void removeBoardCloser() {
+		graphic.removeWindowListener(boardCloser);
+
+	}
+
+	public void showCodingWindow() {
+		codeWindow = new CodeWindow(this);
 	}
 
 }

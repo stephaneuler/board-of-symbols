@@ -19,6 +19,11 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -55,7 +60,6 @@ import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Caret;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.Document;
 import javax.swing.undo.CannotRedoException;
@@ -67,6 +71,7 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import jserver.Analyser.Task;
 import plotter.InfoBox;
 import plotter.Sleep;
 
@@ -116,6 +121,7 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 	private static String removeEmptyLinesText;
 	private static String replaceText = "ersetzen";
 	private static String editNewSnippetText;
+	private static String editCloneSnippetText = "clone";
 	private static String editNewCompleteSnippetText = "new c";
 	private static String editNewInteractiveSnippetText = "new i";
 	private static String deleteSnippetText;
@@ -200,7 +206,7 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 		if (properties.getProperty("author") != null) {
 			authorName = properties.getProperty("author");
 		}
-		resetOnStart = Boolean.parseBoolean(properties.getProperty("resetOnStart"));
+		resetOnStart = Boolean.parseBoolean(properties.getProperty("resetOnStart" , "true" ) );
 
 		fileOpenDirectory = properties.getProperty("codeDir");
 		if (fileOpenDirectory != null) {
@@ -278,8 +284,9 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 
 	private String getXMLFile(boolean askDefault) {
 		String fileName;
-		if (askDefault && Dialogs.useCodesXMLStandard(messages.getBundle())) {
-			fileName = "codes.xml";
+		String defaultXMLFileName = "codes.xml";
+		if (askDefault && Dialogs.useCodesXMLStandard(messages.getBundle(), defaultXMLFileName)) {
+			fileName = defaultXMLFileName;
 		} else {
 			fileName = askCodeFileName();
 		}
@@ -289,11 +296,12 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 	private String readXMLFile(String fileName) {
 		File file = new File(fileName);
 		codeDB.setXmlFile(file);
-		if (!file.exists()) {
+		if (! file.exists()) {
 			String text = messages.getString("file") + " " + fileName + " " + messages.getString("created");
 			JOptionPane.showMessageDialog(this, text, messages.getString("readCodes"), JOptionPane.INFORMATION_MESSAGE);
 			codeDB.createDocument();
 			codeDB.writeXML();
+			codeInput.setText("");
 		}
 		if (file.getParent() != null) {
 			properties.setProperty("codeDir", file.getParent());
@@ -317,6 +325,10 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 		}
 
 		return text;
+	}
+
+	public JTextArea getMessageField() {
+		return messageField;
 	}
 
 	private String askCodeFileName() {
@@ -344,18 +356,6 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 
 	}
 
-	private String guessJDKVersion(String pathname) {
-		int n = pathname.indexOf("jdk-");
-		if (n >= 0) {
-			return pathname.substring(n);
-		}
-		n = pathname.indexOf("jdk");
-		if (n >= 0) {
-			return pathname.substring(n);
-		}
-		return "??";
-	}
-
 	void savePosition() {
 		properties.setProperty("codeWindowPosX", "" + getBounds().x);
 		properties.setProperty("codeWindowPosY", "" + getBounds().y);
@@ -378,14 +378,17 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 	}
 
 	private void setup(String string) {
+		int messageType;
 		if (XMLFileName != null) {
 			codeDB.setXmlFile(new File(fileOpenDirectory, XMLFileName));
-		} 
-		//readXMLFile(XMLFileName);
+			messageType = JOptionPane.ERROR_MESSAGE;
+		} else {
+			messageType = JOptionPane.INFORMATION_MESSAGE;
+		}
 		try {
 			codeDB.readXML();
 		} catch (ParserConfigurationException | SAXException | IOException e1) {
-			JOptionPane.showMessageDialog(this, getExceptionText(e1), messages.getString("readCodeFile"), JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(this, getExceptionText(e1), messages.getString("readCodeFile"), messageType);
 			String newFileName = getXMLFile(true);
 			if (newFileName == null)
 				return;
@@ -471,6 +474,8 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 						break;
 					}
 				}
+			} else {
+				codeInput.setText("");
 			}
 		}
 
@@ -646,6 +651,7 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 
 		menuCompile.addSeparator();
 		Utils.addMenuItem(this, menuCompile, editNewSnippetText, messages.getString("tooltip.newSnippet"), "control N");
+		Utils.addMenuItem(this, menuCompile, editCloneSnippetText);
 		Utils.addMenuItem(this, menuCompile, editNewCompleteSnippetText,
 				messages.getString("tooltip.newCompleteSnippet"));
 		Utils.addMenuItem(this, menuCompile, editNewInteractiveSnippetText);
@@ -769,10 +775,18 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 			if (resetOnStart) {
 				board.reset();
 			}
-			SwingWorker<Boolean, Void> worker = new CodeRunner<Boolean, Void>();
 			runButton.setEnabled(false);
 			stopButton.setEnabled(true);
-			worker.execute();
+ 			SwingWorker<Boolean, Void> worker = new CodeRunner<Boolean, Void>();
+ 			worker.execute();
+//			ExecutorService executor = Executors.newSingleThreadExecutor();
+//			Future<String> future = executor.submit(new Task());
+//			try {
+//				System.out.println( future.get() );
+//			} catch (InterruptedException | ExecutionException e) {
+//				e.printStackTrace();
+//			}
+
 
 		} else if (cmd.equals(stopText)) {
 			codeExecutor.stopExecution();
@@ -783,7 +797,7 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 			messageField.setText(result);
 
 		} else if (cmd.equals(editNewSnippetText) || cmd.equals(editNewCompleteSnippetText)
-				|| cmd.equals(editNewInteractiveSnippetText)) {
+				|| cmd.equals(editNewInteractiveSnippetText) || cmd.equals(editCloneSnippetText)) {
 			if (codeHasChanged) {
 				int reply = Dialogs.codeHasChangedDialog(messages.getBundle());
 				if (reply == JOptionPane.NO_OPTION) {
@@ -794,6 +808,8 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 				codeInput.setText(codeExecutor.getCompleteTemplate());
 			} else if (cmd.equals(editNewInteractiveSnippetText)) {
 				codeInput.setText(codeExecutor.getInteractiveTemplate());
+			} else if (cmd.equals(editCloneSnippetText) ) {
+				codeInput.setText( "// Clone " + Board.LS + codeInput.getText() );
 			} else {
 				codeInput.setText("");
 			}
@@ -818,7 +834,9 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 			String selectedSnippetName = (String) cb.getSelectedItem();
 			// System.out.println("combo: " + selectedSnippetName);
 			snippetName = parseSnippetSelectorText(selectedSnippetName);
-			codeInput.setText(codeDB.getSnippetCode(snippetName));
+			if( codeDB.getSnippetCode(snippetName) != null ) {
+				codeInput.setText(codeDB.getSnippetCode(snippetName));
+			}
 			codeInput.setCaretPosition(0);
 			saveButton.setEnabled(true);
 			codeHasChanged = false;
@@ -882,6 +900,7 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 				infoText += "Dir: .\n";
 			}
 			infoText += "File: " + codeDB.getXMLFileName() + "\n";
+			infoText += "Path: " + new File( codeDB.getXMLFileName() ).getAbsolutePath() + "\n";
 
 			if (snippetName == null) {
 				infoText += "No snippet loaded";
@@ -979,19 +998,16 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 			Font font = new Font("Consolas", Font.PLAIN, ++fontSize);
 			codeInput.setFont(font);
 			messageField.setFont(font);
-			// updateInfoLabel();
 
 		} else if (cmd.equals(fontDecText)) {
 			Font font = new Font("Consolas", Font.PLAIN, --fontSize);
 			codeInput.setFont(font);
 			messageField.setFont(font);
-			// updateInfoLabel(); // verändert größe der Fenster ???
 
 		} else if (cmd.equals(bigFontText)) {
 			fontSize = bigFontSize;
 			codeInput.setFont(bigFont);
 			messageField.setFont(bigFont);
-			// updateInfoLabel();
 
 		} else if (cmd.equals(fontSizeText)) {
 			String a = JOptionPane.showInputDialog(null, messages.getString("tooltip.fontSize"), fontSize);
@@ -1006,7 +1022,6 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 			fontSize = normalFontSize;
 			codeInput.setFont(normalFont);
 			messageField.setFont(normalFont);
-			// updateInfoLabel();
 
 		} else if (cmd.equals(authorText)) {
 			String a = JOptionPane.showInputDialog(this, authorText, authorName);
@@ -1066,6 +1081,7 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 			System.out.println(fileName);
 			readXMLFile(fileName);
 			updateSnippetSelector();
+			setNoSnippetFound();
 
 		} else if (cmd.equals(codeFileText)) {
 			if (codeHasChanged) {
@@ -1081,6 +1097,7 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 			readXMLFile(newFileName);
 			addFileToRecentList(newFileName);
 			updateSnippetSelector();
+			setNoSnippetFound();
 
 		} else if (cmd.equals(javacPathText)) {
 			String newJavacPath = Dialogs.askJavacPath(messages.getBundle(), properties.getProperty("javacPath"));
@@ -1091,7 +1108,7 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 				board.saveProperties();
 				Properties p = System.getProperties();
 				String text = "JRE Version: " + p.getProperty("java.version") + Board.LS;
-				text += "JDK-Version: " + guessJDKVersion(newJavacPath);
+				text += "JDK-Version: " + Utils.guessJDKVersion(newJavacPath);
 				JOptionPane.showMessageDialog(this, text, "Versions", JOptionPane.INFORMATION_MESSAGE);
 			}
 
@@ -1123,6 +1140,14 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 		}
 	}
 
+	private void setNoSnippetFound() {
+		if( codeDB.getSnippetNames().size() == 0 ) {
+			saveButton.setEnabled(false);
+			snippetName = null;
+			codeInput.setText("");
+		}
+	}
+
 	private void updateSnippetSelector() {
 		snippetSelector.removeActionListener(this);
 		snippetSelector.setSelectedIndex(-1);
@@ -1130,8 +1155,7 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 		snippetSelector.addActionListener(this);
 		List<String> snippetNames = codeDB.getSnippetNames();
 		for (String name : snippetNames) {
-			snippetSelector.addItem(buildSnippetSelectorText(name));
-			
+			snippetSelector.addItem(buildSnippetSelectorText(name));			
 		}
 	}
 
@@ -1160,7 +1184,7 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 			board.resetMaxOutOfRange();
 
 			String fileName = codeExecutor.createTmpSourceFile(codeInput.getText());
-			// System.out.println("CodeRunner fileName: " + fileName);
+			System.out.println("CodeRunner fileName: " + fileName);
 			if (fileName == null) {
 				result += "ERROR " + board.getLastError();
 				failedCompilation();
@@ -1199,20 +1223,17 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 
 	@Override
 	public void changedUpdate(DocumentEvent arg0) {
-		// System.out.println("changedUpdate");
 		codeChanged();
 	}
 
 	@Override
 	public void insertUpdate(DocumentEvent arg0) {
-		// System.out.println("insertUpdate");
 		codeChanged();
 
 	}
 
 	@Override
 	public void removeUpdate(DocumentEvent arg0) {
-		// System.out.println("removeUpdate");
 		codeChanged();
 	}
 
@@ -1347,30 +1368,73 @@ public class CodeWindow extends JFrame implements ActionListener, DocumentListen
 	}
 
 	public String getSnippetLocale() {
-		if (snippetName == null) {
+		if (snippetName == null || codeDB.getSnippetByName(snippetName) == null) {
 			return null;
 		} else {
-			Element s = codeDB.getSnippetByName(snippetName);
-			return s.getAttribute("locale");
+			Element snippet = codeDB.getSnippetByName(snippetName);
+			return snippet.getAttribute("locale");
 		}
 	}
 
-	public void addFileToRecentList(String f) {
-		System.out.println("Add file to menu: " + f);
-		if (f == null)
+	public void addFileToRecentList(String fileName) {
+		System.out.println("Add file to menu: " + fileName);
+		if (fileName == null) {
 			return;
-		int i = recentFiles.indexOf(f);
+		}
+		int i = recentFiles.indexOf(fileName);
 		if (i >= 0) {
 			recentFiles.remove(i);
 			recentFileMenu.remove(i);
 		}
-		recentFiles.add(f);
-		JMenuItem m = Utils.addMenuItem(this, recentFileMenu, f);
+		recentFiles.add(fileName);
+		JMenuItem m = Utils.addMenuItem(this, recentFileMenu, fileName);
 		m.setActionCommand("loadFile");
 		if (recentFiles.size() >= maxRecentFiles) {
 			recentFiles.remove(0);
 			recentFileMenu.remove(0);
 		}
 	}
+
+	class Task implements Callable<String> {
+		@Override
+		public String call() throws Exception {
+			String result = "";
+			messageField.setText("compile ...\n");
+			codeExecutor.setMessageField(messageField);
+			board.resetMaxOutOfRange();
+
+			String fileName = codeExecutor.createTmpSourceFile(codeInput.getText());
+			System.out.println("CodeRunner fileName: " + fileName);
+			if (fileName == null) {
+				result += "ERROR " + board.getLastError();
+				failedCompilation();
+			} else {
+				result += codeExecutor.compileAndExecute(fileName);
+			}
+
+			int maxLength = 5000;
+			if (result.length() > maxLength) {
+				System.out.println("Result too long: " + result.length());
+				result = "... \n" + result.substring(result.length() - maxLength);
+				// result = "zu viele Zeilen \n";
+			}
+			if (codeExecutor instanceof CodeExecutorJS) {
+				messageField.append(result);
+			} else if (!(codeExecutor instanceof CodeExecutorJava)) {
+				messageField.append(result);
+			}
+
+			if (board.getMaxOutOfRange() > 0) {
+				messageField.append("Max out of range: " + board.getMaxOutOfRange() + "\n");
+				messageField.append("# out of ranges: " + board.getOutOfRangeCount() + "\n");
+			} 
+//			System.out.println( codeDB );
+//			System.out.println( codeInput );
+//			System.out.println( codeInput.getText() );
+			codeDB.saveAsLast(codeInput.getText());
+			return "Ready!";
+		}
+	}
+
 
 }

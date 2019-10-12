@@ -1,19 +1,28 @@
 package jserver;
 
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
@@ -23,6 +32,9 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+
+import evaluator.EvaluatorConfig;
+import plotter.Sleep;
 
 public class Analyser {
 	private static final String ASTERIX = "*******************************************";
@@ -34,25 +46,30 @@ public class Analyser {
 	private List<String> codes = new ArrayList<>();
 	// private Map<String, Integer> warningCount = new TreeMap<>();
 	private CounterMap<String> warningCount = new CounterMap<>();
+	private JTextArea messageArea = new JTextArea();
 
-	private String XMLFileName = "letters-ws18.xml";
-	private String HTMLFileName = "analyserProtocol.html";
 	private boolean doPatternAnalysis = true;
 	private boolean doPMD = false;
 	private boolean doCheckStyle = true;
+	private String XMLFileName = "letters-ws18.xml";
+	private String HTMLFileName = "analyserProtocol.html";
 	private String filter = ".*";
 	private String contentFilter = null;
 	private String imagePreFix = "";
 	private String snippetPreFix = "";
-	private String dirName = "analyserImages";
+	private String imageDirName = "analyserImages";
+	private String relativeImageDirName = "analyserImages";
+	private String lastError = "";
 	private int maxCodeLength = 120;
+	private int drawingTimeout = 3;
 
 	public static void main(String[] args) {
 		Analyser analyser = new Analyser();
-		// Analyser analyser = new
-		// Analyser("muster-testat/Demir_cueneytdeniz","uebung3.xml", ".*");
 		analyser.start();
+	}
 
+	public void setMessageArea(JTextArea messageArea) {
+		this.messageArea = messageArea;
 	}
 
 	public Analyser(String fileOpenDirectory, String xMLFileName, String filter) {
@@ -61,15 +78,54 @@ public class Analyser {
 		XMLFileName = xMLFileName;
 		this.filter = filter;
 
-		// if necessary create directory for images
-		File dir = new File(dirName);
-		if (!dir.exists()) {
-			dir.mkdirs();
-		}
-
 	}
 
 	public Analyser() {
+		checkImageDir();
+	}
+
+	public String getLastError() {
+		return lastError;
+	}
+
+	private void checkImageDir() {
+		// if necessary create directory for images
+		File dir = new File(imageDirName);
+		if (!dir.exists()) {
+			dir.mkdirs();
+		}
+	}
+
+	public Analyser(EvaluatorConfig config) {
+		setFilter(config.getFilter());
+		setContentFilter(config.getContentFilter());
+		setHTMLFileName(config.gethTMLFileName());
+		setImageDirName(config.getImageDirName());
+		setRelativeImageDirName(config.getImageDirName(), config.getAnalyserFileName());
+		checkImageDir();
+		protocol = new XMLProtocol(config.getAnalyserFileName(), "analyses", "analysis");
+		protocol.writeInfo("snippet-filter", filter);
+		protocol.writeInfo("content-filter", contentFilter);
+	}
+
+	private void setRelativeImageDirName(String imageDirName, String base) {
+		FileSystem fs = FileSystems.getDefault();
+		Path p1 = fs.getPath(imageDirName).toAbsolutePath();
+		if (fs.getPath(base).getParent() == null) {
+			base = "./" + base;
+		}
+		Path p2 = fs.getPath(base).getParent().toAbsolutePath();
+		Path p3 = p2.relativize(p1);
+		System.out.println("Resolve: " + p3);
+		relativeImageDirName = p3.toString();
+	}
+
+	public String getImageDirName() {
+		return imageDirName;
+	}
+
+	public void setImageDirName(String imageDirName) {
+		this.imageDirName = imageDirName;
 	}
 
 	public String getFilter() {
@@ -137,7 +193,7 @@ public class Analyser {
 		if (!loadSnippets()) {
 			protocol.writeInfo("Warning", "konnte keine Snippets laden");
 		} else {
-			analyse();
+			analyseSnippets();
 			System.out.println(ASTERIX + " Summary " + ASTERIX);
 			// warningCount.printSorted();
 		}
@@ -160,16 +216,15 @@ public class Analyser {
 		String result = "";
 		for (String c1 : codes) {
 			System.out.println(c1);
-			String line =  "";
+			String line = "";
 			for (String c2 : codes) {
-				int d = calculate(c1, c2);
+				int d = Utils.calculateLevenshtein(c1, c2);
 				System.out.printf("%5d ", d);
-				line += d +" ";
+				line += d + " ";
 			}
 			result += line.trim() + "\n";
 			System.out.println();
 		}
-//		System.out.print( result );
 		try {
 			Files.write(Paths.get("./checker.txt"), result.getBytes());
 		} catch (IOException e) {
@@ -177,11 +232,10 @@ public class Analyser {
 		}
 	}
 
-	private void analyse() {
-		JTextArea output = new JTextArea();
-		codeExecutor.setMessageField(output);
+	private void analyseSnippets() {
+		codeExecutor.setMessageField(messageArea);
 		codeExecutor.setVerbose(false);
-		System.out.println( "Start Analyse");
+		System.out.println("Start Analyse");
 
 		List<String> snippetNames = codeDB.getSnippetNames();
 		int numSnippets = 0;
@@ -192,13 +246,14 @@ public class Analyser {
 				continue;
 			}
 			String code = codeDB.getSnippetCode(snippetName);
-			if( contentFilter != null ) {
-				if (code.indexOf(contentFilter) < 0 ) {
+			if (contentFilter != null) {
+				if (code.indexOf(contentFilter) < 0) {
 					System.out.println("wrong content, ignoring ...");
 					continue;
-				}			
+				}
 			}
-			
+
+			messageArea.append("Snippet: "+ snippetName + " ");
 			String language = codeDB.getSnippetLocale(snippetName);
 
 			++numSnippets;
@@ -207,7 +262,7 @@ public class Analyser {
 			protocol.writeCData("code", code.trim());
 
 			String purCode = code.replaceAll("\\s", "");
-			codes.add(purCode.substring(0, Integer.min(maxCodeLength , purCode.length())));
+			codes.add(purCode.substring(0, Integer.min(maxCodeLength, purCode.length())));
 
 			CodeAnalyser codeAnalyser = new CodeAnalyser(code);
 
@@ -220,13 +275,19 @@ public class Analyser {
 			System.out.println();
 
 			if (doPatternAnalysis) {
+				board.receiveMessage(">>t " + snippetPreFix + snippetName);
+
 				if (!drawPattern(code, language)) {
 					continue;
 				}
 
-				String filename = dirName + System.getProperty("file.separator") + imagePreFix + snippetName + ".png";
-				protocol.writeInfo("imageFile", "" + filename);
-				saveImage(filename);
+				// String filename = imageDirName + System.getProperty("file.separator") +
+				// imagePreFix + snippetName + ".png";
+				// String filename = relativeImageDirName + System.getProperty("file.separator")
+				// + imagePreFix + snippetName + ".png";
+				String filename = imagePreFix + snippetName + ".png";
+				protocol.writeInfo("imageFile", "" + relativeImageDirName + Board.FS + filename);
+				saveImage(imageDirName + Board.FS + filename);
 				analysePattern();
 			}
 
@@ -289,25 +350,52 @@ public class Analyser {
 		protocol.writeInfo("required-bosl-commands", "" + boardAnalyser.calcNumBoSLCommands());
 	}
 
-	private boolean drawPattern(final String code, String language) {
-		try {
-			SwingUtilities.invokeAndWait(new Runnable() {
-				public void run() {
-					board.reset();
-					board.resetMessageHistory();
-					board.resetMaxOutOfRange();
-					String fileName = codeExecutor.createTmpSourceFile(code, language);
-					if (fileName == null) {
-						System.out.println("compile failed *************");
-						return;
-					}
-					codeExecutor.compileAndExecute("");
-				}
-			});
-		} catch (InvocationTargetException | InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	class Task implements Callable<String> {
+			@Override
+			public String call() throws Exception {
+				codeExecutor.compileAndExecute("");
+				// Interrupts funktionieren nicht mehr 
+	//			try {
+	//				SwingUtilities.invokeAndWait(new Runnable() {
+	//					public void run() {
+	//						codeExecutor.compileAndExecute("");
+	//					}
+	//				});
+	//			} catch (InvocationTargetException | InterruptedException e) {
+	//				// e.printStackTrace();
+	//				return "Interrupted !!!";
+	//			}
+				return "Ready!";
+			}
 		}
+
+	private boolean drawPattern(final String code, String language) {
+		board.reset();
+		board.resetMessageHistory();
+		board.resetMaxOutOfRange();
+		String fileName = codeExecutor.createTmpSourceFile(code, language);
+		if (fileName == null) {
+			System.out.println("createTmpSourceFile failed *************");
+			return false;
+		}
+
+		ExecutorService executor = Executors.newSingleThreadExecutor();
+		Future<String> future = executor.submit(new Task());
+
+		try {
+			System.out.println("Future: " + future.get(drawingTimeout, TimeUnit.SECONDS));
+		} catch (TimeoutException | InterruptedException | ExecutionException e) {
+			codeExecutor.stopExecution();
+			board.receiveMessage("t timout!!!");
+			int c = board.getColumns();
+			int r = board.getRows();
+			board.receiveMessage("#T " + c/2 + " " + r/2 + " timout!!!");
+			future.cancel(true);
+			System.out.println("timout - terminated!");
+			protocol.writeInfo("error", "drawing timeout");
+		}
+		 executor.shutdownNow();
+
 		System.out.println("# BoSL commands: " + board.getMessageCount());
 		protocol.writeInfo("BoSL-commands", "" + board.getMessageCount());
 		protocol.writeInfo("out-of-ranges", "" + board.getOutOfRangeCount());
@@ -315,7 +403,7 @@ public class Analyser {
 	}
 
 	private boolean loadSnippets() {
-		codeDB.setXmlFile(new File(fileOpenDirectory, XMLFileName));
+		codeDB.setXmlFile(new File(XMLFileName));
 		try {
 			codeDB.readXML();
 		} catch (ParserConfigurationException | SAXException | IOException e1) {
@@ -324,37 +412,20 @@ public class Analyser {
 				SAXParseException se = (SAXParseException) e1;
 				message += "\nZeile:" + se.getLineNumber() + " Spalte:" + se.getColumnNumber();
 			}
-			JOptionPane.showMessageDialog(null, message, "Codes lesen", JOptionPane.ERROR_MESSAGE);
+			protocol.writeInfo("XML-error", message);
+			lastError = message;
 			return false;
 		}
 		return true;
 	}
 
-	// http://www.baeldung.com/java-levenshtein-distance
-	static int calculate(String x, String y) {
-		int[][] dp = new int[x.length() + 1][y.length() + 1];
 
-		for (int i = 0; i <= x.length(); i++) {
-			for (int j = 0; j <= y.length(); j++) {
-				if (i == 0) {
-					dp[i][j] = j;
-				} else if (j == 0) {
-					dp[i][j] = i;
-				} else {
-					dp[i][j] = min(dp[i - 1][j - 1] + costOfSubstitution(x.charAt(i - 1), y.charAt(j - 1)),
-							dp[i - 1][j] + 1, dp[i][j - 1] + 1);
-				}
-			}
-		}
-
-		return dp[x.length()][y.length()];
+	public String getRelativeImageDirName() {
+		return relativeImageDirName;
 	}
 
-	public static int min(int... numbers) {
-		return Arrays.stream(numbers).min().orElse(Integer.MAX_VALUE);
+	public void setRelativeImageDirName(String relativeImageDirName) {
+		this.relativeImageDirName = relativeImageDirName;
 	}
 
-	public static int costOfSubstitution(char a, char b) {
-		return a == b ? 0 : 1;
-	}
 }
