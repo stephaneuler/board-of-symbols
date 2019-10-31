@@ -29,5 +29,13 @@ The example uses the German version. You can change the language in the menu Opt
 
 A short video with the first steps: https://www.youtube.com/watch?v=VLVigtQNIeU&feature=youtu.be
 
+## Important hints
+BoS requires a Java runtime (JRE) and a compiler (SDK). 
+- if necessary, install a SDK
+- BoS needs to find the command javac. If the bin-directory is not in the Path, add it in the properties menue
+- different versions of SDK and JRE can cause problems. Make sure that they have the same version. 
+- starting BoS with double click on jserver.jar sometime runs into problems. Try starting it from the command shell. 
+
+
 ## How to start - C
 See [here](documentation/installing-c.md)
