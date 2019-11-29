@@ -1,0 +1,17 @@
+!<html>Aufgaben mit elementaren Ausdr&uuml;cken</html>
+Dyn#mod
+Dyn#mod10
+Dyn#mod10
+Dyn#intDiv
+Dyn#intDiv
+Dyn#plusplus
+Dyn#plusplusPost
+Dyn#minusminus
+Dyn#minusminusPost
+Dyn#logo
+Dyn#logo2
+Dyn#logo2
+Dyn#exp2
+Dyn#exp2
+Dyn#array1
+Dyn#array1

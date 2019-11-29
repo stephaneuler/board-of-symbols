@@ -1,0 +1,5 @@
+YesNo#<html>Die Basisklasse Object ist abstrakt</html>#false
+Open#Schluesselwort fuer Klassen-Methoden#static
+YesNo#Java ist OOP#true
+YesNo#int und Integer sind das selbe#false
+YesNo#String ist ein primitiver Datentyp#false

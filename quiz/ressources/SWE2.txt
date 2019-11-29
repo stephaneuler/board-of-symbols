@@ -1,0 +1,24 @@
+!Fragen zur SWE2-Klausur, Version 28. Nov.
+YesNo#<html>Die Basisklasse Object ist abstrakt</html>#false
+Open#Schluesselwort fuer Klassen-Methoden#static
+Open#Elternklasse, wenn keine andere angegeben#Object
+Open#Schluesselwort Ableitung von Elternklasse#extends
+Open#Schluesselwort fuer Konstanten#final
+Open#Schluesselwort fuer Implementierung eines Interfaces#implements
+YesNo#Java ist OOP#true
+YesNo#int und Integer sind das selbe#false
+YesNo#Eine Klasse kann nur ein Interface implementieren#false
+YesNo#Eine Klasse kann nur eine Elternklasse erweitern#true
+YesNo#String ist ein primitiver Datentyp#false
+YesNo#Ein Debugger ist ein Werkzeug zur Fehlersuche#true
+YesNo#Eine abstrakte Klasse darf nur abstrakte Methoden enthalten#false
+YesNo#Ein Profiler ist ein Werkzeug zur Fehlersuche#false
+MultiOptions#Vorteile verkettete Liste vs Array?#1#Weniger Speicher#Koennen bei Bedarf wachsen#Schnellerer Zugriff auf einzelne Elemente
+Options#Was steht in einer CSV-Datei?#0#Durch Komma getrennte Werte#Konfigurationsdaten#Regeln fuer Zugriffsrechte
+Options#Eine Methode mit gleicher Signatur wie eine Methode in den Elternklassen#1#ueberladen (overload)#ueberschreiben (overwrite)
+MultiOptions#Was sind Klassen fuer eine THM-Software?#0,1,4#Professor#Student#SWE2#Medieninformatik#Fachbereich#IEM
+MultiOptions#Was sind Interfaces?#1,3#JLabel#ActionListener#JButton#BoardClickListener
+Options#Wie sollte man eine static Methode aufrufen?#0#Ueber den Klassennamen#Ueber eine Instanz
+MultiOptions#Welche Namen passen fuer Konstanten?#0,3#PI#Pi#pi#PI_HALBE#piHalbe
+Options#Was ist nio?#1#Kuerzel fuer fuehrende Java-Entwickler#Ein neues API fuer IO#new interface object
+Open#Referenz auf das Objekt, in dem wir uns befinden#this

@@ -1,0 +1,5 @@
+Open#Bekanntester deutscher Computer-Pionier (Nachname)#Zuse
+Options#KI-Pionier#1#Claude Shannon#Alan Turing#Konrad Zuse
+MultiOptions#Namen von Programmiersprachen#0,2,3#Pascal#Peter#Perl#Python
+YesNo#Ein Debugger ist ein Werkzeug zur Fehlersuche#true
+YesNo#Ein Profiler ist ein Werkzeug zur Fehlersuche#false

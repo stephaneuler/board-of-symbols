@@ -1,0 +1,17 @@
+!<html>Ein Fragenset zu Methoden in  Java</html>
+Options#Befehl fuer Ruecksprung aus Methode#2#break#continue#return#exit#leave
+YesNo#Variablen innerhalb von Methoden behalten ihren Wert fuer den naechsten Aufruf#false
+YesNo#<html>Mehrere Methoden k&ouml;nnen den gleichen Namen haben.</html>#true
+YesNo#<html>Eine Methode darf nur ein <em>return</em> enthalten.</html>#false
+YesNo#<html>Methoden ohne R&uuml;ckgabewert ben&ouml;tigen kein expilizites <em>return</em>.</html>#true
+YesNo#<html>Man kann an Methoden nur primitive Datentypen wie <em>int</em> &uuml;bergeben.</html>#false
+YesNo#<html>Bei einer Methode ohne Parameter schreibt man z. B. <em>double f( void )</em></html>#false
+YesNo#<html>Felder werden mittels <em>call by reference</em> &uuml;bergeben.</html>#true
+MultiOptions#Zur Definition einer Methode benoetigt man#0,1,2#Typ des Rueckgabewertes#Name#Parameterliste#Anzahl der return-Anweisungen
+Open#<html>Schl&uuml;sselwort bei Methoden ohne R&uuml;ckgabe#void
+Options#Memoization steht fuer#1#Alphabetische Reihenfolge der Methoden#Speichern von Resultaten fuer weitere Aufrufe#Bestimmte Anordnung der Variablen
+Options#Rekursion ohne Abbruchbedingung fuehrt zu#1#Compiler-Fehler#Stack overflow#Endlose Ausfuehrung
+Options#Primitive Datentypen werden uebergeben als#0#call by value#call by reference
+Options#call by value bedeutet#0#Eine Kopie des Wertes wird uebergeben#Das Argument darf nicht null sein
+MultiOptions#Probleme mit rekursiven Loesungen#1,2,3#Daecher von Nizza#Tuerme von Hanoi#QuickSort#Sudoku
+MultiOptions#Die Methodensignatur enthaelt#1,2#Kuerzel des Authors#Name der Methode#Art und Anzahl der Parameter#Copyright Beschraenkungen

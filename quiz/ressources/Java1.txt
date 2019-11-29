@@ -1,0 +1,30 @@
+!<html>Ein Fragenset zu Grundlagen von Java (Datentypen, Ausdr&uuml;cken, einfachen Abl&auml;ufen)</html>
+Open#i nach i=4; ++i;#5
+Open#j nach i=4; j=3; j = ++i*j;#15
+Open#j nach i=4; j=3; j = i++*j;#12
+Open#6789 % 100#89 
+Open#6789 / 100#67
+YesNo#double x = 11 / 3; ergibt 3#true
+YesNo#double x = 11. / 3; ergibt 3#false
+YesNo#double x = 1. * 11 / 3; ergibt 3#false
+Open#System.out.println( "s=" + 2 + 3 );#s=23
+Open#System.out.println( "p=" + 2 * 3 );#p=6
+Options#Befehl fuer Abbruch einer Schleife#0#break#continue#return#exit#leave
+Options#int-Wert ueberschreitet groessten darstellbaren Wert#3#Programmabsturz#Wert Inf#Wert NaN#negativer Wert
+Options#double-Wert ueberschreitet groessten darstellbaren Wert#1#Programmabsturz#Wert Inf#Wert NaN#negativer Wert
+Options#Math.sqrt( -2 )#2#Programmabsturz#Wert Inf#Wert NaN#negativer Wert
+Correct#for( int i=0; i==50; i++ )#for( int i=0; i<=50; i++ )
+Correct#if( int i=0; i<=50; i++ )#for( int i=0; i<=50; i++ )
+Correct#if( 50 <= p <= 100 )#if( 50 <= p & p <= 100 )
+Open#Was bedeutet das R in RGB (Deutsch)#rot
+YesNo#boolean b = x < 10; ist erlaubt#true
+YesNo#boolean b = 1; setzt b auf true#false
+YesNo#Java ist OOP#true
+YesNo#mit der double-Variablen x liefert x < x +1 immer den Wert true#false
+YesNo#Java ist aelter als C#false
+YesNo#Variablen innerhalb von Methoden behalten ihren Wert fuer den naechsten Aufruf#false
+YesNo#int und Integer sind das selbe#false
+YesNo#String ist ein primitiver Datentyp#false
+YesNo#$2 ist ein nicht empfehlenswerter aber legaler Variablenname#true
+YesNo#<html>In Java haben Arrays eine <em>feste</em> L&auml;nge</html>#true
+MultiOptions#Schlechte Namen fuer Variablen?#1,2,3#anzahl#a#l#Note#studiengang
