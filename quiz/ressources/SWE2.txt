@@ -22,3 +22,5 @@ Options#Wie sollte man eine static Methode aufrufen?#0#Ueber den Klassennamen#Ue
 MultiOptions#Welche Namen passen fuer Konstanten?#0,3#PI#Pi#pi#PI_HALBE#piHalbe
 Options#Was ist nio?#1#Kuerzel fuer fuehrende Java-Entwickler#Ein neues API fuer IO#new interface object
 Open#Referenz auf das Objekt, in dem wir uns befinden#this
+YesNo#Jeder ActionListener ist fuer genau ein GUI-Element (z. B. JButton) zustaendig.#false
+YesNo#Ein GUI-Element (z. B. JButton) kann mehrere ActionListener haben.#true
