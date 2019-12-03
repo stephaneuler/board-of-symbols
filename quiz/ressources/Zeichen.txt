@@ -1,0 +1,14 @@
+!<html>Diverses rund um char und String</html>
+Options#'a' + 2#1#'a2'#'c'#"a2"
+Options#">" + 'a' + 2#0#">a2"#">c"
+RegOpen#"Medieninformatik".substring(0,3)#"?Med"?
+RegOpen#"Die Wetterau".substring(5,10)#"?etter"?
+RegOpen#"Medien".replace( 'e', 'x' )#"?Mxdixn"?
+RegOpen#"Informatik".replaceAll( "[aoi]", "x" )#"?Infxrmxtxk"?
+Dyn#sIndexOf
+Open#"Wetterau".lastIndexOf("e")#4
+Open#"aA b c".split(" ").length#3
+YesNo#text.charAt( 0 ) und text.substring(0,1) ergeben das gleiche#false
+YesNo#String = null; und String t =""; sind das gleiche#false
+YesNo#Fuer zwei Strings testet t1 == t2 auf Identitaet#true
+Open#Womit testet man zwei Strings auf gleichen Inhalt?#equals
