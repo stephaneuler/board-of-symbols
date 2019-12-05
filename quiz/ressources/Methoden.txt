@@ -15,3 +15,7 @@ Options#Primitive Datentypen werden uebergeben als#0#call by value#call by refer
 Options#call by value bedeutet#0#Eine Kopie des Wertes wird uebergeben#Das Argument darf nicht null sein
 MultiOptions#Probleme mit rekursiven Loesungen#1,2,3#Daecher von Nizza#Tuerme von Hanoi#QuickSort#Sudoku
 MultiOptions#Die Methodensignatur enthaelt#1,2#Kuerzel des Authors#Name der Methode#Art und Anzahl der Parameter#Copyright Beschraenkungen
+YesNo#Ist ein Aufruf in der folgenden Form erlaubt: senkrecht(x=0,y=0,laenge=20,farbe=GREEN);#false
+YesNo#<html>Zwei Methoden duerfen den gleichen Namen haben wenn sie sich in Typ oder Anzahl der Parameter unterscheiden.</html>#true
+YesNo#<html>Ist die Definition <em>double fkt( double x, y ) { ...</em> erlaubt?</html>#false
+MultiOptions#Gute Namen fuer Methoden?#0,2#setColor#ResetColor#istPositiv#mfarbe#waagrecht_form
