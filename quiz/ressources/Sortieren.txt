@@ -5,4 +5,3 @@ Options#Welcher Algorithmus profitiert von bereits vorhandener Ordnung?#1#Select
 YesNo#Algorithmen in O(n) sind immer schneller als Algorithmen in O(n^2)#false
 YesNo#Stabilitaet bedeutet bei einem Sortieralgorithmus, dass er immer die richtige Loesung findet#false
 YesNo#Haengt die Laufzeit bei Quick Sort von der Anfangsverteilung ab?#true
-
