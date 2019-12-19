@@ -1,5 +1,20 @@
+!Fragen zu OOP in Java, Version Dez. 2019.
 YesNo#<html>Die Basisklasse Object ist abstrakt</html>#false
 Open#Schluesselwort fuer Klassen-Methoden#static
 YesNo#Java ist OOP#true
 YesNo#int und Integer sind das selbe#false
 YesNo#String ist ein primitiver Datentyp#false
+Open#Elternklasse, wenn keine andere angegeben#Object
+Open#Schluesselwort Ableitung von Elternklasse#extends
+Open#Schluesselwort fuer Konstanten#final
+Open#Schluesselwort fuer Implementierung eines Interfaces#implements
+YesNo#int und Integer sind das selbe#false
+YesNo#Eine Klasse kann nur ein Interface implementieren#false
+YesNo#Eine Klasse kann nur eine Elternklasse erweitern#true
+YesNo#String ist ein primitiver Datentyp#false
+YesNo#Eine abstrakte Klasse darf nur abstrakte Methoden enthalten#false
+Options#Eine Methode mit gleicher Signatur wie eine Methode in den Elternklassen#1#ueberladen (overload)#ueberschreiben (overwrite)
+MultiOptions#Was sind Klassen fuer eine THM-Software?#0,1,4#Professor#Student#SWE2#Medieninformatik#Fachbereich#IEM
+MultiOptions#Was sind Interfaces?#1,3#JLabel#ActionListener#JButton#BoardClickListener
+Options#Wie sollte man eine static Methode aufrufen?#0#Ueber den Klassennamen#Ueber eine Instanz
+Open#Referenz auf das Objekt, in dem wir uns befinden#this

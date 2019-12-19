@@ -1,0 +1,2 @@
+YesNo#Jeder ActionListener ist fuer genau ein GUI-Element (z. B. JButton) zustaendig.#false
+YesNo#Ein GUI-Element (z. B. JButton) kann mehrere ActionListener haben.#true
