@@ -1,2 +1,19 @@
+!Elementare Fragen zu Java Swing
+YesNo#Swing ist ein GUI-Toolkit fuer die Programmiersprache Java#true
+YesNo#Abstract Window Toolkit (AWT) ist ein aelteres GUI-Toolkit fuer die Programmiersprache Java#true
 YesNo#Jeder ActionListener ist fuer genau ein GUI-Element (z. B. JButton) zustaendig.#false
 YesNo#Ein GUI-Element (z. B. JButton) kann mehrere ActionListener haben.#true
+YesNo#Von den JRadionButton in einer ButtonGroup kann immer maximal einer aktiv sein#true
+YesNo#Man kann ein JTextField mit setEditable( false ) auf nicht-editierbar setzen#true
+YesNo#EventListener werden oft in Form anonymer innerer Klassen eingebunden#true
+MultiOptions#Informationen in BoardClickEvent von BoS?#0,1,2#Koordinaten#Anzahl Klicks#Welcher Mausknopf#Dauer des Klicks in msec
+Open#<html>Swing-Klasse f&uuml;r Schaltfl&auml;chen </html>#JButton
+Open#<html>Swing-Klasse f&uuml;r Men&uuml;s</html>#JMenu
+Open#<html>Swing-Klasse f&uuml;r einen Men&uuml;eintrag</html>#JMenuItem
+Options#ActionListener ist#1#eine Klasse#ein Interface
+Options#Mit welcher Klasse lassen sich Dialogfenster aufrufen?#1#JHelper#JOptionPane#JDialogs
+Options#Worin unterscheiden sich Swing und AWT Klassen?#1#garnicht#J am Anfang des Namens#S am Anfang des Namens
+Options#Das Wort pane in JPane steht fuer?#0#Scheibe#Brot
+Open#<html>Was bedeutet frame in JFrame (deutsches Wort)</html>#Rahmen
+Options#Wie werden die Bereiche links und rechts vom Hauptbereich angesprochen?#1#Left - Right#West - East#L0 - L3
+Options#Was ist ein JLabel?#0#statischer Text oder Symbol#Schaltflaeche#Textfeld
