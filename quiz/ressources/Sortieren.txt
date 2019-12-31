@@ -1,7 +1,9 @@
+!Sortier-Algorithmen, Version Dez. 2019.
 YesNo#Quicksort ist stabil#false
 MultiOptions#Algorithmen in O(n^2)?#0,1,2#Selection Sort#Insertion Sort#Bubble Sort#Quick Sort#Shell Sort
 Options#Komplexitaet von Quick Sort#2#O(n)#O(log n)#O(n log n)#O(n!)
 Options#Welcher Algorithmus profitiert von bereits vorhandener Ordnung?#1#Selection Sort#Insertion Sort
 YesNo#Algorithmen in O(n) sind immer schneller als Algorithmen in O(n^2)#false
 YesNo#Stabilitaet bedeutet bei einem Sortieralgorithmus, dass er immer die richtige Loesung findet#false
-YesNo#Haengt die Laufzeit bei Quick Sort von der Anfangsverteilung ab?#true
+YesNo#Haengt die Laufzeit bei Quick-Sort von der Anfangsverteilung ab?#true
+Options#Grundgedanke von Quick-Sort?#1#first things first#divide and conquer#step by step#the winner takes it all

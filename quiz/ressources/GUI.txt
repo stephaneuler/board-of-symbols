@@ -6,6 +6,8 @@ YesNo#Ein GUI-Element (z. B. JButton) kann mehrere ActionListener haben.#true
 YesNo#Von den JRadionButton in einer ButtonGroup kann immer maximal einer aktiv sein#true
 YesNo#Man kann ein JTextField mit setEditable( false ) auf nicht-editierbar setzen#true
 YesNo#EventListener werden oft in Form anonymer innerer Klassen eingebunden#true
+YesNo#Kann man bei einem JLabel mit addActionListener( ... ) einen Listener anmelden?#false
+YesNo#Kann man bei einem JButton mit addActionListener( ... ) einen Listener anmelden?#true
 MultiOptions#Informationen in BoardClickEvent von BoS?#0,1,2#Koordinaten#Anzahl Klicks#Welcher Mausknopf#Dauer des Klicks in msec
 Open#<html>Swing-Klasse f&uuml;r Schaltfl&auml;chen </html>#JButton
 Open#<html>Swing-Klasse f&uuml;r Men&uuml;s</html>#JMenu

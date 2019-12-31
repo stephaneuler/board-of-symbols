@@ -1,0 +1,21 @@
+!<html>Ein Fragenset zu logischen Ausdruecken und Ablauefen </html>
+Options#Befehl fuer Abbruch einer Schleife#0#break#continue#return#exit#leave
+Options#Was bewirkt continue#1#Abbruch der Schleife#Abbruch des Schleifendurchgangs#Neustart der Schleife
+Correct#for( int i=0; i==50; i++ )#for( int i=0; i<=50; i++ )
+Correct#if( int i=0; i<=50; i++ )#for( int i=0; i<=50; i++ )
+Correct#if( 50 <= p <= 100 )#if( 50 <= p & p <= 100 )
+YesNo#In einer for Anweisung koennen Teile leer sein wie z. B. for( ;i<10; )#true
+YesNo#boolean b = x < 10; ist erlaubt#true
+YesNo#boolean b = 1; setzt b auf true#false
+YesNo#Jeder switch Block muss eine Sprungmarke default haben#false
+YesNo#In einem case duerfen nur konstante Ausdruecke als Wert stehen#true
+YesNo#In einem switch Block koennen in neuen Java Versionen int oder String Ausdruecke verwendet werden#true
+Dyn#logo
+Dyn#logo2
+Dyn#logo2
+Open#Wert m nach for( m=1; m<15; m*=2);#16
+Open#Wert m nach for( m=1; m<12; m+=7);#15
+Open#Wert m nach for( m=35; m>10; m = m / 2);#8
+Open#for( int i=0; i<10; i+=3){ System.out.print( i + "-");}#0-3-6-9-
+MultiOptions#Welche Schleifen sind abweisend (mit Kopfpruefung)#0,1#for#while#do - while
+Options#Was ist for(;;)?#1#Syntax-Fehler#Endlos-Schleife

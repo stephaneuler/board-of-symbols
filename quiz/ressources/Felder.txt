@@ -1,0 +1,8 @@
+Dyn#array1
+Dyn#array1
+YesNo#<html>In Java haben Arrays eine <em>feste</em> L&auml;nge</html>#true
+MultiOptions#Erlaubte Anweisungen?#0,1,4#int[] feld;#int feld[];#int[10] feld;#int feld[] = new int[];#int feld[] = new int[10]; 
+MultiOptions#Erlaubte Anweisungen?#0,1,#int[] z = {1,2,3};#int[] z = {1,2,3,};#int[] z = new {1,2,3,};#int[3] z = {1,2,3};
+Options#Was passiert bei einem Feld-Zugriff auf ein Element ausserhalb des definierten Bereichs?#0#Laufzeitfehler#Feld wird automatisch vergroessert#Nichts
+Options#Syntax fuer foreach-Schleife mit int-Feld feld#2#foreach( int w : feld )#for( int w in feld )#for(int w : feld )#for( feld -> int w )  
+Options#Wie koennen die Werte im Array feld ausgegeben werden?#2#System.out.println( feld );#System.out.println( feld.toString() );#System.out.println( Arrays.toString( feld ) );

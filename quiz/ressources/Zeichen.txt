@@ -11,4 +11,7 @@ Open#"aA b c".split(" ").length#3
 YesNo#text.charAt( 0 ) und text.substring(0,1) ergeben das gleiche#false
 YesNo#String = null; und String t =""; sind das gleiche#false
 YesNo#Fuer zwei Strings testet t1 == t2 auf Identitaet#true
+YesNo#String ist ein primitiver Datentyp#false
 Open#Womit testet man zwei Strings auf gleichen Inhalt?#equals
+Options#Was macht die Methode trim() in der Klasse String?#0#Leerzeichen am Rand entfernen#Alle Leerzeichen entfernen#Den String auf eine Standardlaenge kuerzen
+MultiOptions#t und s sind String-Referenzen#0,2#wenn t == s, dann gilt auch t.equals(s)#wenn t.equals(s), dann gilt auch t == s#wenn t.equals(s), dann gilt auch s.equals( t )

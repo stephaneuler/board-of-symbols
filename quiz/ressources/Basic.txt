@@ -8,10 +8,24 @@ Dyn#plusplus
 Dyn#plusplusPost
 Dyn#minusminus
 Dyn#minusminusPost
-Dyn#logo
-Dyn#logo2
-Dyn#logo2
 Dyn#exp2
 Dyn#exp2
-Dyn#array1
-Dyn#array1
+Open#i nach i=4; ++i;#5
+Open#j nach i=4; j=3; j = ++i*j;#15
+Open#j nach i=4; j=3; j = i++*j;#12
+Open#6789 % 100#89 
+Open#6789 / 100#67
+YesNo#double x = 11 / 3; ergibt 3#true
+YesNo#double x = 11. / 3; ergibt 3#false
+YesNo#double x = 1. * 11 / 3; ergibt 3#false
+Open#System.out.println( "s=" + 2 + 3 );#s=23
+Open#System.out.println( "p=" + 2 * 3 );#p=6
+Options#int-Wert ueberschreitet groessten darstellbaren Wert#3#Programmabsturz#Wert Inf#Wert NaN#negativer Wert
+Options#double-Wert ueberschreitet groessten darstellbaren Wert#1#Programmabsturz#Wert Inf#Wert NaN#negativer Wert
+Options#Math.sqrt( -2 )#2#Programmabsturz#Wert Inf#Wert NaN#negativer Wert
+Open#Was bedeutet das R in RGB (Deutsch)#rot
+YesNo#mit der double-Variablen x liefert x < x +1 immer den Wert true#false
+YesNo#int und Integer sind das selbe#false
+YesNo#$2 ist ein nicht empfehlenswerter aber legaler Variablenname#true
+MultiOptions#Schlechte Namen fuer Variablen?#1,2,3#anzahl#a#l#Note#studiengang
+MultiOptions#Erlaubte Anweisungen?#2#int n = [2 + 3] * 5;#int n = {2 + 3} * 5;#int n = (2 + 3) * 5;

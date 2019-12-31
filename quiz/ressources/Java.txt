@@ -1,0 +1,6 @@
+!<html>Ein Fragenset zu Grundlagen von Java</html>
+YesNo#Java ist OOP#true
+YesNo#Java ist aelter als C#false
+Options#Wonach wurde die Java-Technologie benannt?#1#Der gleichnamigen Insel#einer Kaffee-Sorte#Einem  Gesellschaftstanz im 3/4-Takt aus den 1920er-Jahren 
+Options#Von welcher Firma wurde die Java-Technologie entwickelt?#2#Microsoft#Apple#Sun#IBM#HP#Google
+Options#Welche dieser Programmiersprachen ist am aehnlichsten zu Java?#0#C++#Javascript#PHP#Pascal
