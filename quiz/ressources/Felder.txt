@@ -6,3 +6,5 @@ MultiOptions#Erlaubte Anweisungen?#0,1,#int[] z = {1,2,3};#int[] z = {1,2,3,};#i
 Options#Was passiert bei einem Feld-Zugriff auf ein Element ausserhalb des definierten Bereichs?#0#Laufzeitfehler#Feld wird automatisch vergroessert#Nichts
 Options#Syntax fuer foreach-Schleife mit int-Feld feld#2#foreach( int w : feld )#for( int w in feld )#for(int w : feld )#for( feld -> int w )  
 Options#Wie koennen die Werte im Array feld ausgegeben werden?#2#System.out.println( feld );#System.out.println( feld.toString() );#System.out.println( Arrays.toString( feld ) );
+Options#<html>Wie erh&auml;lt man die L&auml;nge des Feldes a?</html>#1#size( a )#a.length#a.length()#length( a )
+Options#Wie definiert man ein zweidimensionales int-Feld?#0#int[][] feld#int[2] feld#int[[]] feld#int[int[]] feld
