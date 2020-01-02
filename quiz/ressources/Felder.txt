@@ -8,3 +8,4 @@ Options#Syntax fuer foreach-Schleife mit int-Feld feld#2#foreach( int w : feld )
 Options#Wie koennen die Werte im Array feld ausgegeben werden?#2#System.out.println( feld );#System.out.println( feld.toString() );#System.out.println( Arrays.toString( feld ) );
 Options#<html>Wie erh&auml;lt man die L&auml;nge des Feldes a?</html>#1#size( a )#a.length#a.length()#length( a )
 Options#Wie definiert man ein zweidimensionales int-Feld?#0#int[][] feld#int[2] feld#int[[]] feld#int[int[]] feld
+YesNo#<html>Zweidimensionale Felder sind immer rechteckig</html>#false
