@@ -9,3 +9,13 @@ Options#Wie koennen die Werte im Array feld ausgegeben werden?#2#System.out.prin
 Options#<html>Wie erh&auml;lt man die L&auml;nge des Feldes a?</html>#1#size( a )#a.length#a.length()#length( a )
 Options#Wie definiert man ein zweidimensionales int-Feld?#0#int[][] feld#int[2] feld#int[[]] feld#int[int[]] feld
 YesNo#<html>Zweidimensionale Felder sind immer rechteckig</html>#false
+<<
+int[] a = {1,2,3};
+int[] b = a;
+
+System.out.print( b[1] );
+a[1] = 3;
+System.out.print( " " + b[1] );
+#
+2 3
+>>

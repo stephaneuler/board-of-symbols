@@ -19,3 +19,39 @@ Open#Wert m nach for( m=35; m>10; m = m / 2);#8
 Open#for( int i=0; i<10; i+=3){ System.out.print( i + "-");}#0-3-6-9-
 MultiOptions#Welche Schleifen sind abweisend (mit Kopfpruefung)#0,1#for#while#do - while
 Options#Was ist for(;;)?#1#Syntax-Fehler#Endlos-Schleife
+<<
+for( int i=0; i<30; i+=10 ) {
+   for( int j=0; j<3; j++ ) {
+      System.out.print( i + j + " ");
+   }
+}
+#
+0 1 2 10 11 12 20 21 22
+>>
+<<
+for( int j=10; j<=1000; j*=10) {
+   for( int i=-1; i<=1; i++ ) {
+      System.out.print( i + j + " ");
+   }
+}
+#
+9 10 11 99 100 101 999 1000 1001
+>>
+<<
+
+for( int j=1; j<10; j++) {
+   System.out.print( j % 2);
+}
+#
+101010101
+>>
+<<
+for( int i=1; i<=3; i++ ) {
+   for( int j=0; j<i; j++ ) {
+      System.out.print( "*");
+   }
+   System.out.print( " ");
+}
+#
+* ** ***
+>>
