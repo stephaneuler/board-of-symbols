@@ -37,3 +37,13 @@ System.out.println(  t2 );
 #
 dcba
 >>
+<<
+String text = "";
+for( char c = 'a'; c < 'h'; c += 2) {
+   text += c;
+}
+System.out.println( text );
+#
+aceg
+>>
+
