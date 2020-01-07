@@ -7,6 +7,9 @@ RegOpen#"Medien".replace( 'e', 'x' )#"?Mxdixn"?
 RegOpen#"Informatik".replaceAll( "[aoi]", "x" )#"?Infxrmxtxk"?
 Dyn#sIndexOf
 Open#"Wetterau".lastIndexOf("e")#4
+Open#"Die Wetterau".substring(4,9)#Wette
+Open#"In der Wetterau".lastIndexOf("Wett")#7
+Open#"In der Wetterau".lastIndexOf("WETT")#-1
 Open#"aA b c".split(" ").length#3
 YesNo#text.charAt( 0 ) und text.substring(0,1) ergeben das gleiche#false
 YesNo#String = null; und String t =""; sind das gleiche#false
@@ -15,3 +18,22 @@ YesNo#String ist ein primitiver Datentyp#false
 Open#Womit testet man zwei Strings auf gleichen Inhalt?#equals
 Options#Was macht die Methode trim() in der Klasse String?#0#Leerzeichen am Rand entfernen#Alle Leerzeichen entfernen#Den String auf eine Standardlaenge kuerzen
 MultiOptions#t und s sind String-Referenzen#0,2#wenn t == s, dann gilt auch t.equals(s)#wenn t.equals(s), dann gilt auch t == s#wenn t.equals(s), dann gilt auch s.equals( t )
+<<
+String text = "*";
+for( int i=0; i<3; i++ ) {
+   text =  "-" + text + "-";
+}
+System.out.println(  text );
+#
+---*---
+>>
+<<
+String t1 = "abcd";
+String t2 = "";
+for( int i=0; i<t1.length(); i++ ) {
+   t2 = t1.charAt( i) + t2;
+}
+System.out.println(  t2 );
+#
+dcba
+>>
