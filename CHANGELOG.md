@@ -1,5 +1,6 @@
 ## Version 
 
+- 1.4 rearranged menus for snippets (Januar 2020)
 - 1.33 new form oval ("o") (November 2019)
 - 1.32 changes in Java compile, new trainer level (October 2019)
 - 1.32 askInteger method (September 2019)
