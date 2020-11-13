@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<snippet locale="de_DE" name="chess">
+    <author>nobody</author>
+    <created>Fri Nov 13 12:13:35 CET 2020</created>
+    <codeA>
+        <![CDATA[
+groesse( 8, 8 );
+formen( "s" );
+farben( WHITE );
+for( int i=0; i<8; i++ ) {
+   for( int j=0; j<8; j++ ) {
+      if( (i+j) %2 == 0 ) {
+         farbe2( i, j,  LIGHTSTEELBLUE );
+      }
+   }
+}
+
+statusText( "CHESS");
+getBoard().receiveMessage( ">>fontsize 48" );
+getBoard().receiveMessage( ">>fonttype Dialog" );
+
+char[] white = {'\u2656', '\u2658','\u2657','\u2655','\u2654','\u2657','\u2658','\u2656', };
+char[] black = {'\u265c', '\u265e','\u265d','\u265b','\u265a','\u265d','\u265e','\u265c', };
+for( int i=0; i <8; i++ ) {
+	zeichen2( i, 0, white[i] );
+	zeichen2( i, 7, black[i] );
+	zeichen2( i, 1, '\u2659' );
+	zeichen2( i, 6, '\u265F' );
+}
+
+
+
+
+
+]]>
+    </codeA>
+    <language>Java</language>
+</snippet>
