@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<snippet locale="de_DE" name="fontDemo">
+    <author>nobody</author>
+    <created>Fri Nov 13 11:56:45 CET 2020</created>
+    <codeA>
+        <![CDATA[
+groesse(1, 2);
+formen("none");
+getBoard().receiveMessage(">>fontsize 32");
+getBoard().receiveMessage(">>statusfontsize 32");
+text2(0, 1, "abcdefghijklmnopqrstuvwxyz");
+text2(0, 0, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+
+var ge = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
+var fonts = ge.getAllFonts();
+
+Random r = new Random();
+for (;;) {
+   int i = r.nextInt(fonts.length);
+   String family = fonts[i].getFamily();
+   statusText(family);
+   getBoard().receiveMessage(">>fonttype " + family);
+   plotter.Sleep.sleep(1000);
+}
+
+
+]]>
+    </codeA>
+    <language>Java</language>
+</snippet>
