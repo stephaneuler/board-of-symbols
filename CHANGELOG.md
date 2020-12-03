@@ -1,5 +1,6 @@
 ## Version 
 
+- 1.45 Drag & drop snippet file into codeview, style checker 
 - 1.4 new inspector tool (March 2020)
 - 1.4 rearranged menus for snippets (Januar 2020)
 - 1.33 new form oval ("o") (November 2019)
