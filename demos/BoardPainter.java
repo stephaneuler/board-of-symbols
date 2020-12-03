@@ -21,7 +21,7 @@ import plotter.Graphic;
 // ****************************************************************
 // Demo fuer GUI-Moeglichkeiten mit BoS
 // Version Wann      Wer  Was
-// 1.0     20.12.03  SE   Erste Versio
+// 1.0     20.12.03  SE   Erste Version
 //****************************************************************
 
 public class BoardPainter implements BoardClickListener {
@@ -30,7 +30,7 @@ public class BoardPainter implements BoardClickListener {
 	private int farben[] = { XSendAdapter.GREEN, XSendAdapter.YELLOW, XSendAdapter.RED };
 	private String[] farbNamen = { "Gruen", "Gelb", "Rot" };
 	private int zeichenFarbe = XSendAdapter.BLUE;
-	private int standardfarbe = XSendAdapter.LIGHTGRAY;
+	private int standardFarbe = XSendAdapter.LIGHTGRAY;
 	private int groesse = 10;
 
 	public static void main(String[] args) {
@@ -43,7 +43,7 @@ public class BoardPainter implements BoardClickListener {
 		Graphic graphic = board.getGraphic();
 		xsend = new XSendAdapter(board);
 		xsend.groesse(groesse, groesse );
-		xsend.farben(standardfarbe);
+		xsend.farben(standardFarbe);
 
 		graphic.setTitle("Board Painter Version 1.0");
 		board.addClickListener(this);
@@ -79,7 +79,7 @@ public class BoardPainter implements BoardClickListener {
 	
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				xsend.farben(XSendAdapter.LIGHTGRAY);
+				xsend.farben( standardFarbe );
 			}
 		});
 	
