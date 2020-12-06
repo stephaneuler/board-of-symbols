@@ -1,5 +1,5 @@
-# board-of-symbols (BoS)
-Board of Symbols (BoS) is an application for teaching (learning) programming. 
+# board-of-symbols (BoSym)
+Board of Symbols (BoSym) is an application for teaching (learning) programming. 
 Using a set of given functions small code snippets produce patterns on a NxM board.
 For example the following JS-Code
 
@@ -30,11 +30,11 @@ The example uses the German version. You can change the language in the menu Opt
 A short video with the first steps: https://www.youtube.com/watch?v=VLVigtQNIeU&feature=youtu.be
 
 ## Important hints
-BoS requires a Java runtime (JRE) and a compiler (SDK). 
+BoSym requires a Java runtime (JRE) and a compiler (SDK). 
 - if necessary, install a SDK
 - BoS needs to find the command javac. If the bin-directory is not in the Path, add it in the properties menue
 - different versions of SDK and JRE can cause problems. Make sure that they have the same version. 
-- starting BoS with double click on jserver.jar sometime runs into problems. Try starting it from the command shell. 
+- starting BoSym with double click on jserver.jar sometime runs into problems. Try starting it from the command shell. 
 
 
 ## How to start - C
