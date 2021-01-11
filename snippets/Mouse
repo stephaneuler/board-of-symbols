@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<snippet locale="de_DE" name="maus">
+    <author>Stephan Euler</author>
+    <created>Mon Jan 11 16:36:33 CET 2021</created>
+    <codeA>
+        <![CDATA[
+
+@Complete
+
+void mySend() throws InterruptedException {
+
+   for( ;; ) {
+	      Thread.sleep( 100 );
+        String s = abfragen(  );
+        if( s.startsWith( "#" ) )  {
+  	        String[] teile = s.split(" " );
+	          int x = Integer.parseInt( teile[2] );
+	          int y = Integer.parseInt( teile[3] );
+	          statusText(  "Mausklick: " + x  + ", " + y);
+        }
+    }
+}
+
+]]>
+    </codeA>
+    <language>Java</language>
+    <updated>Mon Jan 11 16:46:08 CET 2021</updated>
+</snippet>
