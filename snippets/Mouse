@@ -10,7 +10,7 @@
 void mySend() throws InterruptedException {
 
    for( ;; ) {
-	      Thread.sleep( 100 );
+	Thread.sleep( 100 );
         String s = abfragen(  );
         if( s.startsWith( "#" ) )  {
   	        String[] teile = s.split(" " );
