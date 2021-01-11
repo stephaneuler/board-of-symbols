@@ -11,12 +11,14 @@ void mySend() throws InterruptedException {
 
    for( ;; ) {
 	Thread.sleep( 100 );
+        // wait for mouse clicks 
         String s = abfragen(  );
         if( s.startsWith( "#" ) )  {
+                // message has the form "# n x y"
   	        String[] teile = s.split(" " );
-	          int x = Integer.parseInt( teile[2] );
-	          int y = Integer.parseInt( teile[3] );
-	          statusText(  "Mausklick: " + x  + ", " + y);
+	        int x = Integer.parseInt( teile[2] );
+	        int y = Integer.parseInt( teile[3] );
+	        statusText(  "Mausklick: " + x  + ", " + y);
         }
     }
 }
