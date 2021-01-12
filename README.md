@@ -1,5 +1,5 @@
 # board-of-symbols (BoSym)
-Board of Symbols (BoSym) is an application for teaching (learning) programming. 
+Board of Symbols (BoSym, up to 2021 BoS) is an application for teaching (learning) programming. 
 Using a set of given functions small code snippets produce patterns on a NxM board.
 For example the following JS-Code
 
