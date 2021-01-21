@@ -25,6 +25,9 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import jserver.Board;
+import jserver.BoardClickEvent;
+import jserver.BoardClickListener;
+import jserver.Dialogs;
 import jserver.Symbol;
 import jserver.XSendAdapter;
 import plotter.Graphic;
@@ -35,26 +38,32 @@ enum SortierVerfahren {
 	SELECTION, INSERTION, INSERTION_INTERVAL, BUBBLE, SHAKER, GNOME, SELECTION_M, QUICK, SHELL, BOZO
 }
 
+// Version wer wann   was
+// 1.0     se  20-12  erste oeffentliche Version
+// 1.1     se  21-01  Anzeige Anzahl Tauschoperationen, Klick auf Wert, ...
+
+
 /**
- * This class is a BoS based visualization of sorting algorithms.
+ * This class is a BoSym based visualization of sorting algorithms.
  * 
  * @author Stephan Euler
- * @version 1.0 December 2020
+ * @version 1.1 Januar 2021
  *
  */
-public class SortiererGUI implements ActionListener, ChangeListener {
-	static final String VERSION = "BoS-Sortierer, V1.0 Dec 20";
+public class SortiererGUI implements ActionListener, ChangeListener, BoardClickListener {
+	static final String VERSION = "BoSym-Sortierer, V1.1 Jan. 21";
 	static final int SLEEP_MIN = 0;
 	static final int SLEEP_MAX = 500;
 	static final int SLEEP_INIT = SLEEP_MAX / 2;
 
-	Bruch[] brueche; // Vorteil gegenüber double: Zaehler fuer Vergleiche
-	XSendAdapter xsend = new XSendAdapter();
-	Board board = xsend.getBoard();
-	Graphic graphic = board.getGraphic();
+	private Bruch[] brueche; // Vorteil gegenüber double: Zaehler fuer Vergleiche
+	private XSendAdapter xsend = new XSendAdapter();
+	private Board board = xsend.getBoard();
+	private Graphic graphic = board.getGraphic();
 	boolean zufallModus = true;
 	private int warteZeit = SLEEP_INIT;
 	private int anzahlWerte = 30;
+	private int anzahlTauschen = 0;
 	private boolean pause = false;
 	private boolean weiter = true;
 	private boolean showInfo = true;
@@ -94,21 +103,7 @@ public class SortiererGUI implements ActionListener, ChangeListener {
 	}
 
 	void selectionSort() {
-		for (int ende = brueche.length; ende > 1 & weiter; ende--) {
-			int maxIndex = findeMax(ende);
-
-			// Tauschen
-			Bruch tmp = brueche[maxIndex];
-			brueche[maxIndex] = brueche[ende - 1];
-			brueche[ende - 1] = tmp;
-
-			// Symbole anpassen
-			xsend.farbe(maxIndex, XSendAdapter.BLUE);
-			setzeGroesse(maxIndex, brueche[maxIndex]);
-			xsend.farbe(ende - 1, XSendAdapter.LIGHTGREEN);
-			setzeGroesse(ende - 1, brueche[ende - 1]);
-		}
-		xsend.farbe(0, XSendAdapter.LIGHTGREEN);
+		selectionSort( 0, brueche.length  );
 	}
 
 	void selectionSort(int start, int ende) {
@@ -160,19 +155,25 @@ public class SortiererGUI implements ActionListener, ChangeListener {
 	void bubbleSort() {
 		xsend.statusText("Bubble Sort");
 		for (int n = brueche.length; n > 1 & weiter; n = n - 1) {
+			boolean changed = false;
 			for (int i = 0; i < n - 1 & weiter; i = i + 1) {
 				aendere(i, XSendAdapter.YELLOW);
 				// aendere(i+1, XSendAdapter.YELLOW);
 				Sleep.sleep(warteZeit);
+				xsend.statusText("Bubble Sort " + countText());
 				if (brueche[i].groesser(brueche[i + 1])) {
 					tausche(i, i + 1);
 					// aendere(i, XSendAdapter.RED);
 					aendere(i + 1, XSendAdapter.RED);
 					Sleep.sleep(warteZeit);
+					changed = true;
 				}
 				warten();
 				aendere(i, XSendAdapter.BLUE);
 				aendere(i + 1, XSendAdapter.BLUE);
+			}
+			if( ! changed ) {
+				return;
 			}
 			aendere(n - 1, XSendAdapter.LIGHTGREEN);
 		}
@@ -219,6 +220,7 @@ public class SortiererGUI implements ActionListener, ChangeListener {
 		int pos = 0;
 		xsend.statusText("Gnome Sort");
 		while (pos < brueche.length & weiter) {
+			xsend.statusText("Gnome Sort " + countText() );
 			aendere(pos, XSendAdapter.YELLOW);
 			Sleep.sleep(warteZeit);
 			warten();
@@ -263,6 +265,7 @@ public class SortiererGUI implements ActionListener, ChangeListener {
 			aendere(i, XSendAdapter.LIGHTGREEN);
 			for (int k = i; k < ziel; k++) {
 				brueche[k] = brueche[k + 1];
+				++anzahlTauschen;
 				aendere(k, XSendAdapter.LIGHTGREEN);
 				aendere(k + 1, XSendAdapter.LIGHTYELLOW);
 				warten();
@@ -291,6 +294,7 @@ public class SortiererGUI implements ActionListener, ChangeListener {
 			aendere(i, XSendAdapter.LIGHTGREEN);
 			for (int k = i; k < ziel; k++) {
 				brueche[k] = brueche[k + 1];
+				++anzahlTauschen;
 				aendere(k, XSendAdapter.LIGHTGREEN);
 				aendere(k + 1, XSendAdapter.LIGHTYELLOW);
 				warten();
@@ -414,7 +418,7 @@ public class SortiererGUI implements ActionListener, ChangeListener {
 	}
 
 	void quickSort(int links, int rechts) {
-		xsend.statusText("Quick Sort");
+		xsend.statusText("Quick Sort "  + countText() );
 		if (links >= rechts) {
 			if (links < brueche.length) {
 				aendere(links, XSendAdapter.LIGHTGREEN);
@@ -486,6 +490,7 @@ public class SortiererGUI implements ActionListener, ChangeListener {
 	}
 
 	private void tausche(int i, int j) {
+		++anzahlTauschen;
 		Bruch tmp = brueche[i];
 		brueche[i] = brueche[j];
 		brueche[j] = tmp;
@@ -517,7 +522,7 @@ public class SortiererGUI implements ActionListener, ChangeListener {
 	}
 
 	private String countText() {
-		return Bruch.getAnzahlVergleiche() + " Vergleiche";
+		return Bruch.getAnzahlVergleiche() + " Vergleiche, " + anzahlTauschen + " Vertauschungen";
 	}
 
 	private void fuelleZufall(int N) {
@@ -563,6 +568,7 @@ public class SortiererGUI implements ActionListener, ChangeListener {
 	void anlegen() {
 		board.setSize(900, 260);
 		board.receiveMessage("statusfontsize 16");
+		board.addClickListener(this);
 		Symbol.setFontSize(24);
 		Symbol.setBarWidth(0.3);
 		xsend.formen("b");
@@ -575,6 +581,7 @@ public class SortiererGUI implements ActionListener, ChangeListener {
 	
 		Plotter plotter = graphic.getPlotter();
 		plotter.setYrange(-.55, .6);
+		xsend.statusText("BoSym Sortierer");
 	}
 
 	private void addButtons() {
@@ -590,15 +597,13 @@ public class SortiererGUI implements ActionListener, ChangeListener {
 		graphic.addBottomComponent(fillButton);
 		graphic.addBottomComponent(mixButton);
 		graphic.addBottomComponent(reverseButton);
-		graphic.addBottomComponent(Box.createHorizontalStrut(8));
-		graphic.addBottomComponent(new JSeparator(JSeparator.VERTICAL));
+ 		graphic.addBottomComponent(Box.createHorizontalStrut(16));
 
 		graphic.addBottomComponent(startButton);
 		graphic.addBottomComponent(pauseButton);
 		graphic.addBottomComponent(resumeButton);
 		graphic.addBottomComponent(abortButton);
-		graphic.addBottomComponent(Box.createHorizontalStrut(8));
-		graphic.addBottomComponent(new JSeparator(JSeparator.VERTICAL));
+		graphic.addBottomComponent(Box.createHorizontalGlue());		
 	}
 
 	private void addAlgoButtons() {
@@ -654,8 +659,9 @@ public class SortiererGUI implements ActionListener, ChangeListener {
 					startButton.setEnabled(false);
 					mixButton.setEnabled(false);
 					reverseButton.setEnabled(false);
-					countLabel.setText("0 Vergleiche");
 					Bruch.resetAnzahlVergleiche();
+					anzahlTauschen = 0;
+					countLabel.setText( countText() );
 					showInfo = true;
 					switch (verfahren) {
 					case SELECTION:
@@ -791,5 +797,27 @@ public class SortiererGUI implements ActionListener, ChangeListener {
 		if (!source.getValueIsAdjusting()) {
 			warteZeit = (int) source.getValue();
 		}
+	}
+
+	@Override
+	public void boardClick(BoardClickEvent info) {
+		System.out.println( info );
+		int index = info.getX();
+		if( info.getButton() == 1  ) {
+			xsend.statusText( index + ". Wert: " + brueche[index]  );
+		} else {
+			String s = Dialogs.askString("Neuer Wert fuer "+ brueche[index] );
+			if( s != null && s.matches("[0-9]+/[0-9]+" )) {
+				String[] parts = s.split("/");
+				int zaehler = Integer.parseInt(parts[0]);
+				int nenner  = Integer.parseInt(parts[1]);
+				brueche[index]  = new Bruch( zaehler, nenner);
+				alleAktualisieren();
+				xsend.statusText( index + ". Wert neu: " + brueche[index]  );
+			} else {
+				xsend.statusText( "Bitte Format n/z nutzen"  );
+			}
+		}
+		
 	}
 }
