@@ -1,5 +1,6 @@
 ## Version 
 
+- 1.45a add method Dialogs.askStringMessage(String message)  (March 2021)
 - 1.45 Simplified style checker messages (January 2021)
 - 1.45 Drag & drop snippet file into codeview, style checker (December 2020)
 - 1.4 new inspector tool (March 2020)
