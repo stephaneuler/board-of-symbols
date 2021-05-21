@@ -1,6 +1,6 @@
 ## Version 
 
-- 1.46 minor change in Plotter package  (Mai 2021)
+- 1.47 new symbol FRAME, minor change in Plotter package  (Mai 2021)
 - 1.46 solved Trainer bug  (April 2021)
 - 1.45a add method Dialogs.askStringMessage(String message)  (March 2021)
 - 1.45 Simplified style checker messages (January 2021)
