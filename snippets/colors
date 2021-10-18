@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<snippet locale="en_US" name="colors">
+    <author>Stephan Euler</author>
+    <created>Mon Oct 18 17:35:08 CEST 2021</created>
+    <codeA>
+        <![CDATA[size(9,3);
+border( WHITE );
+area( BLUE );
+colors( YELLOW );
+
+board.receiveMessage(">>borderWidth  5");
+
+board.receiveMessage(">>graphicBorder  " + LIGHTPINK);
+board.receiveMessage(">>backgrounds 0xff00");
+
+board.receiveMessage(">>fontsize 36");
+board.receiveMessage(">>fonttype Jokerman");
+String letters = "COLOR";
+for( int i=0; i<letters.length(); i++  ){
+  text2( 2 + i, 1, letters.substring(i, i+1) );
+  textColor2( 2 + i, 1,  (int)(Math.random() * 256 * 256 *256 ) );
+}
+
+statusText( "color demo" );
+board.receiveMessage(">>statusfontsize 24");
+board.receiveMessage(">>statusColor " + DARKSLATEBLUE);
+
+
+]]>
+    </codeA>
+    <language>Java</language>
+    <updated>Mon Oct 18 18:15:49 CEST 2021</updated>
+</snippet>
