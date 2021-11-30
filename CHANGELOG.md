@@ -1,6 +1,6 @@
 ## Version 
 
-- 1.48 CodeWindow, autosave of snippets (October 2021)
+- 1.48 CodeWindow, autosave of snippets (November 2021)
 - 1.48 more BoSL comands such as graphicBorder  (October 2021)
 - 1.48 more BoSL comands such as graphicBorder  (October 2021)
 - 1.47 new symbol FRAME, minor change in Plotter package  (Mai 2021)
