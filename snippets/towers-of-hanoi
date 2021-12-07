@@ -61,7 +61,6 @@ void lege(int n, int von, int nach, int zwischen) throws InterruptedException {
    if (n > 0) {
       lege(n - 1, von, zwischen, nach);
       ziehe( von, nach );
-      //zeichnen();
       statusText("N="+N + " Zug Nr. " + anzahlSchritte);
       Thread.sleep( sleepTime);
       lege(n - 1, zwischen, nach, von);
