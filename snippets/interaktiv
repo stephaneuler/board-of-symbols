@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<snippet locale="de_DE" name="interaktiv">
+    <author>Stephan Euler</author>
+    <created>Wed Dec 08 13:55:48 CET 2021</created>
+    <codeA>
+        <![CDATA[
+// Demo Moeglichkeiten der Interaktion mit Maus, Tastatur, Button & Eingabefeld
+
+@Complete
+void mySend() throws InterruptedException {
+  int size = 30;
+  setUp( size );
+  laufe( size );
+
+}
+void setUp(int size) {
+  groesse( size, 1 );
+  board.setSize(600, 200);
+  board.getGraphic().setTitle("Interaktiv-Demo Dez. 21");
+
+  board.receiveMessage( ">>removeAllButtons" );
+  board.receiveMessage( ">>button Pause east" );
+  board.receiveMessage( ">>button Anfang east" );
+  board.receiveMessage( ">>button Ende south" );
+  board.receiveMessage( ">>showInput" );
+}
+
+void laufe(int size) throws InterruptedException {
+  boolean pause = false;
+  int pos = 0;
+  int farbe = BLUE;
+  int ruheFarbe =  ORANGE;
+  int sleep = 200;
+
+  farben(ruheFarbe);
+  for( ;; ) {
+    if( ! pause ) {
+      farbe2( pos, 0, ruheFarbe );
+      pos = (pos + 1 ) % size;
+      farbe2( pos, 0, farbe );
+    }
+    Thread.sleep( sleep );
+
+    String s = abfragen();
+    if (s.isEmpty())  {
+      continue;
+    }
+    statusText(  "Abfrage: " + s);
+    if( s.startsWith( "#" ) )  {
+      // message has the form "# n x y c"
+      String[] teile = s.split(" " );
+      farbe2( pos, 0, ruheFarbe );
+      pos = Integer.parseInt( teile[2] );
+    } else if( s.equals("Pause" ) | s.startsWith("$ 80 P" )) {
+      pause = ! pause;
+      if( pause ) {
+        flaeche( LIGHTGOLDENRODYELLOW );
+      } else {
+        flaeche( 0xeeeeee );
+      }
+    } else if( s.equals("Ende" ) ) {
+      break;
+    } else if( s.equals("Anfang" ) ) {
+      farbe2( pos, 0, ruheFarbe );
+      pos = -1;
+    } else if( s.startsWith("farbe" ) ) {
+      String[] teile = s.split(" " );
+      farbe = Integer.decode( teile[1] );
+    } else if( s.startsWith("sleep" ) ) {
+      String[] teile = s.split(" " );
+      sleep = Integer.decode( teile[1] );
+    } else if( s.startsWith("$ 39" ) ) {  // Pfeil rechts
+      sleep = 3 * sleep / 4;
+      statusText(  s + " Sleep: " + sleep );
+    } else if( s.startsWith("$ 37" ) ) {  // Pfeil links
+      sleep = 4 * sleep / 3;
+      statusText(  s + " Sleep: " + sleep );
+    }
+  }
+}
+
+]]>
+    </codeA>
+    <language>Java</language>
+    <updated>Thu Dec 09 16:19:54 CET 2021</updated>
+</snippet>
