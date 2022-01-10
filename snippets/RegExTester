@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<snippet locale="de_DE" name="RegExTester">
+    <author>Stephan Euler</author>
+    <created>Mon Jan 10 15:39:38 CET 2022</created>
+    <codeA>
+        <![CDATA[
+// RegEx Tester
+// SE, Jan 2022
+
+String[] tests = {"", "a", "aa", "aaa", "aaaa", "ab"};
+String[] regs = {"a?", "a+", "aa+", "a*", "a{2}", "a{1,2}", "a{2,}", "a.*", "a|aaa"};
+int width = regs.length + 2;
+int height = tests.length + 2;
+
+@Complete
+
+void mySend() {
+  setUp();
+  printHead();
+  printLine();
+  printTable();
+  
+}
+
+void setUp() {
+  groesse(width, height);
+  formen("F");
+  flaeche(   PAPAYAWHIP );
+  rahmen(BLACK);
+  statusText("RegEx Tester");
+  getBoard().receiveMessage(">>fontsize 24");
+  getBoard().receiveMessage(">>fonttype Dialog");
+  getBoard().receiveMessage(">>statusfontsize 28");
+  getBoard().receiveMessage(">>borderWidth 2.5");
+  getBoard().receiveMessage(">>graphicBorder " + PAPAYAWHIP);
+}
+
+void printHead() {
+  System.out.print("      |");
+  for (int i = 0; i < regs.length; i++) {
+    text2(i + 2, height - 1, regs[i]);
+  }
+  System.out.println();
+}
+
+void printLine() {
+  for (int x = 0; x < width; x++) {
+    form2(x, height - 2, "-");
+  }
+  for (int y = 0; y < height; y++) {
+    form2(1, y, "|");
+  }
+  form2(1, height - 2, "+");
+  form2(0, height - 1, "\\");
+}
+
+void printTable() {
+  for (int i = 0; i < tests.length;  i++) {
+    int y = tests.length - i - 1;
+    text2(0, y, "\"" + tests[i] + "\"");
+    for (int j = 0; j < regs.length; j++) {
+      boolean match = tests[i].matches(regs[j]);
+      if (match) {
+        text2(j + 2, y, "&#x2714;");
+        textFarbe2(j + 2, y,  GREEN);
+      } else {
+        text2(j + 2, y,  "&#x2718;");
+        textFarbe2(j + 2, y,  RED);
+      }
+    }
+  }
+}
+
+]]>
+    </codeA>
+    <language>Java</language>
+    <updated>Mon Jan 10 16:11:14 CET 2022</updated>
+</snippet>
