@@ -37,7 +37,7 @@ The image is scaled to the size of the symbol (that can be changed with the func
 *  `textColor2` *x y color* set the text color for symbol at position (x,y)
 *  `backgrounds` *color* set the background  color for all symbols  
 *  `graphicBorder` *color* set the color for the border region   
-*  `borderwidth` *w* the width of the border line
+*  `borderWidth` *w* the width of the border line
 *  `symbolSizes` *r* changes the size of all symbols
 *  *m1 f1 m2 f2 m3 f3 ...* (a sequence of pairs index - color) changes the color of the specified fields
 *  `clearCommands` clears the command queue
