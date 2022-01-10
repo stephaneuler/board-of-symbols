@@ -61,10 +61,10 @@ void printTable() {
     for (int j = 0; j < regs.length; j++) {
       boolean match = tests[i].matches(regs[j]);
       if (match) {
-        text2(j + 2, y, "&#x2714;");
+        text2(j + 2, y, "\u2714");
         textFarbe2(j + 2, y,  GREEN);
       } else {
-        text2(j + 2, y,  "&#x2718;");
+        text2(j + 2, y,  "\u2718");
         textFarbe2(j + 2, y,  RED);
       }
     }
