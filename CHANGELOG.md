@@ -1,5 +1,6 @@
 ## Version 
 
+- add InputUnit from Plotter-project (Februar 2022)
 - 1.48 removed bug with key input (December 2021)
 - 1.48 CodeWindow, autosave of snippets (November 2021)
 - 1.48 more BoSL comands such as graphicBorder  (October 2021)
