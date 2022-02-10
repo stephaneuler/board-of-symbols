@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<snippet locale="de_DE" name="gameofLife">
+    <author>Stephan Euler</author>
+    <created>Tue Jan 18 10:40:06 CET 2022</created>
+    <codeA>
+        <![CDATA[// Simulation Game Of Life
+// Vorlesung 10.02.2022
+// InputUnit
+// zusätzlich Methoden und Eingaben ueber Buttons und Maus
+
+@Complete
+
+utils.InputUnitD probInput;
+
+void mySend()  throws InterruptedException  {
+  int n = 100;
+  groesse(n, n);
+  flaeche(WHITE);
+  statusText("game of life");
+  board.receiveMessage(">>removeAllButtons");
+  board.receiveMessage(">>clearCommands");
+  board.receiveMessage(">>button pause SOUTH");
+  board.receiveMessage(">>button stop SOUTH");
+
+  probInput  = new  utils.InputUnitD(board.getGraphic(), "Symbolgroesse",0.5, "south");
+
+  int[][] feld = new int[n + 2][n + 2];
+  fuelleZufall(feld);
+  simulation(feld);
+
+}
+
+void simulation(int[][] feld) throws InterruptedException {
+  zeichnen(feld);
+  boolean pause = true;
+  for (int t = 1; ; t++) {
+    String meldung = abfragen();
+
+    if (meldung.equals("stop")) {
+      break;
+    } else if (meldung.equals("pause")) {
+      pause = ! pause;
+      statusText("Pause " + (pause? "Ein":"Aus"));
+    } else if (meldung.equals("$ 17 Strg")) {
+      loeschen( feld );
+    } else if (meldung.startsWith("#")) {
+      String[] parts = meldung.split(" ");
+      int xd = 1 + Integer.parseInt(parts[2]);
+      int yd = 1 + Integer.parseInt(parts[3]);
+      if (feld[xd][yd] == 1) {
+        feld[xd][yd] = 0;
+      } else {
+        feld[xd][yd] = 1;
+      }
+      zeichnen(feld);
+    }
+    Thread.sleep(200);
+    if (! pause) {
+      statusText("game of life: generation " + t);
+      feld = naechsteGeneration(feld);
+      zeichnen(feld);
+    }
+  }
+}
+
+int leben(int ist, int anz)  {
+  if (ist == 0 & anz == 3) {
+    return 1;
+  }
+  if (ist == 1 & (anz == 2 | anz == 3))  {
+    return 1;
+  }
+  return 0;
+}
+
+int[][]  naechsteGeneration(int[][] feld) {
+  int[][] neu = new int[feld.length][feld.length];
+
+  for (int x = 1; x < feld.length - 1; x++) {
+    for (int y = 1; y < feld.length - 1; y++) {
+      neu[x][y] = leben(feld[x][y], nachbarn(feld, x, y));
+      int anz = nachbarn(feld, x, y);
+    }
+  }
+  return neu;
+}
+
+int nachbarn(int[][] feld, int x, int y) {
+  int sum = 0;
+  for (int xi = x - 1; xi <= x + 1; xi++) {
+    for (int yi = y - 1; yi <= y + 1; yi++) {
+      sum += feld[xi][yi];
+    }
+  }
+  sum -= feld[x][y];
+  return sum;
+}
+
+void fuelleZufall(int[][] feld) {
+  for (int x = 1; x < feld.length - 1; x++) {
+    for (int y = 1; y < feld.length - 1; y++) {
+      if (Math.random() < .5) {
+        feld[x][y] = 1;
+      }
+    }
+  }
+}
+
+void teste(int[][] feld) {
+  for (int x = 1; x < feld.length - 1; x++) {
+    for (int y = 1; y < feld.length - 1; y++) {
+      text2(x - 1, y - 1, "" + nachbarn(feld, x, y));
+    }
+  }
+}
+
+void loeschen(int[][] feld) {
+  for (int x = 1; x < feld.length - 1; x++) {
+    for (int y = 1; y < feld.length - 1; y++) {
+      feld[x][y] = 0;
+    }
+  }
+}
+
+void zeichnen(int[][] feld) {
+  formen("none");
+  symbolGroessen( probInput.getValue() );
+  for (int x = 1; x < feld.length - 1; x++) {
+    for (int y = 1; y < feld.length - 1; y++) {
+      if (feld[x][y] == 1) {
+        farbe2(x - 1, y - 1, GREEN);
+        form2(x - 1, y - 1, "d");
+      }
+    }
+  }
+}
+
+]]>
+    </codeA>
+    <language>Java</language>
+    <updated>Thu Feb 10 08:29:40 CET 2022</updated>
+</snippet>
