@@ -16,6 +16,7 @@ import utils.InputUnitS;
 // Simulation of an Elementary cellular automaton
 // https://en.wikipedia.org/wiki/Elementary_cellular_automaton
 // SE Feb 2022
+// benoetigt fuer InputUnit jserver Version ab Februar 2022
 
 public class Cellular {
 	private static final double SYMBOL_GROESSE = 0.45;
