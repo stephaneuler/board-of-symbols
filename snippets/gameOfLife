@@ -124,7 +124,7 @@ void loeschen(int[][] feld) {
 
 void zeichnen(int[][] feld) {
   formen("none");
-  symbolGroessen( probInput.getValue() );
+  symbolGroessen(probInput.getOptValue().orElse(0.5)));
   for (int x = 1; x < feld.length - 1; x++) {
     for (int y = 1; y < feld.length - 1; y++) {
       if (feld[x][y] == 1) {
