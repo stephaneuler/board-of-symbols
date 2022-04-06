@@ -9,7 +9,6 @@ This directory contains some documentation for BoS.
 Some additional links:
 * [BoSym Gallery](https://hosting.iem.thm.de/user/euler/gallery2/index.php?inhalt=home "some screenshots from BoS projects")
 * [BoSym Live (in German, using JavaScript)](https://hosting.iem.thm.de/user/euler/gallery2/index.php?inhalt=live "first live version")
-* [ BoSym channel on youtube](https://www.youtube.com/channel/UCzCCpJgSjXkTXP3rHSvkEGA/ "some videos")
-* [Old BoSym channel on youtube](https://www.youtube.com/channel/UCElCYEug97vk-LvFMI6k3ow/videos "some videos")
+* [BoSym channel on youtube](https://www.youtube.com/channel/UCzCCpJgSjXkTXP3rHSvkEGA/ "some videos")
 * [The Plotter project (base for BoSym)](https://hosting.iem.thm.de/user/euler/plotter/index.php "plotter docu")
 
