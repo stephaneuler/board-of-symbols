@@ -11,4 +11,5 @@ Some additional links:
 * [BoSym Live (in German, using JavaScript)](https://hosting.iem.thm.de/user/euler/gallery2/index.php?inhalt=live "first live version")
 * [BoSym channel on youtube](https://www.youtube.com/channel/UCzCCpJgSjXkTXP3rHSvkEGA/ "some videos")
 * [The Plotter project (base for BoSym)](https://hosting.iem.thm.de/user/euler/plotter/index.php "plotter docu")
+* [BoSym Quiz (in German)](https://hosting.iem.thm.de/user/euler/quiz/index.php?inhalt=topic&topic=BoS.top "questions")
 
