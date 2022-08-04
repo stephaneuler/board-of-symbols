@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<snippet locale="de_DE" name="sieb">
+    <author>Stephan Euler</author>
+    <created>Mon Aug 01 16:52:43 CEST 2022</created>
+    <codeA>
+        <![CDATA[// Berechnung der Primazahlen bis zur Schranke max
+// nach dem Sieb des Eratosthenes
+// Die Anzahl der Durchgaenge ist vorgegeben.
+
+int max = 30;
+int schritte = 4;
+boolean[] istPrimzahl = new boolean[max];
+
+groesse(max, schritte);
+for (int i = 2; i < max; i++) {
+  text2(i, 0, "" + i);
+  farbe2(i, 0, LIGHTGREEN);
+  istPrimzahl[i] = true;
+}
+int naechstePrimzahl = 2;
+for (int y = 1; y < schritte; y++) {
+  while (! istPrimzahl[naechstePrimzahl]) {
+    ++naechstePrimzahl;
+  }
+  text2(0, y, "" + naechstePrimzahl);
+  for (int i = 2 * naechstePrimzahl; i < max; i += naechstePrimzahl) {
+    istPrimzahl[i] = false;
+  }
+
+  for (int i = 2; i < max; i++) {
+    if (istPrimzahl[i]) {
+      farbe2(i, y, LIGHTGREEN);
+      text2(i, y, "" + i);
+    }
+  }
+  ++naechstePrimzahl;
+}
+
+]]>
+    </codeA>
+    <language>Java</language>
+    <updated>Thu Aug 04 11:55:34 CEST 2022</updated>
+</snippet>
