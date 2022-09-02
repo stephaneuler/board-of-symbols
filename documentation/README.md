@@ -1,9 +1,9 @@
-This directory contains some documentation for BoS. 
+This directory contains some documentation for BoSym (BoS). 
 * installing- ... additional info on installation 
 * bos_en_2: slides from a talk about BoS
 * BoSL commands: list of advanced commands in the boS Language
 * BoSBlueJ: using BoS from BlueJ
-* java-bos-skript: learning Java with BoS (in German)
+* java-bos-skript: learning Java with BoSym (in German)
 * c-skript: learning C with BoS (in German)
 
 Some additional links:
