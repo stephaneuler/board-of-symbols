@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<snippet locale="de_DE" name="formenShow">
+    <author>Stephan Euler</author>
+    <created>Wed Oct 26 10:50:16 CEST 2022</created>
+    <codeA>
+        <![CDATA[// show all forms in a loop
+
+int sleepTime = 1000;
+groesse(1, 1);
+hintergrund(0, WHITE);
+farbe(0, GREEN);
+
+for (SymbolType type : SymbolType.values()) {
+  form(0, SymbolType.getShort(type));
+  statusText("Form: "  + SymbolType.getShort(type) + " " + type);
+  Thread.sleep(sleepTime);
+}
+
+
+]]>
+    </codeA>
+    <language>Java</language>
+    <updated>Wed Oct 26 11:27:55 CEST 2022</updated>
+</snippet>
