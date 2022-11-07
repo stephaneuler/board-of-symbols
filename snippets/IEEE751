@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<snippet locale="de_DE" name="IEEE751">
+    <author>Stephan Euler</author>
+    <created>Mon Nov 07 13:53:57 CET 2022</created>
+    <codeA>
+        <![CDATA[
+// Darstellung von Gleitkommazahlen
+// Version 1.0, Okt 22; SE
+ 
+System.out.println("*******************************************************");
+System.out.println("************** IEEE 751 Gleitkommaformat **************");
+System.out.println("*******************************************************");
+
+float f;
+int i = Dialogs.askInteger("Integer oder 0 für Float");
+if (i != 0)  {
+  System.out.println("Integer Zahl:  " + i);
+  f = Float.intBitsToFloat(i);
+} else {
+  f = (float) Dialogs.askDouble("Float Zahl");
+}
+
+System.out.println("Float Zahl:    " + f);
+i = Float.floatToRawIntBits(f);
+String s = Integer.toBinaryString(i);
+while (s.length() < 32) {
+  s = "0" + s;
+}
+System.out.println("Bitmuster:     " + s);
+System.out.println("Bitmuster:     " + Integer.toHexString(i) + " (hex)");
+int sign = (i & 0x80000000) >>> 31;
+int ch = (i & 0x7f800000) >>> 23;
+int mantisse = i & 0x007fffff;
+
+String sc = Integer.toBinaryString(ch);
+while (sc.length() < 8) {
+  sc = "0" + sc;
+}
+String sm = Integer.toBinaryString(mantisse);
+while (sm.length() < 23) {
+  sm = "0" + sm;
+}
+
+System.out.println("Vorzeichen:    " + sign);
+System.out.println("Charkteristik: " + sc);
+System.out.println("Exponent:      " + (ch - 127) + " (dez)");
+System.out.println("Mantisse:      " + sm);
+
+]]>
+    </codeA>
+    <language>Java</language>
+</snippet>
