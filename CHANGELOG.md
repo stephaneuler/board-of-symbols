@@ -1,6 +1,6 @@
 ## Version 
 
-- 1.51 new symbol type hex (October 2022)
+- 1.51 new symbol type hex, new trainer levels (November 2022)
 - 1.50 more information in BoardClickEvent (September 2022)
 - 1.49 better support for unicode characters in font selector (June 2022)
 - add InputUnit from Plotter-project (Februar 2022)
