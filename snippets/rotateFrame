@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<snippet locale="de_DE" name="rotateFrame">
+    <author>Stephan Euler</author>
+    <created>Fri Dec 02 12:12:12 CET 2022</created>
+    <codeA>
+        <![CDATA[
+@Complete
+
+void mySend() {
+  setUp();
+  animate();
+}
+
+void setUp() {
+  groesse( 4, 3 );
+  String[][] forms = {
+    {"a", "|", "a"},
+    {"-", "t", "-"},
+    {"-", "+", "-"},
+    {"a", "|", "a"} };
+
+  for (int x = 0; x < forms.length; x++) {
+    for (int y = 0; y < forms[x].length; y++) {
+      form2 (x, y, forms[x][y]);
+    }
+  }
+  farben(BLACK);
+  farbe2(1, 1, GREEN);
+  farbe2(2, 1, RED);
+  symbolGroesse2(2, 1, 0.5);
+
+  board.receiveMessage(">>rotate2 0 0 " + Math.PI);
+  board.receiveMessage(">>rotate2 0 2 " +  Math.PI / 2);
+  board.receiveMessage(">>rotate2 3 0 " +  Math.PI / -2);
+}
+void animate()  {
+  int sleepTime = 1000 / 70;
+  board.receiveMessage(">>rotate2 1 1 " + Math.PI / 20);
+  
+  for (double alpha = 0; alpha < 10 * Math.PI; alpha += .1) {
+    board.receiveMessage(">>rotate2 1 1 " + alpha);
+    board.receiveMessage(">>rotate2 2 1 " + -alpha);
+    statusText("Alpha: "  + alpha);
+    plotter.Sleep.sleep(sleepTime);
+  }
+}
+
+
+
+
+
+
+]]>
+    </codeA>
+    <language>Java</language>
+    <updated>Sat Dec 03 16:28:56 CET 2022</updated>
+</snippet>
