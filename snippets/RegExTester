@@ -36,11 +36,9 @@ void setUp() {
 }
 
 void printHead() {
-  System.out.print("      |");
   for (int i = 0; i < regs.length; i++) {
     text2(i + 2, height - 1, regs[i]);
   }
-  System.out.println();
 }
 
 void printLine() {
