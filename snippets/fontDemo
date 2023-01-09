@@ -4,23 +4,30 @@
     <created>Fri Nov 13 11:56:45 CET 2020</created>
     <codeA>
         <![CDATA[
+String text = "ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÜ";
+
 groesse(1, 2);
 formen("none");
-getBoard().receiveMessage(">>fontsize 32");
-getBoard().receiveMessage(">>statusfontsize 32");
-text2(0, 1, "abcdefghijklmnopqrstuvwxyz");
-text2(0, 0, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-
+board.receiveMessage(">>fontsize 32");
+board.receiveMessage(">>statusfontsize 32");
+board.receiveMessage(">>removeAllButtons");
+board.receiveMessage(">>button Ende south");
+text2(0, 1, text.toLowerCase());
+text2(0, 0, text);
 var ge = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
 var fonts = ge.getAllFonts();
 
-Random r = new Random();
+Random random = new Random();
 for (;;) {
-   int i = r.nextInt(fonts.length);
-   String family = fonts[i].getFamily();
-   statusText(family);
-   getBoard().receiveMessage(">>fonttype " + family);
-   plotter.Sleep.sleep(1000);
+  int i = random.nextInt(fonts.length);
+  String family = fonts[i].getFamily();
+  statusText(family);
+  getBoard().receiveMessage(">>fonttype " + family);
+  String s = abfragen();
+  if (s.equals("Ende")) {
+    break;
+  }
+  plotter.Sleep.sleep(1000);
 }
 
 
