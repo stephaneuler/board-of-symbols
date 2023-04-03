@@ -1,8 +1,11 @@
 package chess;
 
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 
@@ -19,7 +22,7 @@ public class ChessGUI implements ActionListener {
 	private Graphic graphic = board.getGraphic();
 	private ChessBoard chessBoard;
 	private ChessController chessController;
-	private JLabel moveCounter = new JLabel("noch keine Zuege");
+	private JLabel moveCounter = new JLabel();
 	private int[] squareColors = { 0xAFAFAF, 0xFFF7A4 };
 
 	public ChessGUI(ChessBoard chessBoard) {
@@ -34,26 +37,27 @@ public class ChessGUI implements ActionListener {
 	public void setUp() {
 		xsend.groesse(chessBoard.getSize(), chessBoard.getSize());
 		xsend.rahmen(XSendAdapter.SADDLEBROWN);
-		board.receiveMessage("borderWidth  14");
+		xsend.statusText("Schach Spiel V0.0");
+		board.receiveMessage("borderWidth  12");
 		board.receiveMessage("fonttype Dialog");
 		board.receiveMessage("fontsize 28");
-		
+		graphic.removeMenu("Brett");
+
 		addButton();
 
-		graphic.addSouthComponent(moveCounter);
-		graphic.removeMenu("Brett");
-		xsend.statusText("Schach Spiel V0.0");
-		
 		drawChessBoard();
-		drawNumbers();    
+		drawCoordinates();
 		drawPosition();
 	}
 
-
 	private void addButton() {
-		JButton startButton = new JButton("Zug");
+		JButton startButton = new JButton("Ziehe");
 		startButton.addActionListener(this);
 		graphic.addSouthComponent(startButton);
+		// Abstand zwischen Button und Label
+		graphic.addSouthComponent(Box.createRigidArea(new Dimension(10, 0)));
+		moveCounter.setBorder(BorderFactory.createEtchedBorder());
+		graphic.addSouthComponent(moveCounter);
 	}
 
 	void drawChessBoard() {
@@ -61,7 +65,7 @@ public class ChessGUI implements ActionListener {
 		xsend.farben(XSendAdapter.LIGHTGRAY);
 		for (int x = 0; x < chessBoard.getSize(); x++) {
 			for (int y = 0; y < chessBoard.getSize(); y++) {
-				if( chessBoard.isBorder( x, y )  ) {
+				if (chessBoard.isBorder(x, y)) {
 					xsend.form2(x, y, "*");
 				} else {
 					xsend.farbe2(x, y, squareColors[(x + y) % 2]);
@@ -69,8 +73,8 @@ public class ChessGUI implements ActionListener {
 			}
 		}
 	}
-	
-	private void drawNumbers() {
+
+	private void drawCoordinates() {
 		int N = chessBoard.getSize();
 		for (int s = 2; s < N - 2; s++) {
 			xsend.text2(s, 1, fileName(s));
@@ -78,14 +82,18 @@ public class ChessGUI implements ActionListener {
 		}
 	}
 
-	// Die Zeilen im Schachbrett nennt man Reihe bzw auf Englisch rank. 
-	private String rankName(int s) {
+	// Die Zeilen im Schachbrett nennt man Reihe bzw auf Englisch rank.
+	static String rankName(int s) {
 		return "" + "  12345678   ".charAt(s);
 	}
 
-	// Die Spalten im Schachbrett nennt man Linien bzw auf Englisch files. 
-	private String fileName(int s) {
+	// Die Spalten im Schachbrett nennt man Linien bzw auf Englisch files.
+	static String fileName(int s) {
 		return "" + "  ABCDEFGH   ".charAt(s);
+	}
+
+	static String fieldName(int x, int y) {
+		return fileName(x) + rankName(y);
 	}
 
 	public void showInfo(String info) {
@@ -94,15 +102,15 @@ public class ChessGUI implements ActionListener {
 
 	public void drawPosition() {
 		clearPieces();
-		
-		for( King king : chessBoard.getKings() ) {
-			xsend.text2( king.getX(), king.getY(), king.getText());
+
+		for (King king : chessBoard.getKings()) {
+			xsend.text2(king.getX(), king.getY(), king.getText());
 		}
-		for( Bishop bishop : chessBoard.getBishops() ) {
-			xsend.text2( bishop.getX(), bishop.getY(), bishop.getText());
+		for (Bishop bishop : chessBoard.getBishops()) {
+			xsend.text2(bishop.getX(), bishop.getY(), bishop.getText());
 		}
 		moveCounter.setText(chessBoard.getNumMoves() + " Zuege");
-		xsend.statusText( "SpielerIn " + (1 + chessBoard.getNextToMove()) + " am Zug" );
+		xsend.statusText("SpielerIn " + (1 + chessBoard.getNextToMove()) + " am Zug");
 	}
 
 	private void clearPieces() {

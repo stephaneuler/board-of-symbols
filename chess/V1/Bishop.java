@@ -9,6 +9,7 @@ public class Bishop {
 	int x;
 	int y;
 	int color;
+	double value = 3.5;
 
 	public Bishop(int x, int y, int color) {
 		super();

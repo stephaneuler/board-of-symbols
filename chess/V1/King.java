@@ -3,12 +3,17 @@ package chess;
 import java.util.ArrayList;
 import java.util.List;
 
-//Figur Koenig 
-//Version 1.0  Januar 2023 SE
+// Figur Koenig 
+// Version 1.0  Januar 2023 SE
+//
+// value ist der relative Wert einer Figur in Bauerneinheiten. 
+// Ein Koenig ist eigentlich unendlich wertvoll, der Wert 4 bezieht sich auf seine Beweglichkeit. 
+// https://en.wikipedia.org/wiki/Chess_piece_relative_value
 public class King {
 	int x;
 	int y;
 	int color;
+	double value = 4;
 
 	public King(int x, int y, int color) {
 		super();
@@ -79,7 +84,7 @@ public class King {
 	}
 
 	// Bewege den Koenig zu einer neuen Position.
-	// Es wird noch nicht geprueft, ob dabei eine Figur geschlagen wird. 
+	// Es wird noch nicht geprueft, ob dabei eine Figur geschlagen wird.
 	public void move(Move move) {
 		x = move.getToX();
 		y = move.getToY();

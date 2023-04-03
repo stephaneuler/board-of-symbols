@@ -4,8 +4,7 @@ import java.util.List;
 import java.util.Random;
 
 // Der Controller wartet auf Nachrichten vom GUI und führt entsprechende Aktionen aus. 
-// Version 
-// 1.0  Januar 2023 SE
+// Version 1.0  Januar 2023 SE
 
 public class ChessController {
 
@@ -21,6 +20,7 @@ public class ChessController {
 
 	public void move() {
 		// Auswahl Koenig oder Laeufer, danach zufaellige Auswahl eines Zugs
+		// random.nextInt(2) gibt zufaellig 0 oder 1 zurueck
 		switch (random.nextInt(2)) {
 		case 0:
 			for (King king : chessBoard.getKings()) {
