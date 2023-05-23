@@ -1,5 +1,6 @@
 ## Version 
 
+- 1.53 fixed bug: colors of dices (May 2023)
 - 1.52 new symbol types, command rotate (December 2022)
 - 1.51 new symbol type hex, new trainer levels (November 2022)
 - 1.50 more information in BoardClickEvent (September 2022)
