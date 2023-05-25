@@ -12,15 +12,15 @@ public class CastleShort extends Move {
 
 	@Override
 	public void move(List<Piece> pieces) {
-		rook = ChessBoard.pieceAtField(fromX + 3, fromY, pieces);
 		super.move(pieces);
-		rook.setPosition( toX - 1, toY);
+		rook = ChessBoard.pieceAtField(fromX + 3, fromY, pieces);
+		rook.setPosition(toX - 1, toY);
 	}
 
 	@Override
 	public void undo(List<Piece> pieces) {
 		super.undo(pieces);
-		rook.setPosition( fromX + 3, toY);
+		rook.setPosition(fromX + 3, toY);
 	}
 
 	@Override

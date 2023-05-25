@@ -36,8 +36,8 @@ public class King extends Piece {
 	}
 
 	private boolean rookCanCastle(ChessBoard chessBoard, int dx) {
-		Piece rook = chessBoard.pieceAtField(x + dx, y);
-		return rook instanceof Rook && rook.isColor(color) && rook.hasNotMoved();
+		Piece corner = chessBoard.pieceAtField(x + dx, y);
+		return corner instanceof Rook && corner.isColor(color) && corner.hasNotMoved();
 	}
 
 	public King(int x, int y, int color) {

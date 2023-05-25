@@ -49,18 +49,7 @@ public class ChessBoard {
 		brett = new int[N + 4][N + 4];
 
 		setBorder();
-		setPieces();
-	}
-
-	private void setPieces() {
-		pieces.add(new King(3, 3, WHITE));
-		pieces.add(new King(7, 8, BLACK));
-		pieces.add(new Knight(3, 5, WHITE));
-		pieces.add(new Bishop(3, 4, WHITE));
-		pieces.add(new Rook(5, 4, BLACK));
-		pieces.add(new Queen(5, 7, BLACK));
-		pieces.add(new Pawn(6, 3, WHITE));
-		pieces.add(new Pawn(6, 7, BLACK));
+		addPieces(Position.getStartPosition().getPieces());
 	}
 
 	private void setBorder() {
@@ -273,17 +262,14 @@ public class ChessBoard {
 
 	public void removeAllPieces() {
 		pieces.clear();
-
 	}
 
 	public void addPieces(Piece[] pieces2) {
 		pieces.addAll(Arrays.asList(pieces2));
-
 	}
 
 	public void addPiece(Piece piece) {
 		pieces.add(piece);
-
 	}
 
 	public boolean isPieceToMove(Piece piece) {

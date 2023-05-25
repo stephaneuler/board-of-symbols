@@ -6,14 +6,13 @@ public class CastleLong extends Move {
 	Piece rook;
 
 	public CastleLong(Piece piece) {
-		super(piece.getX(), piece.getY(), piece.getX() - 2, piece.getY());
-		this.piece = piece;
+		super(piece, piece.getX(), piece.getY(), piece.getX() - 2, piece.getY());
 	}
 
 	@Override
 	public void move(List<Piece> pieces) {
-		rook = ChessBoard.pieceAtField(piece.x - 4, piece.y, pieces);
-		piece.setPosition(toX, toY);
+		super.move(pieces);
+		rook = ChessBoard.pieceAtField(fromX - 4, piece.y, pieces);
 		rook.setPosition(toX + 1, toY);
 	}
 

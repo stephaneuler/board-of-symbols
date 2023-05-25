@@ -20,10 +20,19 @@ public class Position {
 		this.pieces = pieces;
 	}
 
+	public static Position getStartPosition() {
+		Piece[] pieces = { new King(3, 3, WHITE), new King(7, 8, BLACK), new Knight(3, 5, WHITE),
+				new Bishop(3, 4, WHITE), new Rook(5, 4, BLACK), new Queen(5, 7, BLACK), new Pawn(6, 3, WHITE),
+				new Pawn(6, 7, BLACK), };
+
+		return new Position("Start", pieces);
+
+	}
+
 	public static List<Position> getPositions() {
 		List<Position> positions = new ArrayList<>();
 
-		Piece[] pieces = { new King(3, 3, WHITE), new King(5, 7, BLACK), new Pawn(2, 3, WHITE), new Pawn(6, 4, WHITE),
+		Piece[] pieces = { new King(3, 3, WHITE), new King(5, 7, BLACK), new Pawn(2, 3, WHITE), new Pawn(8, 3, WHITE), new Pawn(6, 4, WHITE),
 				new Pawn(7, 5, BLACK), new Pawn(6, 7, BLACK) };
 		positions.add(new Position("Bauern-Test", pieces));
 
@@ -31,8 +40,8 @@ public class Position {
 				new Rook(2, 9, BLACK), new Pawn(9, 8, BLACK), };
 		positions.add(new Position("Rochade-Test", pieces));
 
-		pieces = new Piece[] { new King(3, 3, WHITE), new King(5, 7, BLACK), new Pawn(2, 8, WHITE),
-				new Pawn(6, 3, BLACK) };
+		pieces = new Piece[] { new King(3, 3, WHITE), new King(5, 7, BLACK), new Pawn(2, 8, WHITE), new Pawn(3, 8, WHITE),
+				new Pawn(6, 3, BLACK), new Bishop(4, 9, BLACK) };
 		positions.add(new Position("Umwandlung", pieces));
 
 		pieces = new Piece[] { new King(3, 3, WHITE), new King(5, 7, BLACK), new Queen(2, 8, WHITE) };
@@ -82,4 +91,5 @@ public class Position {
 	public Piece[] getPieces() {
 		return pieces;
 	}
+
 }
