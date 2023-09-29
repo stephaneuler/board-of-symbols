@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<snippet locale="de_DE" name="farbenFuerBitoperatoren">
+    <author>nobody</author>
+    <created>Fri Sep 29 08:30:27 CEST 2023</created>
+    <codeA>
+        <![CDATA[
+int N = 8;
+
+groesse(N, N);
+
+for (int r = 0; r < N; r++) {
+  for (int g = 0; g < N; g++) {
+    int rot = r * 255 / (N - 1) * 256 * 256;
+    int gruen = g * 255 / (N - 1) * 256;
+    int blau = Integer.min(r, g) * 255 / (N - 1);
+    int testFarbe =  rot + gruen + blau;
+
+    // hier Rechnung einsetzen
+    testFarbe = testFarbe   ;
+
+    farbe2(r, g, testFarbe);
+    text2(r, g, String.format("%06X", testFarbe));
+  }
+}
+]]>
+    </codeA>
+    <language>Java</language>
+</snippet>
