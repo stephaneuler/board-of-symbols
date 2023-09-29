@@ -7,6 +7,7 @@
 int N = 8;
 
 groesse(N, N);
+formen("h");
 
 for (int r = 0; r < N; r++) {
   for (int g = 0; g < N; g++) {
