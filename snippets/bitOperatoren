@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<snippet locale="de_DE" name="bitOperatoren">
+    <author>nobody</author>
+    <created>Thu Nov 02 08:17:52 CET 2023</created>
+    <codeA>
+        <![CDATA[// **************************************************
+// * Beispiele fuer Bit-Operatoren, SE Nov. 2023    *
+// **************************************************
+
+
+int i = 15; // Bitmuster 0000 1111
+String textFormat = "%-27s ";
+String wertFormat = "i= %4d (dez)  %03o (oct)   %02x (hex) %8s (bin)\n";
+
+System.out.printf(textFormat, "Start: ");
+System.out.printf(wertFormat, i, i, i, Integer.toBinaryString(i));
+
+i = i << 1; // Bitmuster 0001 1110
+System.out.printf(textFormat, "links-Shift:  i = i << 1;");
+System.out.printf(wertFormat, i, i, i, Integer.toBinaryString(i));
+
+i = i >> 2; // Bitmuster 0000 0111
+System.out.printf(textFormat, "rechts-Shift: i = i >> 2;");
+System.out.printf(wertFormat, i, i, i, Integer.toBinaryString(i));
+
+i = i | 0x70; // Bitmuster 0111 0111
+System.out.printf(textFormat, "ODER: i = i | 0x70;");
+System.out.printf(wertFormat, i, i, i, Integer.toBinaryString(i));
+
+i = i & 0x3f; // Bitmuster 0011 0111
+System.out.printf(textFormat, "AND:  i = i & 0x3f;");
+System.out.printf(wertFormat, i, i, i, Integer.toBinaryString(i));
+
+i = ~i; // Bitmuster 1100 1000
+System.out.printf(textFormat, "INVERT: i = ~i;");
+System.out.printf(wertFormat, i, i, i, Integer.toBinaryString(i));
+
+
+]]>
+    </codeA>
+    <language>Java</language>
+    <updated>Fri Nov 03 11:40:24 CET 2023</updated>
+</snippet>
