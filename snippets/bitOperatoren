@@ -3,10 +3,10 @@
     <author>nobody</author>
     <created>Thu Nov 02 08:17:52 CET 2023</created>
     <codeA>
-        <![CDATA[// **************************************************
+        <![CDATA[
+// **************************************************
 // * Beispiele fuer Bit-Operatoren, SE Nov. 2023    *
 // **************************************************
-
 
 int i = 15; // Bitmuster 0000 1111
 String textFormat = "%-27s ";
@@ -34,7 +34,6 @@ System.out.printf(wertFormat, i, i, i, Integer.toBinaryString(i));
 i = ~i; // Bitmuster 1100 1000
 System.out.printf(textFormat, "INVERT: i = ~i;");
 System.out.printf(wertFormat, i, i, i, Integer.toBinaryString(i));
-
 
 ]]>
     </codeA>
