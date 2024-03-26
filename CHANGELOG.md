@@ -1,7 +1,7 @@
 ## Version 
 
 - 1.56 some details: e. g. status text font (March 2024)
-  1.55 challenges
+- 1.55 challenges
 - 1.53 new Codewindow version with edit keys (July 2023)
 - 1.53 fixed bug: colors of dices (May 2023)
 - 1.52 new symbol types, command rotate (December 2022)
