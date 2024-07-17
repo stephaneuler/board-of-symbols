@@ -1,5 +1,6 @@
 ## Version 
 
+- 1.6 user defined forms (July 2024)
 - 1.56 some details: e. g. status text font (March 2024)
 - 1.55 challenges
 - 1.53 new Codewindow version with edit keys (July 2023)
